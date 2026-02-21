@@ -6,15 +6,23 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 @Configuration
 public class JwtConfig {
@@ -23,25 +31,59 @@ public class JwtConfig {
     private String jwtSecret;
 
     @Bean
-    public SecretKey secretKey() {
-        byte[] keyBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
-        return new SecretKeySpec(keyBytes, "HmacSHA256");
+    SecretKey secretKey() {
+        return hmacKey(jwtSecret);
     }
 
     @Bean
-    public JwtDecoder jwtDecoder(SecretKey secretKey) {
-        return NimbusJwtDecoder.withSecretKey(secretKey)
+    JwtDecoder jwtDecoder(SecretKey secretKey) {
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(secretKey)
                 .macAlgorithm(MacAlgorithm.HS256)
                 .build();
+        decoder.setJwtValidator(jwtValidator());
+        return decoder;
     }
 
     @Bean
-    public JwtEncoder jwtEncoder(SecretKey secretKey) {
+    JwtEncoder jwtEncoder(SecretKey secretKey) {
         return new NimbusJwtEncoder(new ImmutableSecret<>(secretKey));
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    private SecretKey hmacKey(String secret) {
+        return new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+    }
+
+    private OAuth2TokenValidator<Jwt> jwtValidator() {
+        OAuth2TokenValidator<Jwt> defaultValidators = JwtValidators.createDefaultWithIssuer("qronis");
+        OAuth2TokenValidator<Jwt> claimsValidator = this::validateClaims;
+        return new DelegatingOAuth2TokenValidator<>(defaultValidators, claimsValidator);
+    }
+
+    private OAuth2TokenValidatorResult validateClaims(Jwt jwt) {
+        List<String> missing = new ArrayList<>();
+        if (!hasTextClaim(jwt, "email"))
+            missing.add("email");
+        if (!hasTextClaim(jwt, "tenantId"))
+            missing.add("tenantId");
+        if (!hasTextClaim(jwt, "role"))
+            missing.add("role");
+
+        if (missing.isEmpty()) {
+            return OAuth2TokenValidatorResult.success();
+        }
+        return OAuth2TokenValidatorResult.failure(new OAuth2Error(
+                "invalid_token",
+                "Missing required claims: " + String.join(", ", missing),
+                null));
+    }
+
+    private boolean hasTextClaim(Jwt jwt, String claim) {
+        String value = jwt.getClaimAsString(claim);
+        return value != null && !value.isBlank();
     }
 }
