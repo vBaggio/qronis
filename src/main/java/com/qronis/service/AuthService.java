@@ -6,7 +6,6 @@ import com.qronis.entity.TenantUser;
 import com.qronis.entity.User;
 import com.qronis.repository.TenantRepository;
 import com.qronis.repository.TenantUserRepository;
-import com.qronis.security.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,8 +28,7 @@ public class AuthService {
             TenantUserRepository tenantUserRepository,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
-            AuthenticationManager authenticationManager
-    ) {
+            AuthenticationManager authenticationManager) {
         this.userService = userService;
         this.tenantRepository = tenantRepository;
         this.tenantUserRepository = tenantUserRepository;
@@ -63,8 +61,7 @@ public class AuthService {
 
     public String login(String email, String password) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email, password)
-        );
+                new UsernamePasswordAuthenticationToken(email, password));
 
         User user = userService.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));

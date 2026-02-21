@@ -1,4 +1,4 @@
-package com.qronis.security;
+package com.qronis.service;
 
 import com.qronis.entity.TenantUser;
 import com.qronis.entity.User;
@@ -24,8 +24,7 @@ public class JwtService {
     public JwtService(
             JwtEncoder jwtEncoder,
             TenantUserRepository tenantUserRepository,
-            @Value("${jwt.expiration-hours:24}") long expirationHours
-    ) {
+            @Value("${jwt.expiration-hours:24}") long expirationHours) {
         this.jwtEncoder = jwtEncoder;
         this.tenantUserRepository = tenantUserRepository;
         this.expirationHours = expirationHours;
