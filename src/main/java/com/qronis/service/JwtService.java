@@ -1,9 +1,8 @@
 package com.qronis.service;
 
 import com.qronis.config.JwtProperties;
-import com.qronis.entity.TenantUser;
+import com.qronis.entity.Role;
 import com.qronis.entity.User;
-import com.qronis.repository.TenantUserRepository;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -13,28 +12,21 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 
 @Service
 public class JwtService {
 
     private final JwtEncoder jwtEncoder;
-    private final TenantUserRepository tenantUserRepository;
     private final JwtProperties jwtProperties;
 
-    public JwtService(
-            JwtEncoder jwtEncoder,
-            TenantUserRepository tenantUserRepository,
-            JwtProperties jwtProperties) {
+    public JwtService(JwtEncoder jwtEncoder, JwtProperties jwtProperties) {
         this.jwtEncoder = jwtEncoder;
-        this.tenantUserRepository = tenantUserRepository;
         this.jwtProperties = jwtProperties;
     }
 
-    public String generateToken(User user) {
+    public String generateToken(User user, UUID tenantId, Role role) {
         Instant now = Instant.now();
-
-        TenantUser tenantUser = tenantUserRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new IllegalStateException("Usuário sem tenant associado"));
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer(jwtProperties.getIssuer())
@@ -43,8 +35,8 @@ public class JwtService {
                 .subject(user.getId().toString())
                 .claim("email", user.getEmail())
                 .claim("name", user.getName())
-                .claim("tenantId", tenantUser.getTenant().getId().toString())
-                .claim("role", tenantUser.getRole().name())
+                .claim("tenantId", tenantId.toString())
+                .claim("role", role.name())
                 .build();
 
         JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();

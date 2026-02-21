@@ -6,8 +6,7 @@ import com.qronis.entity.TenantUser;
 import com.qronis.entity.User;
 import com.qronis.repository.TenantRepository;
 import com.qronis.repository.TenantUserRepository;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,21 +19,18 @@ public class AuthService {
     private final TenantUserRepository tenantUserRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private final AuthenticationManager authenticationManager;
 
     public AuthService(
             UserService userService,
             TenantRepository tenantRepository,
             TenantUserRepository tenantUserRepository,
             PasswordEncoder passwordEncoder,
-            JwtService jwtService,
-            AuthenticationManager authenticationManager) {
+            JwtService jwtService) {
         this.userService = userService;
         this.tenantRepository = tenantRepository;
         this.tenantUserRepository = tenantUserRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
-        this.authenticationManager = authenticationManager;
     }
 
     @Transactional
@@ -43,29 +39,28 @@ public class AuthService {
             throw new IllegalArgumentException("Email já cadastrado: " + email);
         }
 
-        // 1. Criar usuário
         User user = new User(email, passwordEncoder.encode(password), name);
         user = userService.save(user);
 
-        // 2. Criar tenant automaticamente
         Tenant tenant = new Tenant(name);
         tenant = tenantRepository.save(tenant);
 
-        // 3. Associar usuário ao tenant como OWNER
         TenantUser tenantUser = new TenantUser(tenant, user, Role.OWNER);
         tenantUserRepository.save(tenantUser);
 
-        // 4. Gerar e retornar JWT
-        return jwtService.generateToken(user);
+        return jwtService.generateToken(user, tenant.getId(), Role.OWNER);
     }
 
     public String login(String email, String password) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email, password));
+        TenantUser tenantUser = tenantUserRepository.findByUserEmailWithUser(email)
+                .orElseThrow(() -> new BadCredentialsException("Credenciais inválidas"));
 
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+        User user = tenantUser.getUser();
 
-        return jwtService.generateToken(user);
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new BadCredentialsException("Credenciais inválidas");
+        }
+
+        return jwtService.generateToken(user, tenantUser.getId().getTenantId(), tenantUser.getRole());
     }
 }
