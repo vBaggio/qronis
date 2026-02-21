@@ -2,6 +2,7 @@ package com.qronis.service;
 
 import com.qronis.entity.User;
 import com.qronis.repository.UserRepository;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
