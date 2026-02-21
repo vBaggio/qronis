@@ -21,14 +21,10 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          secret: ${JWT_SECRET:qronis-dev-secret-key-change-in-production-minimum-256-bits!!}
-
 server:
   port: ${SERVER_PORT:8080}
 
 jwt:
+  secret: ${JWT_SECRET:qronis-dev-secret-key-change-in-production-minimum-256-bits!!}
+  issuer: qronis
   expiration-hours: ${JWT_EXPIRATION_HOURS:24}

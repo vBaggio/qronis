@@ -1,11 +1,9 @@
 package com.qronis.config;
 
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
@@ -25,41 +23,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
+@EnableConfigurationProperties(JwtProperties.class)
 public class JwtConfig {
 
-    @Value("${spring.security.oauth2.resourceserver.jwt.secret}")
-    private String jwtSecret;
-
     @Bean
-    SecretKey secretKey() {
-        return hmacKey(jwtSecret);
+    JwtEncoder jwtEncoder(JwtProperties properties) {
+        SecretKey key = hmacKey(properties.getSecret());
+        return new NimbusJwtEncoder(new ImmutableSecret<>(key));
     }
 
     @Bean
-    JwtDecoder jwtDecoder(SecretKey secretKey) {
-        NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(secretKey)
+    JwtDecoder jwtDecoder(JwtProperties properties) {
+        SecretKey key = hmacKey(properties.getSecret());
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(key)
                 .macAlgorithm(MacAlgorithm.HS256)
                 .build();
-        decoder.setJwtValidator(jwtValidator());
+        decoder.setJwtValidator(jwtValidator(properties.getIssuer()));
         return decoder;
-    }
-
-    @Bean
-    JwtEncoder jwtEncoder(SecretKey secretKey) {
-        return new NimbusJwtEncoder(new ImmutableSecret<>(secretKey));
-    }
-
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
     private SecretKey hmacKey(String secret) {
         return new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
     }
 
-    private OAuth2TokenValidator<Jwt> jwtValidator() {
-        OAuth2TokenValidator<Jwt> defaultValidators = JwtValidators.createDefaultWithIssuer("qronis");
+    private OAuth2TokenValidator<Jwt> jwtValidator(String issuer) {
+        OAuth2TokenValidator<Jwt> defaultValidators = JwtValidators.createDefaultWithIssuer(issuer);
         OAuth2TokenValidator<Jwt> claimsValidator = this::validateClaims;
         return new DelegatingOAuth2TokenValidator<>(defaultValidators, claimsValidator);
     }

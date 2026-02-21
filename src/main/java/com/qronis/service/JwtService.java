@@ -1,9 +1,9 @@
 package com.qronis.service;
 
+import com.qronis.config.JwtProperties;
 import com.qronis.entity.TenantUser;
 import com.qronis.entity.User;
 import com.qronis.repository.TenantUserRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -19,15 +19,15 @@ public class JwtService {
 
     private final JwtEncoder jwtEncoder;
     private final TenantUserRepository tenantUserRepository;
-    private final long expirationHours;
+    private final JwtProperties jwtProperties;
 
     public JwtService(
             JwtEncoder jwtEncoder,
             TenantUserRepository tenantUserRepository,
-            @Value("${jwt.expiration-hours:24}") long expirationHours) {
+            JwtProperties jwtProperties) {
         this.jwtEncoder = jwtEncoder;
         this.tenantUserRepository = tenantUserRepository;
-        this.expirationHours = expirationHours;
+        this.jwtProperties = jwtProperties;
     }
 
     public String generateToken(User user) {
@@ -37,9 +37,9 @@ public class JwtService {
                 .orElseThrow(() -> new IllegalStateException("Usuário sem tenant associado"));
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuer("qronis")
+                .issuer(jwtProperties.getIssuer())
                 .issuedAt(now)
-                .expiresAt(now.plus(expirationHours, ChronoUnit.HOURS))
+                .expiresAt(now.plus(jwtProperties.getExpirationHours(), ChronoUnit.HOURS))
                 .subject(user.getId().toString())
                 .claim("email", user.getEmail())
                 .claim("name", user.getName())
