@@ -1,0 +1,61 @@
+# ========================
+# Java / Gradle
+# ========================
+build/
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+bin/
+out/
+*.class
+*.jar
+*.war
+*.ear
+
+# ========================
+# IDE
+# ========================
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+*.swp
+*.swo
+*~
+
+# ========================
+# Node / React
+# ========================
+node_modules/
+dist/
+.cache/
+*.tsbuildinfo
+
+# ========================
+# Environment / Secrets
+# ========================
+.env
+.env.*
+!.env.example
+
+# ========================
+# OS
+# ========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ========================
+# Projeto - Context (uso interno da IA)
+# ========================
+/context/
+
+# ========================
+# Logs
+# ========================
+*.log
+logs/
