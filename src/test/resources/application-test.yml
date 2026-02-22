@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:17:///qronis_test
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+  flyway:
+    enabled: true
+
+jwt:
+  secret: qronis-test-secret-com-pelo-menos-32-caracteres
+  expiration-hours: 1
+  issuer: qronis-test
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    com.qronis: DEBUG
