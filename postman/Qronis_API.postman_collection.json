@@ -1,0 +1,258 @@
+{
+  "info": {
+    "name": "Qronis API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    pm.environment.set('token', json.token);",
+                  "",
+                  "    // Decode JWT payload to extract IDs",
+                  "    var payload = JSON.parse(atob(json.token.split('.')[1]));",
+                  "    pm.environment.set('userId', payload.sub);",
+                  "    pm.environment.set('tenantId', payload.tenantId);",
+                  "    pm.environment.set('email', payload.email);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Vinicius\",\n  \"email\": \"vini@email.com\",\n  \"password\": \"123456\",\n  \"companyName\": \"Qronis Ltda\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    pm.environment.set('token', json.token);",
+                  "",
+                  "    var payload = JSON.parse(atob(json.token.split('.')[1]));",
+                  "    pm.environment.set('userId', payload.sub);",
+                  "    pm.environment.set('tenantId', payload.tenantId);",
+                  "    pm.environment.set('email', payload.email);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"vini@email.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "item": [
+        {
+          "name": "Create Project",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var json = pm.response.json();",
+                  "    pm.environment.set('projectId', json.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Projeto Alpha\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/projects",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "projects"]
+            }
+          }
+        },
+        {
+          "name": "List Projects",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/projects",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "projects"]
+            }
+          }
+        },
+        {
+          "name": "Get Project by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/{{projectId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "projects", "{{projectId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Project",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Projeto Alpha v2\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/{{projectId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "projects", "{{projectId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Project",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/{{projectId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "projects", "{{projectId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Time Entries",
+      "item": [
+        {
+          "name": "Start Timer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var json = pm.response.json();",
+                  "    pm.environment.set('timeEntryId', json.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"projectId\": \"{{projectId}}\",\n  \"description\": \"Trabalhando na feature X\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/time-entries/start",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "time-entries", "start"]
+            }
+          }
+        },
+        {
+          "name": "Get Active Timer",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/time-entries/active",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "time-entries", "active"]
+            }
+          }
+        },
+        {
+          "name": "Stop Timer",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/time-entries/{{timeEntryId}}/stop",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "time-entries", "{{timeEntryId}}", "stop"]
+            }
+          }
+        },
+        {
+          "name": "List History",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/time-entries",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "time-entries"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
