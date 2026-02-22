@@ -2,6 +2,7 @@ package com.qronis.mapper;
 
 import com.qronis.dto.ProjectResponseDTO;
 import com.qronis.entity.Project;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

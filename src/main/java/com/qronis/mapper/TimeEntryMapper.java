@@ -2,6 +2,7 @@ package com.qronis.mapper;
 
 import com.qronis.dto.TimeEntryResponseDTO;
 import com.qronis.entity.TimeEntry;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

@@ -3,6 +3,7 @@ package com.qronis.service;
 import com.qronis.config.JwtProperties;
 import com.qronis.entity.Role;
 import com.qronis.entity.User;
+
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;

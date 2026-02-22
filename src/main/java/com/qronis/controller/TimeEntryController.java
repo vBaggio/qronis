@@ -8,6 +8,7 @@ import com.qronis.entity.TimeEntry;
 import com.qronis.mapper.TimeEntryMapper;
 import com.qronis.security.AuthenticatedUser;
 import com.qronis.service.TimeEntryService;
+
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
