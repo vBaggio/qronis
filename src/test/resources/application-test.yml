@@ -1,13 +1,13 @@
 spring:
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
     properties:
       hibernate:
         format_sql: true
     show-sql: true
   flyway:
-    enabled: false
+    enabled: true
 
 jwt:
   secret: qronis-test-secret-com-pelo-menos-32-caracteres
