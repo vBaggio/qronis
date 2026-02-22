@@ -33,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 class TimeEntryRepositoryTest {
 
+    @SuppressWarnings("resource") // objeto gerenciado pelo testcontainers
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17-alpine")
             .withDatabaseName("qronis_test")
@@ -48,12 +49,16 @@ class TimeEntryRepositoryTest {
 
     @Autowired
     private TimeEntryRepository timeEntryRepository;
+
     @Autowired
     private TenantRepository tenantRepository;
+
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     private TenantUserRepository tenantUserRepository;
+
     @Autowired
     private ProjectRepository projectRepository;
 

@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 class ProjectRepositoryTest {
 
+    @SuppressWarnings("resource") // objeto gerenciado pelo testcontainers
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17-alpine")
             .withDatabaseName("qronis_test")
