@@ -16,4 +16,7 @@ public interface TimeEntryRepository extends JpaRepository<TimeEntry, UUID> {
 
     @Query("SELECT te FROM TimeEntry te JOIN FETCH te.project WHERE te.createdBy.id = :userId ORDER BY te.startTime DESC")
     List<TimeEntry> findByUserIdWithProject(@Param("userId") UUID userId);
+
+    @Query("SELECT te FROM TimeEntry te JOIN FETCH te.project JOIN FETCH te.createdBy WHERE te.project.id = :projectId ORDER BY te.startTime DESC")
+    List<TimeEntry> findByProjectIdWithProject(@Param("projectId") UUID projectId);
 }

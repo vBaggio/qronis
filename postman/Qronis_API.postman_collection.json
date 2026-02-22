@@ -27,8 +27,6 @@
                   "if (pm.response.code === 200) {",
                   "    var json = pm.response.json();",
                   "    pm.environment.set('token', json.token);",
-                  "",
-                  "    // Decode JWT payload to extract IDs",
                   "    var payload = JSON.parse(atob(json.token.split('.')[1]));",
                   "    pm.environment.set('userId', payload.sub);",
                   "    pm.environment.set('tenantId', payload.tenantId);",
@@ -40,10 +38,15 @@
             }
           ],
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -51,8 +54,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/auth/register",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "auth", "register"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
             }
           }
         },
@@ -66,7 +75,6 @@
                   "if (pm.response.code === 200) {",
                   "    var json = pm.response.json();",
                   "    pm.environment.set('token', json.token);",
-                  "",
                   "    var payload = JSON.parse(atob(json.token.split('.')[1]));",
                   "    pm.environment.set('userId', payload.sub);",
                   "    pm.environment.set('tenantId', payload.tenantId);",
@@ -78,10 +86,15 @@
             }
           ],
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -89,8 +102,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "auth", "login"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
             }
           }
         }
@@ -118,7 +137,10 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -126,8 +148,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/projects",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "projects"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects"
+              ]
             }
           }
         },
@@ -137,8 +164,13 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/projects",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "projects"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects"
+              ]
             }
           }
         },
@@ -148,8 +180,14 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/projects/{{projectId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "projects", "{{projectId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{projectId}}"
+              ]
             }
           }
         },
@@ -158,7 +196,10 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -166,8 +207,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/projects/{{projectId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "projects", "{{projectId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{projectId}}"
+              ]
             }
           }
         },
@@ -177,15 +224,39 @@
             "method": "DELETE",
             "url": {
               "raw": "{{baseUrl}}/api/projects/{{projectId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "projects", "{{projectId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{projectId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Project Time Entries",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/{{projectId}}/time-entries",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{projectId}}",
+                "time-entries"
+              ]
             }
           }
         }
       ]
     },
     {
-      "name": "Time Entries",
+      "name": "Time Entries - Timer",
       "item": [
         {
           "name": "Start Timer",
@@ -206,7 +277,10 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -214,8 +288,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/time-entries/start",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "time-entries", "start"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "time-entries",
+                "start"
+              ]
             }
           }
         },
@@ -225,8 +305,14 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/time-entries/active",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "time-entries", "active"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "time-entries",
+                "active"
+              ]
             }
           }
         },
@@ -235,9 +321,158 @@
           "request": {
             "method": "PUT",
             "url": {
-              "raw": "{{baseUrl}}/api/time-entries/{{timeEntryId}}/stop",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "time-entries", "{{timeEntryId}}", "stop"]
+              "raw": "{{baseUrl}}/api/time-entries/stop",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "time-entries",
+                "stop"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Time Entries - CRUD",
+      "item": [
+        {
+          "name": "Create Manual Entry",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var json = pm.response.json();",
+                  "    pm.environment.set('timeEntryId', json.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"projectId\": \"{{projectId}}\",\n  \"description\": \"Reunião retroativa\",\n  \"startTime\": \"2026-02-21T09:00:00Z\",\n  \"endTime\": \"2026-02-21T12:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/time-entries",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "time-entries"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Patch Entry - Description",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Descrição atualizada\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/time-entries/{{timeEntryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "time-entries",
+                "{{timeEntryId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Patch Entry - Times",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startTime\": \"2026-02-21T08:30:00Z\",\n  \"endTime\": \"2026-02-21T11:30:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/time-entries/{{timeEntryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "time-entries",
+                "{{timeEntryId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Patch Entry - Project",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"projectId\": \"{{projectId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/time-entries/{{timeEntryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "time-entries",
+                "{{timeEntryId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Entry",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/time-entries/{{timeEntryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "time-entries",
+                "{{timeEntryId}}"
+              ]
             }
           }
         },
@@ -247,8 +482,13 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/time-entries",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "time-entries"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "time-entries"
+              ]
             }
           }
         }

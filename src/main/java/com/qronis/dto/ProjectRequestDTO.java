@@ -2,6 +2,6 @@ package com.qronis.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record ProjectRequest(
+public record ProjectRequestDTO(
         @NotBlank(message = "Nome do projeto é obrigatório") String name) {
 }

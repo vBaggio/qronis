@@ -3,7 +3,7 @@ package com.qronis.dto;
 import java.time.Instant;
 import java.util.UUID;
 
-public record ProjectResponse(
+public record ProjectResponseDTO(
         UUID id,
         String name,
         UUID tenantId,

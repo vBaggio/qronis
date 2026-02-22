@@ -1,7 +1,9 @@
 package com.qronis.controller;
 
-import com.qronis.dto.TimeEntryResponse;
-import com.qronis.dto.TimeEntryStartRequest;
+import com.qronis.dto.TimeEntryCreateRequestDTO;
+import com.qronis.dto.TimeEntryPatchRequestDTO;
+import com.qronis.dto.TimeEntryResponseDTO;
+import com.qronis.dto.TimeEntryStartRequestDTO;
 import com.qronis.entity.TimeEntry;
 import com.qronis.mapper.TimeEntryMapper;
 import com.qronis.security.AuthenticatedUser;
@@ -27,22 +29,22 @@ public class TimeEntryController {
     }
 
     @PostMapping("/start")
-    public ResponseEntity<TimeEntryResponse> start(@Valid @RequestBody TimeEntryStartRequest request) {
+    public ResponseEntity<TimeEntryResponseDTO> start(@Valid @RequestBody TimeEntryStartRequestDTO request) {
         AuthenticatedUser auth = AuthenticatedUser.fromContext();
         TimeEntry entry = timeEntryService.start(
                 request.projectId(), request.description(), auth.tenantId(), auth.userId());
         return ResponseEntity.status(HttpStatus.CREATED).body(timeEntryMapper.toResponse(entry));
     }
 
-    @PutMapping("/{id}/stop")
-    public ResponseEntity<TimeEntryResponse> stop(@PathVariable UUID id) {
+    @PutMapping("/stop")
+    public ResponseEntity<TimeEntryResponseDTO> stop() {
         AuthenticatedUser auth = AuthenticatedUser.fromContext();
-        TimeEntry entry = timeEntryService.stop(id, auth.userId());
+        TimeEntry entry = timeEntryService.stop(auth.userId());
         return ResponseEntity.ok(timeEntryMapper.toResponse(entry));
     }
 
     @GetMapping("/active")
-    public ResponseEntity<TimeEntryResponse> active() {
+    public ResponseEntity<TimeEntryResponseDTO> active() {
         AuthenticatedUser auth = AuthenticatedUser.fromContext();
         return timeEntryService.findActive(auth.userId())
                 .map(entry -> ResponseEntity.ok(timeEntryMapper.toResponse(entry)))
@@ -50,9 +52,34 @@ public class TimeEntryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TimeEntryResponse>> history() {
+    public ResponseEntity<List<TimeEntryResponseDTO>> history() {
         AuthenticatedUser auth = AuthenticatedUser.fromContext();
         List<TimeEntry> entries = timeEntryService.findByUserId(auth.userId());
         return ResponseEntity.ok(timeEntryMapper.toResponseList(entries));
+    }
+
+    @PostMapping
+    public ResponseEntity<TimeEntryResponseDTO> create(@Valid @RequestBody TimeEntryCreateRequestDTO request) {
+        AuthenticatedUser auth = AuthenticatedUser.fromContext();
+        TimeEntry entry = timeEntryService.create(
+                request.projectId(), request.description(),
+                request.startTime(), request.endTime(),
+                auth.tenantId(), auth.userId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(timeEntryMapper.toResponse(entry));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<TimeEntryResponseDTO> patch(@PathVariable UUID id,
+            @RequestBody TimeEntryPatchRequestDTO request) {
+        AuthenticatedUser auth = AuthenticatedUser.fromContext();
+        TimeEntry entry = timeEntryService.patch(id, request, auth.tenantId(), auth.userId());
+        return ResponseEntity.ok(timeEntryMapper.toResponse(entry));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        AuthenticatedUser auth = AuthenticatedUser.fromContext();
+        timeEntryService.delete(id, auth.userId());
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,6 +1,6 @@
 package com.qronis.mapper;
 
-import com.qronis.dto.ProjectResponse;
+import com.qronis.dto.ProjectResponseDTO;
 import com.qronis.entity.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -12,7 +12,7 @@ public interface ProjectMapper {
 
     @Mapping(target = "tenantId", source = "tenant.id")
     @Mapping(target = "createdByName", source = "createdBy.name")
-    ProjectResponse toResponse(Project project);
+    ProjectResponseDTO toResponse(Project project);
 
-    List<ProjectResponse> toResponseList(List<Project> projects);
+    List<ProjectResponseDTO> toResponseList(List<Project> projects);
 }
