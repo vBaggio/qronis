@@ -34,7 +34,7 @@ public class AuthService {
     }
 
     @Transactional
-    public String register(String name, String email, String password) {
+    public String register(String name, String email, String password, String companyName) {
         if (userService.existsByEmail(email)) {
             throw new IllegalArgumentException("Email já cadastrado: " + email);
         }
@@ -42,7 +42,7 @@ public class AuthService {
         User user = new User(email, passwordEncoder.encode(password), name);
         user = userService.save(user);
 
-        Tenant tenant = new Tenant(name);
+        Tenant tenant = new Tenant(companyName);
         tenant = tenantRepository.save(tenant);
 
         TenantUser tenantUser = new TenantUser(tenant, user, Role.OWNER);

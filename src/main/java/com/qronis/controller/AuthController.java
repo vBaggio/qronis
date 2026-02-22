@@ -23,7 +23,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        String token = authService.register(request.name(), request.email(), request.password());
+        String token = authService.register(request.name(), request.email(), request.password(), request.companyName());
         return ResponseEntity.ok(new AuthResponse(token));
     }
 
