@@ -12,6 +12,9 @@ import com.qronis.service.ProjectService;
 import com.qronis.service.TimeEntryService;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,10 +40,11 @@ public class ProjectController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProjectResponseDTO>> list() {
+    public ResponseEntity<Page<ProjectResponseDTO>> list(
+            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
         AuthenticatedUser auth = AuthenticatedUser.fromContext();
-        List<Project> projects = projectService.findByTenantId(auth.tenantId());
-        return ResponseEntity.ok(projectMapper.toResponseList(projects));
+        Page<Project> projects = projectService.findByTenantId(auth.tenantId(), pageable);
+        return ResponseEntity.ok(projects.map(projectMapper::toResponse));
     }
 
     @GetMapping("/{id}")
