@@ -14,7 +14,7 @@ public abstract class AbstractIntegrationTest {
 
     @SuppressWarnings("resource") // objeto gerenciado pelo testcontainers
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17-alpine")
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
             .withDatabaseName("qronis_test")
             .withUsername("test")
             .withPassword("test");
