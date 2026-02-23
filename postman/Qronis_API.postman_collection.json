@@ -58,7 +58,6 @@
                 "{{baseUrl}}"
               ],
               "path": [
-                "api",
                 "auth",
                 "register"
               ]
@@ -106,9 +105,30 @@
                 "{{baseUrl}}"
               ],
               "path": [
-                "api",
                 "auth",
                 "login"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "me"
               ]
             }
           }
@@ -159,17 +179,31 @@
           }
         },
         {
-          "name": "List Projects",
+          "name": "List Projects (Paginated)",
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/api/projects",
+              "raw": "{{baseUrl}}/api/projects?page=0&size=20&sort=createdAt,desc",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "projects"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                },
+                {
+                  "key": "sort",
+                  "value": "createdAt,desc"
+                }
               ]
             }
           }
