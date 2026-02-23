@@ -49,6 +49,7 @@ dependencies {
 
 tasks.withType<JavaCompile> {
     options.compilerArgs.addAll(listOf(
+        "-parameters",
         "-Amapstruct.defaultComponentModel=spring",
         "-Amapstruct.unmappedTargetPolicy=IGNORE"
     ))

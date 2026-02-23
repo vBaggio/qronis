@@ -48,9 +48,9 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProjectResponseDTO> getById(@PathVariable UUID id) {
+    public ResponseEntity<ProjectResponseDTO> getById(@PathVariable("id") String id) {
         AuthenticatedUser auth = AuthenticatedUser.fromContext();
-        Project project = projectService.findByIdAndTenantId(id, auth.tenantId());
+        Project project = projectService.findByIdAndTenantId(UUID.fromString(id), auth.tenantId());
         return ResponseEntity.ok(projectMapper.toResponse(project));
     }
 
@@ -62,22 +62,22 @@ public class ProjectController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProjectResponseDTO> update(@PathVariable UUID id,
+    public ResponseEntity<ProjectResponseDTO> update(@PathVariable("id") String id,
             @Valid @RequestBody ProjectRequestDTO request) {
         AuthenticatedUser auth = AuthenticatedUser.fromContext();
-        Project project = projectService.update(id, auth.tenantId(), request.name());
+        Project project = projectService.update(UUID.fromString(id), auth.tenantId(), request.name());
         return ResponseEntity.ok(projectMapper.toResponse(project));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+    public ResponseEntity<Void> delete(@PathVariable("id") String id) {
         AuthenticatedUser auth = AuthenticatedUser.fromContext();
-        projectService.delete(id, auth.tenantId());
+        projectService.delete(UUID.fromString(id), auth.tenantId());
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/time-entries")
-    public ResponseEntity<List<TimeEntryResponseDTO>> listTimeEntries(@PathVariable UUID id) {
+    public ResponseEntity<List<TimeEntryResponseDTO>> listTimeEntries(@PathVariable("id") UUID id) {
         AuthenticatedUser auth = AuthenticatedUser.fromContext();
         List<TimeEntry> entries = timeEntryService.findByProjectId(id, auth.tenantId());
         return ResponseEntity.ok(timeEntryMapper.toResponseList(entries));

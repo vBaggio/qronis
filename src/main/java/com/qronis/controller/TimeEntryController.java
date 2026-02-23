@@ -70,7 +70,7 @@ public class TimeEntryController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<TimeEntryResponseDTO> patch(@PathVariable UUID id,
+    public ResponseEntity<TimeEntryResponseDTO> patch(@PathVariable("id") UUID id,
             @RequestBody TimeEntryPatchRequestDTO request) {
         AuthenticatedUser auth = AuthenticatedUser.fromContext();
         TimeEntry entry = timeEntryService.patch(id, request, auth.tenantId(), auth.userId());
@@ -78,7 +78,7 @@ public class TimeEntryController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+    public ResponseEntity<Void> delete(@PathVariable("id") UUID id) {
         AuthenticatedUser auth = AuthenticatedUser.fromContext();
         timeEntryService.delete(id, auth.userId());
         return ResponseEntity.noContent().build();

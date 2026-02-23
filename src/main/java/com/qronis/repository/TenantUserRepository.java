@@ -14,7 +14,7 @@ public interface TenantUserRepository extends JpaRepository<TenantUser, TenantUs
 
     Optional<TenantUser> findByUserId(UUID userId);
 
-    @Query("SELECT tu FROM TenantUser tu JOIN FETCH tu.user WHERE tu.user.email = :email")
+    @Query("SELECT tu FROM TenantUser tu JOIN FETCH tu.user JOIN FETCH tu.tenant WHERE tu.user.email = :email")
     Optional<TenantUser> findByUserEmailWithUser(@Param("email") String email);
 
     @Query("SELECT tu FROM TenantUser tu JOIN FETCH tu.user JOIN FETCH tu.tenant WHERE tu.user.id = :userId")
