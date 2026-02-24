@@ -2,6 +2,34 @@
 
 As Fases 1, 2 e 3 de fundação back-end e segurança foram dadas como estritamente entregues (100% testadas e blindadas). A prioridade agora foca na cobertura maciça de testes e na entrega da UI.
 
+### Fase 1: Setup da Infraestrutura e Esqueletos
+- [x] Criar arquivos `.gitignore` abrangentes para ignorar `node_modules`, `build`, `.gradle`, arquivos de configuração de IDE e `.env`.
+- [x] Pasta /context no gitignore
+- [x] Inicializar projeto Gradle para Spring Boot (Java 25, Web, Data JPA, Security, PostgreSQL, Validation, Flyway, MapStruct). Configurar o `annotationProcessor` do MapStruct.
+- [x] Configurar `application.yml` com conexão ao banco na porta 5434, chaves JWT com fallback e `ddl-auto=validate`.
+- [x] Inicializar projeto React com Vite + TypeScript na pasta `/frontend`.
+- [x] Configurar Tailwind CSS e inicializar Shadcn UI no React.
+
+### Fase 2: Banco de Dados, Segurança e Modelagem (Back-end)
+- [x] Criar script inicial de migração do Flyway (`V1__create_initial_schema.sql`) para as tabelas: `tenant`, `users`, `tenant_user`, `project`, `time_entry`.
+- [x] Criar entidades JPA mapeando as tabelas acima.
+- [x] Implementar configuração de Segurança (Spring Security) com `SecurityFilterChain` separando rotas públicas e protegidas.
+- [x] Implementar geração e validação de JWT (`NimbusJwtDecoder`).
+
+### Fase 3: Core API e Validações (Back-end)
+- [x] Criar DTOs usando **Java Records**.
+- [x] Criar interfaces de mapeamento com **MapStruct** para converter Entity <-> Record DTO.
+- [x] Configurar um `@RestControllerAdvice` para capturar e formatar exceções globais e erros do Jakarta Validation.
+- [x] Implementar endpoints CRUD para `Project` (usando validações como `@NotBlank`).
+- [x] Implementar endpoint para iniciar timer (`POST /api/time-entries/start`).
+- [x] Implementar endpoint para parar timer (`PUT /api/time-entries/stop`).
+- [x] Implementar endpoint de listagem de histórico e captura da tarefa ativa.
+- [x] Implementar criação manual de time entry (`POST /api/time-entries`).
+- [x] Implementar edição parcial inline (`PATCH /api/time-entries/{id}`).
+- [x] Implementar exclusão de time entry (`DELETE /api/time-entries/{id}`).
+- [x] Implementar listagem de entries por projeto (`GET /api/projects/{id}/time-entries`).
+- [x] Atualizar Postman collection com os novos endpoints.
+
 ### Fase 3.5: Automação e Malha de Qualificação (Back-end)
 Esta fase blinda regressões para futuros refactorings.
 
