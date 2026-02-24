@@ -57,3 +57,15 @@ Este documento registra decisões arquiteturais cruciais para que o contexto de 
 **Contexto:** O upgrade prematuro para o recém-lançado Spring Boot 4 quebrou o ecossistema padrão de testes que usava flyway nativo (`flyway-core`).
 **Decisão:**
 - Como o projeto migrou a autoconfiguração do flyway para um wrapper, fomos forçados a importar o módulo `spring-boot-starter-flyway` explícito no `build.gradle.kts` e ajustar a parametrização do `ddl-auto` no profile de testes com Testcontainers.
+
+---
+
+## ADR 007: Vulnerabilidade N+1 no endpoint PATCH de TimeEntry (Conhecida)
+**Status:** Adiado / Mapeado
+**Contexto:** Durante a revisão profunda da base de código para geração das documentações de arquitetura, foi identificado um ponto cego nas Regras Estritas de mapeamento prático. O método `TimeEntryService.patch()` utiliza o método padrão do JpaRepository (`findById`), que carrega a entidade `TimeEntry` de forma estrita (Lazy Loader ativado). No entanto, o retorno deste service é convertido para um `TimeEntryResponseDTO` pelo MapStruct no `TimeEntryController`.
+- Como o DTO exige os campos `projectId` e `projectName`, e o `Project` não foi carregado via `JOIN FETCH` na origem da busca pelo ID, o Hibernate dispara uma **Query N+1** de forma implícita durante a conversão do MapStruct.
+**Tentativa de Correção:**
+- Foi tentada a criação de um método `findByIdAndCreatedByIdWithProject` abusando de `JOIN FETCH` diretamente no `TimeEntryRepository` e substituí-lo na service.
+- **Motivo do Rollback:** A alteração na camada de persistência introduziu quebras colaterais em vários testes unitários sensíveis (`TimeEntryServiceTest`), requerendo a reescrita massiva de Mocks e injeções de dependência que não estavam no escopo do momento.
+**Decisão Atual:**
+- O código-fonte Java sofreu `git restore` e voltou ao estado funcional com cobertura 100%. A query N+1 nesse fluxo específico é aceitável por ora (dado o impacto controlado de apenas buscar 1 projeto e não realizar paginação em lote do DTO individual). A refatoração foi anotada para ser corrigida apenas quando as suítes E2E de Controller estiverem totalmente maduras e seguras.
