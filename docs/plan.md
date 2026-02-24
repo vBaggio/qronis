@@ -68,3 +68,21 @@ O pulmão transacional do produto.
 - Liga-se a um `Project`.
 - Pertence a um `User` (o obreiro).
 - É blindado por constraints contra sobreposições (Apenas um registro pode ter `end_time` igual a `NULL` para um respectivo escopo de dono).
+
+## 🛡️ Contratos Padronizados
+
+### Transferência de Dados (DTOs)
+As mutações inter-sistemas acontecem em formato blindado através de Java Records imutáveis. Validações semânticas da JSR-380 (`@NotNull`, `@NotBlank`) são executadas no momento do deserializer antes do Controller processar a lógica. 
+
+### Tratamento de Falhas (ErrorResponseDTO)
+O `GlobalExceptionHandler` intercepta exceções garantindo uma topologia HTTP determinística.
+```json
+{
+  "status": 400,
+  "message": "Erro de validação",
+  "errors": {
+    "startTime": "Horário de início é obrigatório",
+    "projectId": "ID do projeto é obrigatório"
+  }
+}
+```

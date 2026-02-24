@@ -25,3 +25,6 @@ O sistema é governado pelas seguintes diretrizes imutáveis de domínio:
 
 4. **Isolamento de Tenant:**
    - Todos os projetos e registros gerados são estritamente isolados pelo `Tenant` ao qual o usuário pertence. Informações de um espaço de trabalho jamais cruzam fronteiras, mesmo que o sistema seja single-database.
+
+5. **Tratamento Global de Exceções:**
+   - O produto nunca expõe stack-traces nativas ou HTMLs de erro não amigáveis do Tomcat para os clientes. Erros de validação (400) ou de negócio (409) são invariavelmente interceptados por um `GlobalExceptionHandler` e devolvidos seguindo um contrato JSON restrito e previsível de `ErrorResponseDTO`.

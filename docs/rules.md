@@ -35,6 +35,9 @@ Estas são as regras invioláveis para o desenvolvimento do lado servidor.
    - O Login deve ser efetuado utilizando uma query direta no banco buscando em **1 query via JOIN FETCH** a relação `TenantUser → User`.
    - A validação de senha ocorre manualmente na camada Service usando `passwordEncoder.matches()`.
 
+5. **Assinatura Protegida JWT:**
+   - Módulo construído sobre o `NimbusJwtEncoder`/`NimbusJwtDecoder`. Tokens são gerados utilizando o algoritmo HMAC (HS256) em conformidade com o Resource Server padrão do Spring `oauth2ResourceServer`.
+
 ---
 
 ## ⚡ Leis Universais do Frontend (Invioláveis)
