@@ -51,9 +51,10 @@ Este documento descreve as assinaturas mapeadas dos serviços expostos. Todos os
 ```json
 {
   "id": "123e4567-e89b-12d3... (User ID)",
-  "email": "jane@email.com",
   "name": "Jane Doe",
+  "email": "jane@email.com",
   "tenantId": "987f6543-e21b... (Tenant ID)",
+  "tenantName": "Acme Corp",
   "role": "OWNER"
 }
 ```
@@ -74,8 +75,7 @@ Este documento descreve as assinaturas mapeadas dos serviços expostos. Todos os
       "name": "Projeto Alpha",
       "tenantId": "c3d4...",
       "createdByName": "Jane Doe",
-      "createdAt": "2026-02-21T09:00:00Z",
-      "updatedAt": "2026-02-21T09:00:00Z"
+      "createdAt": "2026-02-21T09:00:00Z"
     }
   ],
   "totalElements": 1,
@@ -103,8 +103,7 @@ Este documento descreve as assinaturas mapeadas dos serviços expostos. Todos os
   "name": "Projeto Alpha",
   "tenantId": "c3d4...",
   "createdByName": "Jane Doe",
-  "createdAt": "2026-02-21T09:00:00Z",
-  "updatedAt": "2026-02-21T09:00:00Z"
+  "createdAt": "2026-02-21T09:00:00Z"
 }
 ```
 
@@ -133,7 +132,18 @@ Rotas dividem-se entre **Ações do Live Timer** e **Ações Isoladas**.
   "description": "Trabalhando em X"
 }
 ```
-- **Output (201 Created):** `TimeEntryResponseDTO` (sem `endTime`).
+- **Output (201 Created):** `TimeEntryResponseDTO`
+```json
+{
+  "id": "f5e6...",
+  "description": "Trabalhando em X",
+  "startTime": "2026-02-21T10:00:00Z",
+  "endTime": null,
+  "projectId": "id-do-projeto...",
+  "projectName": "Projeto Alpha",
+  "createdAt": "2026-02-21T10:00:00Z"
+}
+```
 
 ### (Live) Parar Timer
 Busca e pausa proativamente qualquer timer aberto para aquele User em cache ativo.
