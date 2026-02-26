@@ -46,21 +46,21 @@ Esta fase blinda regressões para futuros refactorings.
 
 ---
 
-### Fase 4: Autenticação e Layout (Front-end)
-Base de interação humana.
+### Fase 4: Autenticação e Layout (Front-end Pragmático MVP)
+Base de interação humana focada em simplicidade e entrega rápida.
 
-- [ ] Arquitetar Axios ou Fetch Client isolado (`/src/lib/api.ts`) que processe transparentemente a expiração e injeção do cabeçalho JWT Bearer.
-- [ ] Engenhar Componente Form para `/auth/register` (Nome, Companhia, Email, Senha).
-- [ ] Engenhar Componente Form para `/auth/login`.
-- [ ] Codificar App Shell Navbar e Sidebar inspirados pelo visual limpo de dashboards financeiras e utilitários modernos (ex: Conta Azul).
-- [ ] Rotear o estado de Auth (Proteção de telas e Redireções inteligentes).
+- [x] Instalar dependências base: Inicializar CLI do `shadcn/ui`, instalar Tailwind plugins e definir tema neutro (Zinc/Slate) com acentuação Emerald.
+- [x] Arquitetar Axios Client isolado (`/src/lib/api.ts`) processando JWT Bearer e interceptors de expiração.
+- [x] Engenhar Telas de Autenticação (`/auth/register` e `/auth/login`) usando os componentes Form e Input do `shadcn/ui`.
+- [x] Rotear o estado de Auth (Proteção de telas via React Router / Guarda de Rotas).
+- [x] Codificar o App Shell (Layout Base): Adotar Navbar superior simples e limpa `[Logo] | [Timer] [Projetos] | [Perfil]`, abandonando sidebars complexas para focar no conteúdo central.
 
 ---
 
 ### Fase 5: Domínio de Negócios Visual (Front-end)
-A mágica acontece (Operação de Fluxo Real).
+A mágica acontece (Operação de Fluxo Real). Foco na legibilidade e "Zen Mode".
 
-- [ ] Elaborar a página CRUD e Grade de Apresentação visual para listagem inteligente e busca em Projetos da Workspace (Aproveitar `size=20&sort=createdAt`).
-- [ ] Construir o coração gravitacional: O **Live Tracker UI (Zen Mode)**. Construir com layout fixed no top ou bottom screen, contendo select para escolher projeto via autocomplete, descritivo, calculo manual matemático rodando fora do State React, e um botão massivo de Play/Stop de reatividade absoluta.
-- [ ] Estruturar Tela History. Uma grade infinita que suporte on-blur (foco fora) para disparar instantaneamente na rede requisições `PATCH` visando inputs de Descrições/Projetos e Modais rápidos para editar StartTime e EndTime.
+- [ ] Construir o **Live Tracker UI (Zen Mode)**: O coração gravitacional da aplicação. Timer GIGANTE e centralizado na tela (foco em topografia moderna/bold) + Botões maciços de Play/Stop (Verde/Vermelho) + ComboBox simples (`shadcn/ui`) para selecionar o Projeto. Tudo sem distrações laterais.
+- [ ] Elaborar a Grade de Projetos: Tela simples consumindo o endpoint de listagem/busca usando a base do componente Table (`shadcn/ui`).
+- [ ] Estruturar Tela History (Abaixo do Timer): Uma grade infinita suportando *on-blur* para disparar instantaneamente `PATCH`. Combinação de inputs sem borda nas células para entregar a edição inline sem botões de "Salvar".
 - [ ] Injetar Gráficos Analytics de produtividade atrelados a blocos Recharts interativos no Dashboard Master.
