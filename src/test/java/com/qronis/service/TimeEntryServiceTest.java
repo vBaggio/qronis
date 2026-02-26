@@ -163,7 +163,8 @@ class TimeEntryServiceTest {
         entry.setEndTime(Instant.now());
         entry.setDescription("Original");
 
-        when(timeEntryRepository.findById(entry.getId())).thenReturn(Optional.of(entry));
+        when(timeEntryRepository.findByIdAndCreatedByIdWithProject(entry.getId(), userId))
+                .thenReturn(Optional.of(entry));
         when(timeEntryRepository.save(any(TimeEntry.class))).thenAnswer(inv -> inv.getArgument(0));
 
         TimeEntryPatchRequestDTO request = new TimeEntryPatchRequestDTO("Atualizada", null, null, null);
@@ -181,7 +182,8 @@ class TimeEntryServiceTest {
         entry.setStartTime(Instant.now().minus(2, ChronoUnit.HOURS));
         entry.setEndTime(Instant.now());
 
-        when(timeEntryRepository.findById(entry.getId())).thenReturn(Optional.of(entry));
+        when(timeEntryRepository.findByIdAndCreatedByIdWithProject(entry.getId(), userId))
+                .thenReturn(Optional.of(entry));
 
         Instant badEnd = entry.getStartTime().minus(1, ChronoUnit.HOURS);
         TimeEntryPatchRequestDTO request = new TimeEntryPatchRequestDTO(null, null, badEnd, null);
@@ -200,7 +202,8 @@ class TimeEntryServiceTest {
         entry.setId(UUID.randomUUID());
         entry.setCreatedBy(user);
 
-        when(timeEntryRepository.findById(entry.getId())).thenReturn(Optional.of(entry));
+        when(timeEntryRepository.findByIdAndCreatedByIdWithProject(entry.getId(), userId))
+                .thenReturn(Optional.of(entry));
 
         timeEntryService.delete(entry.getId(), userId);
 
@@ -217,7 +220,7 @@ class TimeEntryServiceTest {
         entry.setId(UUID.randomUUID());
         entry.setCreatedBy(otherUser);
 
-        when(timeEntryRepository.findById(entry.getId())).thenReturn(Optional.of(entry));
+        when(timeEntryRepository.findByIdAndCreatedByIdWithProject(entry.getId(), userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> timeEntryService.delete(entry.getId(), userId))
                 .isInstanceOf(ResourceNotFoundException.class);
