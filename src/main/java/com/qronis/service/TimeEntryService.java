@@ -128,13 +128,7 @@ public class TimeEntryService {
     }
 
     private TimeEntry findByIdAndUserId(UUID id, UUID userId) {
-        TimeEntry entry = timeEntryRepository.findById(id)
+        return timeEntryRepository.findByIdAndCreatedByIdWithProject(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Lançamento não encontrado"));
-
-        if (!entry.getCreatedBy().getId().equals(userId)) {
-            throw new ResourceNotFoundException("Lançamento não encontrado");
-        }
-
-        return entry;
     }
 }
