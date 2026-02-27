@@ -52,6 +52,7 @@ Base de interação humana focada em simplicidade e entrega rápida.
 - [x] Instalar dependências base: Inicializar CLI do `shadcn/ui`, instalar Tailwind plugins e definir tema neutro (Zinc/Slate) com acentuação Emerald.
 - [x] Arquitetar Axios Client isolado (`/src/lib/api.ts`) processando JWT Bearer e interceptors de expiração.
 - [x] Engenhar Telas de Autenticação (`/auth/register` e `/auth/login`) usando os componentes Form e Input do `shadcn/ui`.
+- [x] Engenhar **Landing Page** (`/`): Tela inicial limpa com introdução ao produto e call-to-actions claros para Autenticação.
 - [x] Rotear o estado de Auth (Proteção de telas via React Router / Guarda de Rotas).
 - [x] Codificar o App Shell (Layout Base): Adotar Navbar superior simples e limpa `[Logo] | [Timer] [Projetos] | [Perfil]`, abandonando sidebars complexas para focar no conteúdo central.
 
@@ -60,7 +61,9 @@ Base de interação humana focada em simplicidade e entrega rápida.
 ### Fase 5: Domínio de Negócios Visual (Front-end)
 A mágica acontece (Operação de Fluxo Real). Foco na legibilidade e "Zen Mode".
 
-- [ ] Construir o **Live Tracker UI (Zen Mode)**: O coração gravitacional da aplicação. Timer GIGANTE e centralizado na tela (foco em topografia moderna/bold) + Botões maciços de Play/Stop (Verde/Vermelho) + ComboBox simples (`shadcn/ui`) para selecionar o Projeto. Tudo sem distrações laterais.
-- [ ] Elaborar a Grade de Projetos: Tela simples consumindo o endpoint de listagem/busca usando a base do componente Table (`shadcn/ui`).
-- [ ] Estruturar Tela History (Abaixo do Timer): Uma grade infinita suportando *on-blur* para disparar instantaneamente `PATCH`. Combinação de inputs sem borda nas células para entregar a edição inline sem botões de "Salvar".
+- [ ] Construir o **Live Tracker UI (Zen Mode)**: O coração gravitacional da aplicação. Timer GIGANTE e centralizado na tela (foco em topografia moderna/bold). Botões maciços de Play/Stop (Verde/Vermelho) + ComboBox simples (`shadcn/ui`) para selecionar o Projeto.
+  - *Feature "Escape Hatch":* Quando *Idle* (parado), manter navegação (`TopNav`) visível para fuga. Quando *Active* (rodando), ocultar todo ruído visual da tela.
+- [ ] Elaborar a Grade de Projetos: Tela simples consumindo o endpoint de listagem/busca usando a base do componente Table (`shadcn/ui`). Cores de "Accent" por projeto para rápida identificação.
+- [ ] Estruturar Tela History: Uma grade infinita suportando *on-blur* para disparar instantaneamente `PATCH`. Combinação de inputs sem borda nas células para entregar a edição inline.
+  - *Feature Formatação Dinâmica:* Duração inteligente formatando `< 1m` (segundos), `< 1h` (min/seg), `> 1h` (horas/min) para limpar a tabela ao máximo.
 - [ ] Injetar Gráficos Analytics de produtividade atrelados a blocos Recharts interativos no Dashboard Master.
