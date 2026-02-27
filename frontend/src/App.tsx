@@ -3,6 +3,8 @@ import { AuthProvider, useAuth } from './lib/auth-context';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { TopNav } from './components/layout/TopNav';
 import { Login } from './pages/auth/Login';
+import { Register } from './pages/auth/Register';
+import { Landing } from './pages/public/Landing';
 
 // Placeholder for the main dashboard 
 const DashboardPlaceholder = () => {
@@ -34,8 +36,9 @@ const AppRoutes = () => {
 
   return (
     <Routes>
+      <Route path="/" element={isAuthenticated ? <Navigate to="/tracker" replace /> : <Landing />} />
       <Route path="/login" element={isAuthenticated ? <Navigate to="/tracker" replace /> : <Login />} />
-      {/* TODO: Add Register inside Public layout if needed */}
+      <Route path="/register" element={isAuthenticated ? <Navigate to="/tracker" replace /> : <Register />} />
 
       <Route
         path="/tracker"
@@ -46,8 +49,7 @@ const AppRoutes = () => {
         }
       />
 
-      <Route path="/" element={<Navigate to="/tracker" replace />} />
-      <Route path="*" element={<Navigate to="/tracker" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };
