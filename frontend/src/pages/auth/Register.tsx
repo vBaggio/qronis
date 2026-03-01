@@ -37,7 +37,8 @@ export const Register: React.FC = () => {
         }
 
         try {
-            const { confirmPassword: _, ...apiPayload } = formData;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { confirmPassword, ...apiPayload } = formData;
             const response = await authApi.post('/register', apiPayload);
 
             if (response.data?.token) {

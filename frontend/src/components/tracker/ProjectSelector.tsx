@@ -70,7 +70,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ selectedProjec
                     role="combobox"
                     aria-expanded={open}
                     disabled={disabled}
-                    className="h-14 md:h-16 px-6 sm:w-[250px] justify-between rounded-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400"
+                    className="h-14 md:h-16 px-6 w-full sm:w-[250px] justify-between rounded-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 shrink-0"
                 >
                     <div className="flex items-center gap-2 truncate">
                         <Folder className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-500" />

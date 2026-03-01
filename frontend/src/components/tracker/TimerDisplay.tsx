@@ -15,8 +15,10 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({ isActive, startTime 
         if (isActive && startTime) {
             const startMs = new Date(startTime).getTime();
 
-            // Immediate update to avoid 1-second delay
-            setElapsedSeconds(Math.max(0, Math.floor((Date.now() - startMs) / 1000)));
+            // Immediate update to avoid 1-second delay length, pushed to end of tick
+            setTimeout(() => {
+                setElapsedSeconds(Math.max(0, Math.floor((Date.now() - startMs) / 1000)));
+            }, 0);
 
             interval = setInterval(() => {
                 setElapsedSeconds(Math.max(0, Math.floor((Date.now() - startMs) / 1000)));

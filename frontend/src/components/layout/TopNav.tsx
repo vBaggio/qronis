@@ -26,7 +26,7 @@ export const TopNav: React.FC = () => {
 
     return (
         <header className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
-            <div className="container mx-auto flex h-16 items-center justify-between px-4">
+            <div className="container max-w-5xl mx-auto flex h-16 items-center justify-between px-4">
 
                 {/* LEFT SIDE: Hamburger (Mobile) + Logo */}
                 <div className="flex items-center gap-3">
@@ -41,7 +41,9 @@ export const TopNav: React.FC = () => {
                         <SheetContent side="left" className="w-[300px] sm:w-[340px] bg-white dark:bg-zinc-950 p-6 flex flex-col">
                             <SheetHeader className="pb-6 border-b border-zinc-100 dark:border-zinc-800 text-left">
                                 <SheetTitle className="flex items-center gap-2">
-                                    <img src="/qronis_ext.svg" alt="Qronis" className="h-10 md:h-12 w-auto object-contain drop-shadow-sm" />
+                                    <Link to="/" className="transition-transform hover:scale-105">
+                                        <img src="/qronis_ext.svg" alt="Qronis" className="h-10 md:h-12 w-auto object-contain drop-shadow-sm" />
+                                    </Link>
                                 </SheetTitle>
                             </SheetHeader>
                             <nav className="flex-1 flex flex-col gap-2 pt-6">
@@ -79,13 +81,17 @@ export const TopNav: React.FC = () => {
 
                     {/* DESKTOP LOGO */}
                     <div className="hidden md:flex items-center">
-                        <img src="/qronis_ext.svg" alt="Qronis" className="h-9 md:h-11 w-auto object-contain drop-shadow-sm" />
+                        <Link to="/" className="transition-transform hover:scale-105">
+                            <img src="/qronis_ext.svg" alt="Qronis" className="h-9 md:h-11 w-auto object-contain drop-shadow-sm" />
+                        </Link>
                     </div>
                 </div>
 
                 {/* CENTER/DESKTOP MOBILE LOGO */}
                 <div className="md:hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                    <img src="/qronis_ext.svg" alt="Qronis" className="h-11 w-auto object-contain drop-shadow-sm" />
+                    <Link to="/" className="transition-transform hover:scale-105">
+                        <img src="/qronis_ext.svg" alt="Qronis" className="h-11 w-auto object-contain drop-shadow-sm" />
+                    </Link>
                 </div>
 
 

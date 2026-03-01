@@ -30,10 +30,12 @@ export const ZenTimer: React.FC = () => {
                 setSelectedProjectId(res.data.projectId);
                 setStartTime(res.data.startTime);
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             // Se retornar 204 No Content, é porque não tem timer rodando
-            if (error.response?.status !== 204) {
+            if (axios.isAxiosError(error) && error.response?.status !== 204) {
                 console.error('Falha ao verificar timer ativo:', error);
+            } else if (!axios.isAxiosError(error)) {
+                console.error('Falha inexperada:', error);
             }
         } finally {
             setIsLoading(false);
@@ -113,24 +115,26 @@ export const ZenTimer: React.FC = () => {
                     </div>
 
                     {/* Start controls & Input (Idle Mode) */}
-                    <div className={`w-full flex flex-col sm:flex-row gap-4 items-center justify-center transition-all duration-700 ${isZenMode ? 'opacity-0 h-0 overflow-hidden scale-95' : 'opacity-100 scale-100'}`}>
-                        <ProjectSelector
-                            selectedProjectId={selectedProjectId}
-                            onSelect={setSelectedProjectId}
-                            disabled={isZenMode}
-                        />
+                    <div className={`w-full flex flex-col md:flex-row gap-3 md:gap-4 items-center justify-center transition-all duration-700 ${isZenMode ? 'opacity-0 h-0 overflow-hidden scale-95' : 'opacity-100 scale-100'}`}>
+                        <div className="w-full md:w-auto">
+                            <ProjectSelector
+                                selectedProjectId={selectedProjectId}
+                                onSelect={setSelectedProjectId}
+                                disabled={isZenMode}
+                            />
+                        </div>
                         <Input
                             id="taskDescription"
                             name="taskDescription"
                             value={taskDescription}
                             onChange={(e) => setTaskDescription(e.target.value)}
                             placeholder="O que você está construindo agora?"
-                            className="flex-1 h-14 md:h-16 text-lg md:text-xl px-6 border-transparent focus-visible:ring-1 focus-visible:ring-emerald-500 bg-white dark:bg-zinc-900 text-left shadow-sm rounded-full"
+                            className="w-full md:flex-1 h-14 md:h-16 text-lg md:text-xl px-6 border-transparent focus-visible:ring-1 focus-visible:ring-emerald-500 bg-white dark:bg-zinc-900 text-left shadow-sm rounded-full"
                         />
                         <Button
                             onClick={handleStart}
                             size="lg"
-                            className="w-full sm:w-auto h-14 md:h-16 px-8 md:px-10 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-lg shadow-lg hover:shadow-emerald-500/25 disabled:opacity-50 transition-all flex-shrink-0"
+                            className="w-full md:w-auto h-14 md:h-16 px-8 md:px-10 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-lg shadow-lg hover:shadow-emerald-500/25 disabled:opacity-50 transition-all flex-shrink-0"
                             disabled={!selectedProjectId} // Frontend validation for required project
                         >
                             <Play className="mr-2 h-5 w-5 fill-current" /> Iniciar
