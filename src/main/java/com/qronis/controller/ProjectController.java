@@ -41,9 +41,10 @@ public class ProjectController {
 
     @GetMapping
     public ResponseEntity<Page<ProjectResponseDTO>> list(
+            @RequestParam(required = false) String name,
             @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
         AuthenticatedUser auth = AuthenticatedUser.fromContext();
-        Page<Project> projects = projectService.findByTenantId(auth.tenantId(), pageable);
+        Page<Project> projects = projectService.findByTenantId(auth.tenantId(), name, pageable);
         return ResponseEntity.ok(projects.map(projectMapper::toResponse));
     }
 

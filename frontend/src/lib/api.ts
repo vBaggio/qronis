@@ -38,22 +38,17 @@ api.interceptors.request.use(
     }
 );
 
+// Evento customizado para sinalizar expiração de sessão ao AuthContext
+export const AUTH_EXPIRED_EVENT = 'auth:expired';
+
 // Interceptor para tratar respostas e erros de autorização globais
 api.interceptors.response.use(
-    (response: AxiosResponse) => {
-        return response;
-    },
+    (response: AxiosResponse) => response,
     (error: AxiosError) => {
-        // Se o token expirou ou for inválido, limpa e redireciona (401 Unauthorized)
-        if (error.response && error.response.status === 401) {
-            console.warn('Sessão expirada ou token inválido. Redirecionando para login.');
+        if (error.response?.status === 401) {
             localStorage.removeItem(TOKEN_KEY);
-            // O React Router no AppShell ouvirá essa mudança se integrarmos com contexto
-            // mas como fallback bruto, podemos forçar loading da página:
-            window.location.href = '/login';
+            window.dispatchEvent(new CustomEvent(AUTH_EXPIRED_EVENT));
         }
-
-        // Devolve o erro para ser tratado no nível do componente ou hook
         return Promise.reject(error);
     }
 );

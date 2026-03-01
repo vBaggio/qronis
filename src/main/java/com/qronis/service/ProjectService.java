@@ -23,8 +23,8 @@ public class ProjectService {
         this.projectRepository = projectRepository;
     }
 
-    public Page<Project> findByTenantId(UUID tenantId, Pageable pageable) {
-        return projectRepository.findByTenantIdWithCreator(tenantId, pageable);
+    public Page<Project> findByTenantId(UUID tenantId, String name, Pageable pageable) {
+        return projectRepository.findByTenantIdWithCreator(tenantId, name, pageable);
     }
 
     public List<Project> findByTenantId(UUID tenantId) {

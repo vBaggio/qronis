@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { useAuth } from '../../lib/auth-context';
 import { authApi } from '../../lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 export const Register: React.FC = () => {
     const { login } = useAuth();
-    const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
         name: '',
@@ -37,21 +37,20 @@ export const Register: React.FC = () => {
         }
 
         try {
-            // Separa o confirmPassword do payload oficial via destructuring
-            const { confirmPassword, ...apiPayload } = formData;
-
-            // Chama o backend para criar a conta e o tenant
+            const { confirmPassword: _, ...apiPayload } = formData;
             const response = await authApi.post('/register', apiPayload);
 
-            // Assume the backend returns an auth token directly upon registration
-            if (response.data && response.data.token) {
+            if (response.data?.token) {
                 await login(response.data.token);
-                navigate('/tracker');
             } else {
                 setError('Conta criada, mas o token não foi retornado. Tente fazer login.');
             }
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'Falha ao criar a conta. Verifique os dados.');
+        } catch (err: unknown) {
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data?.message || 'Falha ao criar a conta. Verifique os dados.');
+            } else {
+                setError('Erro inesperado. Tente novamente.');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -72,7 +71,7 @@ export const Register: React.FC = () => {
 
                 <Card className="border-0 shadow-xl dark:border dark:border-zinc-800 dark:bg-zinc-900/50">
                     <form onSubmit={handleSubmit}>
-                        <CardContent className="flex flex-col gap-4 p-6 pt-2    ">
+                        <CardContent className="flex flex-col gap-4 p-6 pt-2">
                             {error && (
                                 <div className="rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/30 dark:text-red-400">
                                     {error}

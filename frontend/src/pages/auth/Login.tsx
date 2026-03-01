@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { useAuth } from '../../lib/auth-context';
 import { authApi } from '../../lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 export const Login: React.FC = () => {
     const { login } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -21,17 +23,21 @@ export const Login: React.FC = () => {
         setIsLoading(true);
 
         try {
-            // In real scenario, the endpoint would be '/auth/login'
             const response = await authApi.post('/login', { email, password });
 
-            // Assume the backend returns a token field
-            if (response.data && response.data.token) {
+            if (response.data?.token) {
                 await login(response.data.token);
+                const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/tracker';
+                navigate(from, { replace: true });
             } else {
                 setError('Resposta inválida do servidor.');
             }
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'E-mail ou senha inválidos.');
+        } catch (err: unknown) {
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data?.message || 'E-mail ou senha inválidos.');
+            } else {
+                setError('Erro inesperado. Tente novamente.');
+            }
         } finally {
             setIsLoading(false);
         }

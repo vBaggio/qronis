@@ -14,8 +14,17 @@ import org.springframework.data.repository.query.Param;
 
 public interface ProjectRepository extends JpaRepository<Project, UUID> {
 
-    @Query(value = "SELECT p FROM Project p JOIN FETCH p.createdBy WHERE p.tenant.id = :tenantId", countQuery = "SELECT COUNT(p) FROM Project p WHERE p.tenant.id = :tenantId")
-    Page<Project> findByTenantIdWithCreator(@Param("tenantId") UUID tenantId, Pageable pageable);
+    @Query(value = """
+            SELECT p FROM Project p JOIN FETCH p.createdBy
+            WHERE p.tenant.id = :tenantId
+            AND (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')))
+            """, countQuery = """
+            SELECT COUNT(p) FROM Project p
+            WHERE p.tenant.id = :tenantId
+            AND (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')))
+            """)
+    Page<Project> findByTenantIdWithCreator(@Param("tenantId") UUID tenantId, @Param("name") String name,
+            Pageable pageable);
 
     @Query("SELECT p FROM Project p JOIN FETCH p.createdBy WHERE p.tenant.id = :tenantId ORDER BY p.createdAt DESC")
     List<Project> findByTenantIdWithCreator(@Param("tenantId") UUID tenantId);
