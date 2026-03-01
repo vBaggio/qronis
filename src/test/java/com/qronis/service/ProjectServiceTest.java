@@ -13,6 +13,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +25,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -50,6 +56,33 @@ class ProjectServiceTest {
 
         project = new Project("Projeto Alpha", tenant, user);
         project.setId(UUID.randomUUID());
+    }
+
+    @Test
+    @DisplayName("findByTenantId paginado: deve delegar ao repository sem filtro de nome")
+    void findByTenantId_paged_withoutFilter() {
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Project> page = new PageImpl<>(List.of(project), pageable, 1);
+        when(projectRepository.findByTenantIdWithCreator(eq(tenantId), isNull(), eq(pageable))).thenReturn(page);
+
+        Page<Project> result = projectService.findByTenantId(tenantId, null, pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        verify(projectRepository).findByTenantIdWithCreator(tenantId, null, pageable);
+    }
+
+    @Test
+    @DisplayName("findByTenantId paginado: deve delegar ao repository com filtro de nome")
+    void findByTenantId_paged_withNameFilter() {
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Project> page = new PageImpl<>(List.of(project), pageable, 1);
+        when(projectRepository.findByTenantIdWithCreator(eq(tenantId), eq("alpha"), eq(pageable))).thenReturn(page);
+
+        Page<Project> result = projectService.findByTenantId(tenantId, "alpha", pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+        verify(projectRepository).findByTenantIdWithCreator(tenantId, "alpha", pageable);
     }
 
     @Test

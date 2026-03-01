@@ -15,6 +15,9 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +47,45 @@ class ProjectRepositoryTest extends AbstractIntegrationTest {
         tenant = tenantRepository.save(new Tenant("Qronis Test"));
         user = userRepository.save(new User("test@email.com", "encoded", "Tester"));
         tenantUserRepository.save(new TenantUser(tenant, user, Role.OWNER));
+    }
+
+    @Test
+    @DisplayName("findByTenantIdWithCreator paginado: deve retornar todos sem filtro de nome")
+    void findByTenantIdWithCreator_paged_returnsAll() {
+        projectRepository.save(new Project("Alpha", tenant, user));
+        projectRepository.save(new Project("Beta", tenant, user));
+
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Project> result = projectRepository.findByTenantIdWithCreator(tenant.getId(), null, pageable);
+
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getTotalElements()).isEqualTo(2);
+        assertThat(result.getContent().get(0).getCreatedBy().getName()).isEqualTo("Tester");
+    }
+
+    @Test
+    @DisplayName("findByTenantIdWithCreator paginado: deve filtrar por nome parcial case-insensitive")
+    void findByTenantIdWithCreator_paged_filterByName() {
+        projectRepository.save(new Project("Alpha", tenant, user));
+        projectRepository.save(new Project("Beta", tenant, user));
+
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Project> result = projectRepository.findByTenantIdWithCreator(tenant.getId(), "alph", pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getName()).isEqualTo("Alpha");
+    }
+
+    @Test
+    @DisplayName("findByTenantIdWithCreator paginado: deve retornar vazio quando filtro não corresponde")
+    void findByTenantIdWithCreator_paged_filterByName_noMatch() {
+        projectRepository.save(new Project("Alpha", tenant, user));
+
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Project> result = projectRepository.findByTenantIdWithCreator(tenant.getId(), "xyz", pageable);
+
+        assertThat(result.getContent()).isEmpty();
+        assertThat(result.getTotalElements()).isZero();
     }
 
     @Test
