@@ -8,7 +8,7 @@ export const Landing: React.FC = () => {
     <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-zinc-950 font-sans selection:bg-emerald-200 dark:selection:bg-emerald-900/40">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b border-zinc-200/50 bg-white/70 backdrop-blur-xl dark:border-zinc-800/50 dark:bg-zinc-950/70">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <div className="flex items-center">
             <img src="/qronis_ext.svg" alt="Qronis" className="h-9 md:h-10 w-auto object-contain drop-shadow-sm" />
           </div>
@@ -30,23 +30,17 @@ export const Landing: React.FC = () => {
           <div className="absolute top-0 -left-1/4 h-[500px] w-[500px] rounded-full bg-emerald-400/10 blur-[100px] dark:bg-emerald-900/20 -z-10" />
 
           {/* Left Copy: Vexatious Pain vs Zen Solution */}
-          <div className="flex-1 space-y-8 text-center lg:text-left z-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-            {/* Elite Trust Builder Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-4 py-1.5 text-xs font-semibold text-zinc-600 dark:text-zinc-400 shadow-sm mx-auto lg:mx-0">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              Lançamento Qronis 1.0
-            </div>
-
+          <div className="flex-1 space-y-6 lg:space-y-8 text-center lg:text-left z-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
             <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 leading-[1.1]">
-              Rastreamento de tempo.<br />
-              <span className="text-emerald-600 dark:text-emerald-500">Zero atrito.</span>
+              Gestão de projetos e tempo.<br />
+              <span className="text-emerald-600 dark:text-emerald-400">Zero atrito.</span>
             </h1>
 
             <p className="max-w-xl text-lg lg:text-xl text-zinc-600 dark:text-zinc-400 leading-relaxed mx-auto lg:mx-0 font-medium">
-              Projetado para engenheiros e freelancers de elite que odeiam preencher planilhas no fim do dia. Pressione Play, entre no Zen Mode e vamos com tudo.
+              A ferramenta definitiva para quem ganha a vida resolvendo problemas complexos. Selecione o projeto, dê Play e entre em deep work. O Qronis cuida dos blocos de tempo e do seu faturamento enquanto você codifica.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center gap-4 pt-4 justify-center lg:justify-start">
+            <div className="flex flex-col sm:flex-row items-center gap-4 pt-4 pb-8 lg:pb-12 justify-center lg:justify-start">
               <Button asChild size="lg" className="h-14 px-8 text-lg bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-xl shadow-emerald-500/25 transition-all hover:ring-4 ring-emerald-500/20 active:scale-95 w-full sm:w-auto">
                 <Link to="/register">
                   Começar agora
@@ -55,18 +49,7 @@ export const Landing: React.FC = () => {
               </Button>
             </div>
 
-            {/* Social Proof Avatars */}
-            <div className="pt-8 flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start text-sm text-zinc-500 font-medium border-t border-zinc-100 dark:border-zinc-800/60 mt-8 pt-8 lg:mt-12 lg:pt-12">
-              <div className="flex -space-x-3">
-                {[1, 2, 3, 4].map((i) => (
-                  <img key={i} className="inline-block h-10 w-10 rounded-full ring-2 ring-white dark:ring-zinc-950 shadow-sm" src={`https://i.pravatar.cc/100?img=${i + 10}`} alt={`User ${i}`} />
-                ))}
-                <div className="flex items-center justify-center h-10 w-10 rounded-full border-2 border-white dark:border-zinc-950 bg-zinc-100 dark:bg-zinc-800 text-xs font-bold text-zinc-600 dark:text-zinc-400 z-10 shadow-sm">
-                  +500
-                </div>
-              </div>
-              <p>Engenheiros recuperando o foco neste exato minuto.</p>
-            </div>
+            {/* Note: Removed fake social proof to maintain complete authenticity and align with the Zen Paradigm. */}
           </div>
 
           {/* Right Art: Concept Vector Illustration (Transparent Background) */}
@@ -81,7 +64,7 @@ export const Landing: React.FC = () => {
         </section>
 
         {/* ── 2. Asymmetric Bento Grid (Features) ── */}
-        <section className="bg-white dark:bg-zinc-900 border-y border-zinc-100 dark:border-zinc-800 py-16 lg:py-24">
+        <section className="bg-white dark:bg-zinc-900 border-y border-zinc-100 dark:border-zinc-800 pt-8 pb-16 lg:pt-12 lg:pb-24">
           <div className="mx-auto max-w-6xl px-6">
             <div className="text-center mb-10 max-w-2xl mx-auto space-y-4">
               <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Tudo que você precisa. Nada mais.</h2>
@@ -141,8 +124,8 @@ export const Landing: React.FC = () => {
                     <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-700/50 shadow-sm border border-emerald-500/50 mb-2 text-white group-hover:scale-110 transition-transform">
                       <BarChart3 className="h-6 w-6" />
                     </div>
-                    <h3 className="text-xl font-bold text-white">Insights Brutais</h3>
-                    <p className="text-emerald-100 font-medium max-w-sm">Métricas reais para faturamento de projetos. Transparência nua e crua da sua alocação.</p>
+                    <h3 className="text-xl font-bold text-white">Relatórios de Fim de Dia</h3>
+                    <p className="text-emerald-100 font-medium max-w-sm">Dê stop e relaxe. O Qronis cruza as horas com seus projetos e calcula seu faturamento de forma automática.</p>
                   </div>
                   <div className="mt-8 flex items-end gap-2 h-20 opacity-80">
                     <div className="w-1/6 bg-white/40 h-[40%] rounded-t-sm transition-all group-hover:h-[60%]"></div>
@@ -158,67 +141,76 @@ export const Landing: React.FC = () => {
           </div>
         </section>
 
-        {/* ── 3. Philosophy & Architecture (Trust Builder) ── */}
+        {/* ── 3. Philosophy (The Zen Manifesto) ── */}
         <section className="bg-zinc-50 dark:bg-zinc-950 py-24">
           <div className="mx-auto max-w-4xl px-6 text-center space-y-8">
-            <div className="inline-flex items-center justify-center p-3 bg-zinc-100 dark:bg-zinc-900 rounded-full border border-zinc-200 dark:border-zinc-800 mb-4">
-              <Code className="h-6 w-6 text-zinc-500" />
-            </div>
-            <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Arquitetura de Grau Enterprise</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Transparência e Foco.</h2>
             <p className="text-lg text-zinc-500 dark:text-zinc-400 font-medium max-w-2xl mx-auto leading-relaxed">
-              O Qronis não é mais uma ferramenta no-code frágil. Somos esculpidos à mão sobre uma fundação robusta de <b>Java 21 LTS</b> e <b>PostgreSQL</b> no backend, acrisolados com um frontend imaculado em <b>React 19</b>. Sem falsas promessas, entregamos performance pura.
+              Acreditamos que o tempo é o seu ativo mais valioso. Ferramentas de trabalho não deveriam roubar sua atenção com dezenas de pop-ups ou engrenagens complexas. O Qronis foi desenhado para desaparecer no fundo, permitindo que você mergulhe em estado de Deep Work.
             </p>
-            <div className="pt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
-              {/* Fictional/Tech badges to boost perception */}
-              <div className="flex flex-col items-center gap-2 p-4"><div className="font-bold text-zinc-800 dark:text-zinc-200">JWT</div><div className="text-xs text-zinc-400">Security</div></div>
-              <div className="flex flex-col items-center gap-2 p-4"><div className="font-bold text-zinc-800 dark:text-zinc-200">OAuth2</div><div className="text-xs text-zinc-400">Resource Server</div></div>
-              <div className="flex flex-col items-center gap-2 p-4"><div className="font-bold text-zinc-800 dark:text-zinc-200">OKLCH</div><div className="text-xs text-zinc-400">Color System</div></div>
-              <div className="flex flex-col items-center gap-2 p-4"><div className="font-bold text-emerald-600 dark:text-emerald-500">SSOT</div><div className="text-xs text-zinc-400">Single Source</div></div>
+            <div className="pt-8 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto">
+              <div className="flex flex-col items-center gap-3 text-center">
+                <div className="h-12 w-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center outline outline-4 outline-zinc-50 dark:outline-zinc-950 shadow-sm">
+                  <Clock className="h-5 w-5 text-emerald-600 dark:text-emerald-500" />
+                </div>
+                <div>
+                  <div className="font-bold text-zinc-800 dark:text-zinc-200">Respeito ao Tempo</div>
+                  <div className="text-xs text-zinc-500">Milissegundos importam.</div>
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-3 text-center">
+                <div className="h-12 w-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center outline outline-4 outline-zinc-50 dark:outline-zinc-950 shadow-sm">
+                  <ShieldCheck className="h-5 w-5 text-emerald-600 dark:text-emerald-500" />
+                </div>
+                <div>
+                  <div className="font-bold text-zinc-800 dark:text-zinc-200">Intencionalidade</div>
+                  <div className="text-xs text-zinc-500">Sem métricas de vaidade.</div>
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-3 text-center">
+                <div className="h-12 w-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center outline outline-4 outline-zinc-50 dark:outline-zinc-950 shadow-sm">
+                  <Keyboard className="h-5 w-5 text-emerald-600 dark:text-emerald-500" />
+                </div>
+                <div>
+                  <div className="font-bold text-zinc-800 dark:text-zinc-200">Atrito Zero</div>
+                  <div className="text-xs text-zinc-500">Teclado como extensão.</div>
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-3 text-center">
+                <div className="h-12 w-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center outline outline-4 outline-zinc-50 dark:outline-zinc-950 shadow-sm">
+                  <Code className="h-5 w-5 text-emerald-600 dark:text-emerald-500" />
+                </div>
+                <div>
+                  <div className="font-bold text-zinc-800 dark:text-zinc-200">Essência</div>
+                  <div className="text-xs text-zinc-500">Apenas o necessário.</div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
       </main>
 
-      {/* ── 4. Elevated SaaS Footer ── */}
+      {/* ── 4. Minimal SaaS Footer (MVP) ── */}
       <footer className="border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 py-12 lg:py-16">
-        <div className="mx-auto max-w-6xl px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="md:col-span-1 space-y-4">
+        <div className="mx-auto max-w-6xl px-6 flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
+          <div className="flex flex-col items-center md:items-start space-y-4 text-center md:text-left">
             <img src="/qronis_ext.svg" alt="Qronis" className="h-8 w-auto object-contain grayscale opacity-80" />
             <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-xs">
               O padrão ouro em rastreamento de tempo para profissionais de alto desempenho.
             </p>
           </div>
 
-          <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 uppercase tracking-wider">Produto</h4>
-            <ul className="space-y-2 text-sm text-zinc-500 dark:text-zinc-400">
-              <li><Link to="/register" className="hover:text-emerald-600 transition-colors">Testar Grátis</Link></li>
-              <li><Link to="/login" className="hover:text-emerald-600 transition-colors">Login</Link></li>
-              <li><a href="#" className="hover:text-emerald-600 transition-colors">Preços</a></li>
-            </ul>
-          </div>
-
-          <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 uppercase tracking-wider">Recursos</h4>
-            <ul className="space-y-2 text-sm text-zinc-500 dark:text-zinc-400">
-              <li><a href="#" className="hover:text-emerald-600 transition-colors">API & Docs</a></li>
-              <li><a href="#" className="hover:text-emerald-600 transition-colors">Open Source</a></li>
-              <li className="flex items-center gap-2"><div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div><a href="#" className="hover:text-emerald-600 transition-colors">Status do Sistema</a></li>
-            </ul>
-          </div>
-
-          <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 uppercase tracking-wider">Legal</h4>
-            <ul className="space-y-2 text-sm text-zinc-500 dark:text-zinc-400">
-              <li><a href="#" className="hover:text-emerald-600 transition-colors">Privacidade</a></li>
-              <li><a href="#" className="hover:text-emerald-600 transition-colors">Termos de Serviço</a></li>
-              <li><a href="#" className="hover:text-emerald-600 transition-colors flex items-center gap-1"><Globe className="h-3 w-3" /> PT-BR</a></li>
-            </ul>
+          <div className="flex flex-col md:flex-row gap-4 md:gap-8 text-sm text-zinc-500 dark:text-zinc-400">
+            <Link to="/register" className="hover:text-emerald-600 transition-colors font-medium">Cadastre-se</Link>
+            <Link to="/login" className="hover:text-emerald-600 transition-colors font-medium">Acessar Sistema</Link>
+            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition-colors font-medium flex items-center gap-1 justify-center md:justify-start">
+              <Globe className="h-4 w-4" /> PT-BR
+            </a>
           </div>
         </div>
 
-        <div className="mx-auto max-w-6xl px-6 pt-12 mt-12 border-t border-zinc-100 dark:border-zinc-800/60 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-400">
-          <p>&copy; {new Date().getFullYear()} Qronis. Todos os direitos reservados. Foco absoluto.</p>
+        <div className="mx-auto max-w-6xl px-6 pt-12 mt-12 border-t border-zinc-100 dark:border-zinc-800/60 flex justify-center text-xs text-zinc-400">
+          <p>&copy; {new Date().getFullYear()} Qronis. Foco absoluto.</p>
         </div>
       </footer>
     </div>

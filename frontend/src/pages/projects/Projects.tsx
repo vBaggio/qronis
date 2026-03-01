@@ -163,9 +163,9 @@ const NewProjectDialog: React.FC<NewProjectDialogProps> = ({ onCreated }) => {
             <DialogTrigger asChild>
                 <Button
                     id="btn-new-project"
-                    className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20 gap-2 shrink-0 rounded-full px-5 shadow-sm transition-colors border border-emerald-200 dark:border-emerald-800/50 w-full sm:w-auto"
+                    className="bg-emerald-50/80 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20 gap-2 shrink-0 rounded-full h-11 px-6 shadow-sm transition-all border border-emerald-200/50 dark:border-emerald-800/50 w-full sm:w-auto font-semibold text-base"
                 >
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-5 w-5" />
                     Novo Projeto
                 </Button>
             </DialogTrigger>
@@ -304,29 +304,29 @@ export const Projects: React.FC = () => {
                 {/* ── Unified Page Header & Search ── */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                     <div className="flex-1">
-                        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+                        <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
                             Projetos
                         </h1>
-                        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                        <p className="text-base text-zinc-500 dark:text-zinc-400 mt-1 font-medium">
                             {totalElements > 0
                                 ? `${totalElements} projeto${totalElements !== 1 ? 's' : ''} no workspace`
                                 : 'Nenhum projeto criado ainda'}
                         </p>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-                        <div className="relative w-full sm:w-64 md:w-80">
+                    <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto pt-2 md:pt-0">
+                        <div className="relative w-full sm:w-72 md:w-80">
                             {isSearchPending || loading ? (
-                                <Loader2 className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 animate-spin" />
+                                <Loader2 className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400 animate-spin" />
                             ) : (
-                                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
                             )}
                             <Input
                                 id="search-projects"
                                 placeholder="Buscar projetos..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-10 h-10 w-full rounded-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 focus-visible:ring-emerald-500 shadow-sm"
+                                className="pl-11 h-11 w-full rounded-full bg-white dark:bg-zinc-900/50 border-zinc-200/80 dark:border-zinc-800/80 focus-visible:ring-emerald-500/30 shadow-sm text-base transition-all"
                             />
                         </div>
                         <div className="w-full sm:w-auto">

@@ -4,7 +4,6 @@ import { useAuth } from '../../lib/auth-context';
 import { authApi } from '../../lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
@@ -44,42 +43,76 @@ export const Login: React.FC = () => {
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 py-12 dark:bg-zinc-950">
-            <div className="w-full max-w-md space-y-6">
-                <div className="flex flex-col items-center justify-center space-y-2 text-center">
-                    <Link to="/" className="flex h-16 items-center justify-center mb-2 transition-transform hover:scale-105">
-                        <img src="/qronis_ext.svg" alt="Qronis Logo" className="h-12 w-auto object-contain drop-shadow-sm" />
+        <div className="flex h-screen w-full bg-white dark:bg-zinc-950 font-sans selection:bg-emerald-200 dark:selection:bg-emerald-900/40 overflow-hidden">
+            {/* Lado Esquerdo: Canvas Interativo / Identidade da Marca (Desktop Only) */}
+            <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-between h-full bg-zinc-50 dark:bg-zinc-950 overflow-hidden text-zinc-900 dark:text-zinc-50 p-8 lg:p-12 border-r border-zinc-200 dark:border-zinc-800/50">
+                {/* Efeito de Luz / Fundo */}
+                <div className="absolute top-0 left-0 w-full h-[500px] bg-emerald-500/10 dark:bg-emerald-900/20 blur-[120px] rounded-full -translate-x-1/2 -translate-y-1/2" />
+
+                <div className="relative z-10 w-full flex justify-between items-start shrink-0">
+                    <Link to="/" className="inline-block transition-transform hover:scale-105 active:scale-95">
+                        <img src="/qronis_ext.svg" alt="Qronis Logo" className="h-10 w-auto object-contain dark:brightness-0 dark:invert dark:opacity-90" />
                     </Link>
-                    <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Bem-vindo ao Qronis</h1>
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                        Foque no trabalho. Nós cuidamos do tempo.
-                    </p>
                 </div>
 
-                <Card className="border-0 shadow-xl dark:border dark:border-zinc-800 dark:bg-zinc-900/50">
-                    <form onSubmit={handleSubmit}>
-                        <CardContent className="flex flex-col gap-4 p-6 pt-2">
-                            {error && (
-                                <div className="rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/30 dark:text-red-400">
-                                    {error}
-                                </div>
-                            )}
+                {/* Arte Minimalista Dinâmica (Respeita Telas Menores) */}
+                <div className="relative z-0 flex-1 flex items-center justify-center min-h-0 py-4 opacity-80 dark:opacity-20 pointer-events-none mix-blend-multiply dark:mix-blend-screen transition-transform duration-1000 hover:scale-105 hover:opacity-100 w-full lg:px-12">
+                    <img src="/auth_portal_art.png" alt="Concept Art" className="w-full max-w-[400px] h-full object-contain filter dark:grayscale" />
+                </div>
+
+                <div className="relative z-10 max-w-md space-y-6 pb-4">
+                    <h2 className="text-4xl font-extrabold tracking-tight leading-[1.1]">
+                        Estado de fluxo.<br />Acesso liberado.
+                    </h2>
+                    <p className="text-lg text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">
+                        A arquitetura do desenvolvedor moderno. Nós cuidamos do tempo, das métricas e do faturamento para que você possa focar exclusivamente em resolver o impossível.
+                    </p>
+                </div>
+            </div>
+
+            {/* Lado Direito: Área de Ação (Login) */}
+            <div className="flex-1 flex flex-col justify-center items-center py-6 px-6 md:px-12 relative overflow-y-auto">
+                {/* Efeito Mobile: Logo para telas menores */}
+                <div className="lg:hidden absolute top-6 left-6">
+                    <Link to="/" className="inline-block transition-transform hover:scale-105 active:scale-95">
+                        <img src="/qronis_ext.svg" alt="Qronis Logo" className="h-8 w-auto object-contain drop-shadow-sm" />
+                    </Link>
+                </div>
+
+                <div className="w-full max-w-[400px] animate-in fade-in slide-in-from-bottom-8 duration-700">
+                    <div className="mb-10 text-center lg:text-left">
+                        <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 mb-2">Bem-vindo de volta</h1>
+                        <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">Insira suas credenciais corporativas para continuar.</p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        {error && (
+                            <div className="rounded-xl bg-red-50 p-4 text-sm font-medium text-red-600 dark:bg-red-900/20 dark:text-red-400 border border-red-100 dark:border-red-900/50 flex items-start gap-3 animate-in fade-in zoom-in-95 duration-300">
+                                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400">!</span>
+                                {error}
+                            </div>
+                        )}
+
+                        <div className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="email">E-mail</Label>
+                                <Label htmlFor="email" className="text-zinc-700 dark:text-zinc-300 font-semibold">E-mail</Label>
                                 <Input
                                     id="email"
                                     type="email"
-                                    placeholder="Seu e-mail profissional"
+                                    placeholder="alan@turing.com"
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     disabled={isLoading}
-                                    className="bg-white dark:bg-zinc-950"
+                                    className="h-12 bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 focus-visible:ring-emerald-500/30 text-base"
                                 />
                             </div>
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
-                                    <Label htmlFor="password">Senha</Label>
+                                    <Label htmlFor="password" className="text-zinc-700 dark:text-zinc-300 font-semibold">Senha</Label>
+                                    <Link to="#" className="text-xs font-medium text-emerald-600 dark:text-emerald-500 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors">
+                                        Esqueceu a senha?
+                                    </Link>
                                 </div>
                                 <Input
                                     id="password"
@@ -88,21 +121,27 @@ export const Login: React.FC = () => {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     disabled={isLoading}
-                                    className="bg-white dark:bg-zinc-950"
+                                    className="h-12 bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 focus-visible:ring-emerald-500/30 text-base"
                                 />
                             </div>
-                        </CardContent>
-                        <CardFooter className="pt-4">
-                            <Button
-                                type="submit"
-                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-600 dark:hover:bg-emerald-700"
-                                disabled={isLoading}
-                            >
-                                {isLoading ? 'Autenticando...' : 'Entrar na Plataforma'}
-                            </Button>
-                        </CardFooter>
+                        </div>
+
+                        <Button
+                            type="submit"
+                            className="w-full h-12 text-base font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-500/20 transition-all hover:ring-4 ring-emerald-500/20 active:scale-95"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? 'Autenticando...' : 'Entrar na Plataforma'}
+                        </Button>
                     </form>
-                </Card>
+
+                    <p className="mt-8 text-center text-sm text-zinc-500 dark:text-zinc-400 font-medium">
+                        Não tem uma conta?{' '}
+                        <Link to="/register" className="text-emerald-600 dark:text-emerald-500 underline underline-offset-4 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors">
+                            Crie seu Workspace grátis
+                        </Link>
+                    </p>
+                </div>
             </div>
         </div>
     );
