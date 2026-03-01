@@ -66,17 +66,29 @@ A mágica acontece (Operação de Fluxo Real). Foco na legibilidade e "Zen Mode"
 - [x] Elaborar a Grade de Projetos: Tela consumindo o endpoint de listagem paginada usando componente Table (`shadcn/ui`). Cores de "Accent" determinísticas por UUID do projeto. Dialog de criação inline e exclusão com confirmação.
 
 #### Fase 5.1: Polimento da Grade de Projetos (Quick Wins)
-- [ ] Dialog de confirmação de exclusão customizado (substituir `window.confirm` por Dialog shadcn com ícone, nome do projeto em destaque e botão destructive).
-- [ ] Busca live com debounce 400ms (remover botão "Buscar", filtro via query param `?name=` no backend).
-- [ ] Accent colors via `border-l-4` na row (trocar dot + badge por borda lateral colorida, estilo Linear/Notion).
-- [ ] Coesão visual `rounded-full` nos inputs e botão "Novo Projeto" (herança do ZenTimer).
-- [ ] Hover row com elevação sutil (`shadow-sm` + `translate-y-[1px]`) e stagger animation (fade-in escalonado por row).
+- [x] Dialog de confirmação de exclusão customizado (substituir `window.confirm` por Dialog shadcn com ícone, nome do projeto em destaque e botão destructive).
+- [x] Busca live com debounce 400ms (remover botão "Buscar", filtro via query param `?name=` no backend).
+- [x] Accent colors via `border-l-4` na row (trocar dot + badge por borda lateral colorida, estilo Linear/Notion).
+- [x] Coesão visual `rounded-full` nos inputs e botão "Novo Projeto" (herança do ZenTimer).
+- [x] Hover row com elevação sutil (`shadow-sm` + `translate-y-[1px]`) e stagger animation (fade-in escalonado por row).
 
-#### Fase 5.2: Evolução de Identidade Visual
+## 6. Live Tracker Mobile Polish
+- [x] Reproject `ZenTimer.tsx` and `ProjectSelector.tsx` form controls to avoid the "boxy" stacked look on small screens.
+
+## 7. Additional UX Refinements
+- [x] Hide the global "Novo Projeto" button in `/projects` when the empty state CTA is visible.
+- [x] Move row actions to a Dropdown Menu (`...` vertical) and remove the "Ações" table header.
+
+#### Fase 5.2: Evolução de Identidade Visual e UX Premium (O Paradigma "Zen")
+- [ ] Refatorar Navbar (`TopNav.tsx`) restringindo largura para `max-w-5xl` para unificar alinhamento visual com as páginas.
+- [ ] Header de `/projects`: Unificar Título, Busca ("pill-shape") e Botão "Novo Projeto" (Estilo Ghost/Soft) num layout orgânico e responsivo.
+- [ ] Refinar tipografia ("Projetos" com `font-semibold tracking-tight` e "TableHeader" em *sentence case* discreto).
+- [ ] Redesenhar indicador de cor da tabela: remover `border-l-4` bruta e usar *Pill/Badge* circular sutil interno.
+- [ ] Minimalismo Tabela: Excluir coluna "Criado por" e aumentar `padding-y` das linhas (respiro / luxo visual).
+- [ ] Empty State Ativo: Injetar botão "Novo Projeto" centralizado na tela vazia (Lei de Fitts).
+- [ ] Reestruturar GRID/FLEX Mobile do `/tracker`: impedir o empilhamento em caixotes ("boxy") do selector de projetos e campos adjacentes.
 - [ ] Integrar Toast Notifications (`sonner`) para feedback não-intrusivo de criação/exclusão/erros.
 - [ ] Skeleton Loading na Table (substituir spinner por rows fantasma para melhorar CLS).
-- [ ] Empty State humanizado com ilustração/emoji e CTA integrado de criação.
-- [ ] TopNav: refinamento de espaçamento em telas largas (`max-w-6xl`).
 - [ ] Tipografia premium: avaliar adição de fonte Inter via Google Fonts.
 - [ ] Dark Mode Toggle na TopNav (Sun/Moon) com persistência em `localStorage`.
 

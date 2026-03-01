@@ -47,3 +47,30 @@ Estas são as regras invioláveis para o desenvolvimento das interfaces, especia
    - Para evitar bloqueios na thread principal e re-renders em cadeia, a UI deve utilizar um manipulador `setInterval` atachado num hook utilitário.
    - O frontend **NUNCA DEVE SOMAR SEGUNDOS VIA STATE (`setSeconds(s => s+1)`)**.
    - O cálculo matemático inviolável para renderizar o timer é: `[Hora Local do Browser Atual] - [start_time do banco convertido para o fuso local]`. Essa diferença nativa gera a interface visual, de forma imune a gargalos do event loop.
+
+## 🎨 O Paradigma "Zen" (Identidade Visual e UX)
+O Qronis deve transparecer calma, foco e acabamento premium. Para manter a coesão do design system nas próximas telas, siga estas heurísticas visuais:
+
+1. **Minimalismo e Redução de Carga Cognitiva:**
+   - Evite poluição visual. Esconda elementos secundários e mantenha o foco absoluto na ação primária da página.
+   - Ações contextuais de listas/tabelas devem ser escondidas em **Dropdown Menus** (ícone `MoreVertical` `...`). Nunca exponha botões de "Editar" ou "Excluir" abertamente ocupando espaço na tabela, e remova o cabeçalho textual "Ações" das tabelas.
+   - Elimine botões redundantes. Por exemplo: se o botão "Novo Projeto" já está gigante no centro da tela em um *Empty State*, oculte-o temporariamente do Header da página para evitar duplicidade de CTAs.
+
+2. **Tipografia Premium:**
+   - **Títulos Customizados:** Títulos de página (`h1`) devem usar `text-2xl font-semibold tracking-tight text-zinc-900`. O tracking (espaçamento negativo) dita um tom mais moderno.
+   - **Cabeçalhos Mudos:** Cabeçalhos de tabela (`TableHeader`) não devem usar `uppercase`. Devem adotar *Sentence Case* (minúscula) com `text-sm font-medium text-zinc-500` para transmitir leveza.
+
+3. **Cores, Botões e Coesão Orgânica:**
+   - O tom primário de fundo é neutro (`zinc`). A cor de destaque é o `emerald`.
+   - Modere o uso de botões sólidos (`bg-emerald-600`). Reserve-os apenas para as ações essenciais e afirmativas da view (como "Iniciar" timer, ou confirmar submit modal).
+   - Para gatilhos (triggers) ou ações de navegação (como "Novo Projeto" no header), prefira botões modulares do tipo **Ghost/Soft** (`bg-emerald-50 text-emerald-700 hover:bg-emerald-100`). Eles dão utilidade sem "gritar" pela atenção do usuário.
+   - Inputs de busca e controles principais (como os do Tracker) devem usar cantos perfeitamente arredondados (`rounded-full`) para gerar formas contínuas e orgânicas, nunca caixas rústicas quadradas.
+
+4. **Anatomia de Tabelas e Listagens (Fim do CRUD corporativo):**
+   - **Sem Bordas Agressivas:** Nunca use bordas laterais espessas (`border-l-4`) para denotar cor/categoria. Em vez disso, incorpore o indicador de cor de forma sutil através de um "Color Pill" esférico minúsculo (badge) renderizado na mesma célula textual com `gap`.
+   - **Respiro Visceral:** O respiro vertical das linhas (padding) deve ser luxuoso (ex: `py-5`). Tabelas apertadas reduzem a sensação de produto premium.
+   - **Estados Vazios Acionáveis:** O *Empty State* de qualquer listagem deve sempre centralizar um grande botão de ação (Lei de Fitts), transformando um dead-end em uma via de valor.
+
+5. **Responsividade Inteligente (Mobile First Real):**
+   - Em telas móveis (`sm` ou menores), evite o "efeito caixote" gerado pelo clássico empilhamento vertical `flex-col` estrito com larguras variadas em formulários ou controles de barra.
+   - Elementos primários (ex: Seletor de Relacionamento) e Inputs textuais devem fluir ocupando de forma orgânica e previsível a largura da tela (`w-full`), alinhados logicamente para não parecerem "montados às pressas".

@@ -109,3 +109,15 @@ Este documento registra decisões arquiteturais cruciais para que o contexto de 
 - **Camada 2 (Identidade Visual):** Toast notifications via `sonner`, skeleton loading, empty state humanizado, refinamento TopNav, tipografia Inter, dark mode toggle.
 - **Camada 3 (Infraestrutura):** Lazy loading de rotas (`React.lazy`), Error Boundary global, acessibilidade (a11y), preparação estrutural i18n.
 - **Filosofia:** Todas as decisões respeitam o DNA Zen/Minimalista do Qronis — polimento, não adição de complexidade.
+
+---
+
+## ADR 012: @RequestParam Requer `name` Explícito (Spring Boot / Gradle)
+**Status:** Aceito
+**Contexto:** Ao adicionar o parâmetro de busca `?name=` ao endpoint `GET /api/projects`, o método do Controller foi anotado com `@RequestParam(required = false) String name`. O backend passou a retornar **400 Bad Request** em todas as chamadas ao endpoint — inclusive sem o parâmetro `name` — com a mensagem: *"Name for argument of type [java.lang.String] not specified, and parameter name information not available via reflection. Ensure that the compiler uses the '-parameters' flag."*
+**Causa Raiz:** O compilador Java, por padrão no Gradle sem configuração adicional, não preserva os nomes dos argumentos de método no bytecode. O Spring tenta inferir o nome do `@RequestParam` via reflection, mas falha sem a flag `-parameters`. Isso quebrou todo o endpoint `GET /api/projects` (o frontend recebia 400 e limpava a lista para `[]` no `catch` block).
+**Decisão:**
+- **Regra inviolável:** Todo `@RequestParam`, `@PathVariable` e `@RequestHeader` no projeto **deve** declarar o atributo `name` (ou `value`) de forma explícita.
+- Correto: `@RequestParam(name = "name", required = false) String name`
+- Incorreto: `@RequestParam(required = false) String name`
+- Alternativa sistêmica (não adotada por ora): adicionar `compileJava { options.compilerArgs << "-parameters" }` no `build.gradle.kts`.
