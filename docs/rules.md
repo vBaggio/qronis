@@ -6,7 +6,7 @@ O Qronis deve respeitar as versões estipuladas abaixo para garantir estabilidad
 ### Backend
 - **Linguagem:** Java 21 (LTS).
 - **Framework:** Spring Boot 4.0.3 (arquitetura modularizada).
-- **Banco de Dados:** PostgreSQL 17 (na porta local 5434).
+- **Banco de Dados:** PostgreSQL 16 (na porta local 5434).
 - **Ferramental:** Gradle, Flyway (Migrations).
 - **Segurança:** Spring Security com OAuth2 Resource Server para validação JWT stateless.
 

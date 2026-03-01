@@ -61,9 +61,33 @@ Base de interação humana focada em simplicidade e entrega rápida.
 ### Fase 5: Domínio de Negócios Visual (Front-end)
 A mágica acontece (Operação de Fluxo Real). Foco na legibilidade e "Zen Mode".
 
-- [ ] Construir o **Live Tracker UI (Zen Mode)**: O coração gravitacional da aplicação. Timer GIGANTE e centralizado na tela (foco em topografia moderna/bold). Botões maciços de Play/Stop (Verde/Vermelho) + ComboBox simples (`shadcn/ui`) para selecionar o Projeto.
+- [x] Construir o **Live Tracker UI (Zen Mode)**: O coração gravitacional da aplicação. Timer GIGANTE e centralizado na tela (foco em topografia moderna/bold). Botões maciços de Play/Stop (Verde/Vermelho) + ComboBox simples (`shadcn/ui`) para selecionar o Projeto.
   - *Feature "Escape Hatch":* Quando *Idle* (parado), manter navegação (`TopNav`) visível para fuga. Quando *Active* (rodando), ocultar todo ruído visual da tela.
-- [ ] Elaborar a Grade de Projetos: Tela simples consumindo o endpoint de listagem/busca usando a base do componente Table (`shadcn/ui`). Cores de "Accent" por projeto para rápida identificação.
+- [x] Elaborar a Grade de Projetos: Tela consumindo o endpoint de listagem paginada usando componente Table (`shadcn/ui`). Cores de "Accent" determinísticas por UUID do projeto. Dialog de criação inline e exclusão com confirmação.
+
+#### Fase 5.1: Polimento da Grade de Projetos (Quick Wins)
+- [ ] Dialog de confirmação de exclusão customizado (substituir `window.confirm` por Dialog shadcn com ícone, nome do projeto em destaque e botão destructive).
+- [ ] Busca live com debounce 400ms (remover botão "Buscar", filtro via query param `?name=` no backend).
+- [ ] Accent colors via `border-l-4` na row (trocar dot + badge por borda lateral colorida, estilo Linear/Notion).
+- [ ] Coesão visual `rounded-full` nos inputs e botão "Novo Projeto" (herança do ZenTimer).
+- [ ] Hover row com elevação sutil (`shadow-sm` + `translate-y-[1px]`) e stagger animation (fade-in escalonado por row).
+
+#### Fase 5.2: Evolução de Identidade Visual
+- [ ] Integrar Toast Notifications (`sonner`) para feedback não-intrusivo de criação/exclusão/erros.
+- [ ] Skeleton Loading na Table (substituir spinner por rows fantasma para melhorar CLS).
+- [ ] Empty State humanizado com ilustração/emoji e CTA integrado de criação.
+- [ ] TopNav: refinamento de espaçamento em telas largas (`max-w-6xl`).
+- [ ] Tipografia premium: avaliar adição de fonte Inter via Google Fonts.
+- [ ] Dark Mode Toggle na TopNav (Sun/Moon) com persistência em `localStorage`.
+
+#### Fase 5.3: Infraestrutura de Qualidade Frontend
+- [ ] Lazy Loading de rotas via `React.lazy()` + `Suspense` no `App.tsx`.
+- [ ] Error Boundary global com fallback visual amigável.
+- [ ] Acessibilidade (a11y): `focus-visible` rings, `aria-labels` em botões de ação, keyboard navigation.
+- [ ] Preparação i18n: extrair strings hardcoded para constantes (futuro `react-i18next`).
+
+---
+
 - [ ] Estruturar Tela History: Uma grade infinita suportando *on-blur* para disparar instantaneamente `PATCH`. Combinação de inputs sem borda nas células para entregar a edição inline.
   - *Feature Formatação Dinâmica:* Duração inteligente formatando `< 1m` (segundos), `< 1h` (min/seg), `> 1h` (horas/min) para limpar a tabela ao máximo.
 - [ ] Injetar Gráficos Analytics de produtividade atrelados a blocos Recharts interativos no Dashboard Master.

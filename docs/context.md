@@ -28,3 +28,8 @@ O sistema é governado pelas seguintes diretrizes imutáveis de domínio:
 
 5. **Tratamento Global de Exceções:**
    - O produto nunca expõe stack-traces nativas ou HTMLs de erro não amigáveis do Tomcat para os clientes. Erros de validação (400) ou de negócio (409) são invariavelmente interceptados por um `GlobalExceptionHandler` e devolvidos seguindo um contrato JSON restrito e previsível de `ErrorResponseDTO`.
+
+## 🧘‍♂️ Princípios de Interface (O Paradigma "Zen")
+A Interface de Usuário (UI) foi codificada para servir estritamente à modelagem de foco (Deep Work):
+- **Ato de Desaparecimento Visual:** Quando o botão de iniciar é ativado, a interface entra em mutação. As âncoras de escape clássicas de Web Apps (Menu Superior, TopNav, Avatar e caixas de Inputs extras) são encolhidas e escurecidas (`opacity-0 h-0`). Sobra visualmente apenas a essência: O cronômetro gigante e singular e o que está sendo feito.
+- **Redução Cognitiva (Anti-Friction Rules):** É proibido forçar navegações inúteis. A escolha do projeto integra a criação *in-line*. Qualquer coisa que retarde o ato central de "Apertar o Play" é considerado uma falha arquitetural.

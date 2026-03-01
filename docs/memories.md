@@ -69,3 +69,43 @@ Este documento registra decisões arquiteturais cruciais para que o contexto de 
 - **Motivo do Rollback:** A alteração na camada de persistência introduziu quebras colaterais em vários testes unitários sensíveis (`TimeEntryServiceTest`), requerendo a reescrita massiva de Mocks e injeções de dependência que não estavam no escopo do momento.
 **Decisão Atual:**
 - O código-fonte Java sofreu `git restore` e voltou ao estado funcional com cobertura 100%. A query N+1 nesse fluxo específico é aceitável por ora (dado o impacto controlado de apenas buscar 1 projeto e não realizar paginação em lote do DTO individual). A refatoração foi anotada para ser corrigida apenas quando as suítes E2E de Controller estiverem totalmente maduras e seguras.
+
+---
+
+## ADR 008: Regra de Ouro do Cronômetro (Frontend)
+**Status:** Aceito
+**Contexto:** Ao construir o Live Tracker (ZenTimer), usar `setInterval` iterando uma variável de estado (`setSeconds(s => s+1)`) gera dessincronização severa devido a gargalos do event-loop do navegador (abas inativas, processamento pesado em outras páginas).
+**Decisão:**
+- O cronômetro visual é estritamente derivativo e "stateless" em relação à contagem temporal.
+- A matemática adotada é ancorada em carimbo absoluto: `Date.now() - startTime` (onde `startTime` é o ISO Time real retornado pelo backend).
+- O React apenas guarda o resultado do delta em segundos no estado para forçar o re-render, mas essa soma nunca é feita de forma recursiva a partir de si mesmo. As abas podem dormir ou processar lags sem afetar a verdade do cronômetro.
+
+---
+
+## ADR 009: Otimização de Espaçamentos Condicionais (Flex Gap vs Space-Y)
+**Status:** Aceito
+**Contexto:** Nos formulários de autenticação (Login/Register) deparamo-nos com componentes ocultos condicionalmente (mensagens de texto vermelho `{error && ...}`). O uso utilitário do Tailwind `space-y-*` forçava a injeção falha de top-margins baseada em seletores sibling `> * + *`, que não calculam a abstração do React.
+**Decisão:**
+- Formações de tela com caixas escondíveis/condicionais aboliram categoricamente a utilidade `space-y-*`.
+- Adotou-se o modelo inviolável em container pai: `flex flex-col gap-*`. O Gap lida inerentemente com a ausência de componentes no DOM e distribui os elásticos perfeitamente, sem "margins" vazadas.
+
+---
+
+## ADR 010: Criação In-Flow de Associações (Project Selector)
+**Status:** Aceito
+**Contexto:** Como forçar que uma Task pertença a um `Project`, se o usuário não tiver aquele determinado projeto criado ainda? Uma rota de escape para `/projetos/novo` assassinaria completamente o senso prático do Tracker.
+**Decisão:**
+- Abordagem unificada: O filtro do `<ComboBox>` monitora a String livre.
+- Se os resultados para o Array retornarem Length 0 e a query for válida, injecta-se um *Action Button* transparente na lista para "Criar novo projeto [Query]".
+- Isso perfura o fluxo, joga um `POST /api/projects` no backend e recupera o ID simultaneamente atrelando ao Timer. O Foco não se quebra.
+
+---
+
+## ADR 011: Plano de Evolução UI/UX em 3 Camadas (Grade de Projetos)
+**Status:** Aceito
+**Contexto:** Após a entrega funcional da Grade de Projetos (`/projects`), foi realizada uma análise profunda de UI/UX cruzando agentes (`frontend-specialist`, `performance-optimizer`), skills (`react-best-practices`, `web-design-guidelines`, `performance-profiling`, `i18n-localization`, `frontend-design`) e toda a documentação do produto para elevar o frontend de "funcional" para "produto de primeira linha".
+**Decisão:**
+- **Camada 1 (Quick Wins):** Dialog de exclusão customizado, busca live com debounce + filtro backend por nome, accent colors via `border-l-4` (estilo Linear/Notion), coesão visual `rounded-full`, hover com elevação e stagger animation nas rows.
+- **Camada 2 (Identidade Visual):** Toast notifications via `sonner`, skeleton loading, empty state humanizado, refinamento TopNav, tipografia Inter, dark mode toggle.
+- **Camada 3 (Infraestrutura):** Lazy loading de rotas (`React.lazy`), Error Boundary global, acessibilidade (a11y), preparação estrutural i18n.
+- **Filosofia:** Todas as decisões respeitam o DNA Zen/Minimalista do Qronis — polimento, não adição de complexidade.

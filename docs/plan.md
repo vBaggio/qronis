@@ -7,7 +7,7 @@ O ecossistema do Qronis é projetado para escalabilidade lateral horizontal. Ope
 graph TD
     UI[Frontend: React 19 + Tailwind v4 + Vite]
     API[Backend: Spring Boot 4.0.3 API]
-    DB[(Database: PostgreSQL 17)]
+    DB[(Database: PostgreSQL 16)]
     
     UI -- "JSON & JWT (OAuth2 Bearer)" --> API
     API -- "JOIN FETCH (Hibernate JPA)" --> DB
@@ -21,7 +21,7 @@ qronis/
 ├── docker-compose.yml        # Infra local (PostgreSQL)
 ├── context/                  # Contexto antigo/legado
 ├── docs/                     # Repositório de Specs Técnicas
-│   ├── contexto.md           # Visão de Produto e Regras    
+│   ├── context.md           # Visão de Produto e Regras    
 │   ├── rules.md              # Leis da Arquitetura
 │   ├── plan.md               # Você está aqui
 │   ├── api.md                # Desenho dos Endpoints
