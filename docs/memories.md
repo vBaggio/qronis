@@ -101,6 +101,25 @@ Este documento registra decisões arquiteturais cruciais para que o contexto de 
 
 ---
 
+## ADR 011: Travas de Viewport em Páginas de Setup (Auth)
+**Status:** Aceito
+**Contexto:** Nas páginas de Login e Register, em monitores com baixa resolução vertical (ex: notebooks antigos 1024x768), o uso de `min-h-screen` com flexbox e paddings internos extensos forçava o texto ou formulário para além do rodapé, ativando um scroll desconfortável que quebrava o "Zen Paradigm" imersivo.
+**Decisão:**
+- Arquitetura "App-like Strict": Telas de entrada agora herdam a restrição `h-screen overflow-hidden` na tag pai.
+- Isso impede categoricamente o scroll da janela.
+- Os paddings flexíveis centrais (`flex-1 min-h-0`) assumem a função de absorvedores de choque: a arte central encolhe microscopicamente para garantir que a tipografia e logo ancorados caibam em 100% dos cenários dentro do viewport visualizado do usuário.
+
+---
+
+## ADR 012: Identificação Pragmática de Servidor Offline (Axios)
+**Status:** Aceito
+**Contexto:** O erro padrão capturado em falhas do backend disparava a lógica genérica de `|| "Credenciais inválidas"` porque o objeto `err.response` retornava nulo quando o backend Java nem sequer estava rodando. Isso passava uma falsa impressão de senha incorreta para o usuário ao invés de um problema da plataforma.
+**Decisão:**
+- Adotar o padrão de inspeção de handshake do Axios: `if (!err.response && err.request)` em vez de focar apenas no `.data.message`.
+- O lado cliente não deduz mais motivos funcionais se o handshake nem se consolidou. Erros onde a *request* saiu, mas a *response* não voltou, são categoricamente classificados como falha de rede ou "Servidor indisponível", garantindo Transparência de Status do Sistema (Heurística de Nielsen).
+
+---
+
 ## ADR 011: Plano de Evolução UI/UX em 3 Camadas (Grade de Projetos)
 **Status:** Aceito
 **Contexto:** Após a entrega funcional da Grade de Projetos (`/projects`), foi realizada uma análise profunda de UI/UX cruzando agentes (`frontend-specialist`, `performance-optimizer`), skills (`react-best-practices`, `web-design-guidelines`, `performance-profiling`, `i18n-localization`, `frontend-design`) e toda a documentação do produto para elevar o frontend de "funcional" para "produto de primeira linha".
