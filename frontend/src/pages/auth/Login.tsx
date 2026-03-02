@@ -33,7 +33,11 @@ export const Login: React.FC = () => {
             }
         } catch (err: unknown) {
             if (axios.isAxiosError(err)) {
-                setError(err.response?.data?.message || 'E-mail ou senha inválidos.');
+                if (!err.response && err.request) {
+                    setError('Servidor indisponível. Verifique sua conexão ou tente novamente mais tarde.');
+                } else {
+                    setError(err.response?.data?.message || 'E-mail ou senha inválidos.');
+                }
             } else {
                 setError('Erro inesperado. Tente novamente.');
             }

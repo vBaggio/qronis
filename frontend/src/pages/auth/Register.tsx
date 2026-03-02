@@ -47,7 +47,11 @@ export const Register: React.FC = () => {
             }
         } catch (err: unknown) {
             if (axios.isAxiosError(err)) {
-                setError(err.response?.data?.message || 'Falha ao criar a conta. Verifique os dados.');
+                if (!err.response && err.request) {
+                    setError('Servidor indisponível. Verifique sua conexão ou tente novamente mais tarde.');
+                } else {
+                    setError(err.response?.data?.message || 'Falha ao criar a conta. Verifique os dados.');
+                }
             } else {
                 setError('Erro inesperado. Tente novamente.');
             }
