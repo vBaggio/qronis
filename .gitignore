@@ -47,7 +47,7 @@ dist/
 # ========================
 .DS_Store
 Thumbs.db
-desktop.ini
+desktop.ini 
 
 # ========================
 # Projeto - Context (uso interno da IA)
@@ -60,5 +60,4 @@ desktop.ini
 *.log
 logs/
 
-docs/
 .agent/
