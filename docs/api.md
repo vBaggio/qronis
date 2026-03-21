@@ -116,6 +116,18 @@ Mapeamento secundário padrão (Buscar, Atualizar, Deletar):
 - **GET** `/api/projects/{id}/time-entries`
 - **Output (200 OK):** Retorna array de `TimeEntryResponseDTO`.
 
+### Resumo Agregado do Projeto
+- **GET** `/api/projects/{id}/summary`
+- **Security:** Bearer Token
+- **Output (200 OK):**
+```json
+{
+  "projectId": "a1b2...",
+  "totalDurationSeconds": 14520
+}
+```
+- **Observação:** Calcula a soma total via query nativa PostgreSQL (`SUM(EXTRACT(EPOCH...))`). Considera apenas entries com `endTime` não-nulo.
+
 ---
 
 ## 4. ⏱️ Time Entries (Autenticado & Scope User/Projeto)

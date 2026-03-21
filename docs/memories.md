@@ -140,3 +140,25 @@ Este documento registra decisões arquiteturais cruciais para que o contexto de 
 - Correto: `@RequestParam(name = "name", required = false) String name`
 - Incorreto: `@RequestParam(required = false) String name`
 - Alternativa sistêmica (não adotada por ora): adicionar `compileJava { options.compilerArgs << "-parameters" }` no `build.gradle.kts`.
+
+---
+
+## ADR 013: Agregação de Horas via Native Query PostgreSQL
+**Status:** Aceito
+**Contexto:** A tela de detalhes do projeto (`/projects/:id`) exibe um "Mini-Dash" com o total de horas investidas. Precisávamos decidir entre calcular no client-side (baixar todas as pages) ou no banco.
+**Decisão:**
+- Criada uma **native query** PostgreSQL no `TimeEntryRepository`: `SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (te.end_time - te.start_time))), 0) FROM time_entry te WHERE te.project_id = CAST(:projectId AS uuid) AND te.created_by = CAST(:userId AS uuid) AND te.end_time IS NOT NULL`.
+- Retorna `Long` (total em segundos) processado em O(1) pelo banco — zero transferência de dados desnecessários.
+- O `CAST(:param AS uuid)` é necessário para compatibilidade com Spring Data JPA native queries + PostgreSQL UUID type.
+- **Cuidado com nomes de tabelas:** O Hibernate mapeia `@Table(name = "time_entry")` (singular). A query nativa deve usar esse nome exato, não plurais inventados.
+
+---
+
+## ADR 014: Blindagem de UUID.fromString() nos Controllers
+**Status:** Aceito
+**Contexto:** O React Router pode temporariamente despachar IDs inválidos (ex: string `"undefined"`) durante transições de rota. Sem proteção, `UUID.fromString("undefined")` lança `IllegalArgumentException` não-tratada, resultando em **500 Internal Server Error** — violando o contrato de erros previsíveis do produto.
+**Decisão:**
+- Todos os métodos do `ProjectController` que recebem `@PathVariable("id") String id` agora encapsulam `UUID.fromString(id)` em `try-catch(IllegalArgumentException)`.
+- Em caso de falha, lançam `ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Project ID format")` — retornando 400 limpo.
+- O frontend também aplica early-return (`if (!id || id === 'undefined') return`) para evitar chamadas desnecessárias.
+

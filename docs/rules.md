@@ -74,3 +74,14 @@ O Qronis deve transparecer calma, foco e acabamento premium. Para manter a coes�
 5. **Responsividade Inteligente (Mobile First Real):**
    - Em telas móveis (`sm` ou menores), evite o "efeito caixote" gerado pelo clássico empilhamento vertical `flex-col` estrito com larguras variadas em formulários ou controles de barra.
    - Elementos primários (ex: Seletor de Relacionamento) e Inputs textuais devem fluir ocupando de forma orgânica e previsível a largura da tela (`w-full`), alinhados logicamente para não parecerem "montados às pressas".
+
+6. **Tokens Invioláveis de Consistência (Design System Codificado):**
+   - **Background de páginas internas:** `bg-white dark:bg-zinc-950` (nunca `bg-zinc-50` para telas autenticadas).
+   - **Título `h1` de páginas internas:** `text-4xl md:text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50`. Toda página deve usar a mesma escala.
+   - **Subtítulo descritivo abaixo do `h1`:** `text-lg text-zinc-500 dark:text-zinc-400 font-medium`.
+   - **Botão Primário (Ação Essencial):** `bg-emerald-600 hover:bg-emerald-700 text-white rounded-full`. Sempre `rounded-full`, nunca `rounded-xl`.
+   - **Botão Secundário (Ação de Navegação/Complementar):** `bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-full`.
+   - **Textos informativos leves:** Mínimo `text-zinc-500` (nunca `text-zinc-400` para garantir contraste WCAG AA).
+   - **Campos editáveis inline:** Devem ter affordance visual via `hover:bg-zinc-50 dark:hover:bg-zinc-800/30 rounded-sm` para comunicar interatividade.
+   - **Redundância contextual:** Se o usuário já está dentro de um contexto (ex: `/projects/:id`), não repetir na lista interna a informação que o título/header já comunica (badges, prefixos de data).
+   - **Sub-headers de seção:** Evitar `h2` intermediários quando o conteúdo é óbvio pelo contexto da página. Controles de filtro/sort/ação devem ser apresentados como **toolbars minimalistas** (flex row com `border-t border-zinc-100 pt-6`) diretamente acima do conteúdo, sem heading desnecessário. Padrão consistente: Projects e History embarcam ações no header; detalhes de entidade devem seguir o mesmo princípio.
