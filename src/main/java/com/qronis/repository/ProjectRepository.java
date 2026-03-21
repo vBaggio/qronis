@@ -26,9 +26,9 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
         Page<Project> findByTenantIdWithCreator(@Param("tenantId") UUID tenantId, @Param("name") String name,
                         Pageable pageable);
 
-        @Query("SELECT p FROM Project p JOIN FETCH p.createdBy WHERE p.tenant.id = :tenantId ORDER BY p.createdAt DESC")
+        @Query("SELECT p FROM Project p JOIN FETCH p.createdBy JOIN FETCH p.tenant WHERE p.tenant.id = :tenantId ORDER BY p.createdAt DESC")
         List<Project> findByTenantIdWithCreator(@Param("tenantId") UUID tenantId);
 
-        @Query("SELECT p FROM Project p JOIN FETCH p.createdBy WHERE p.id = :id AND p.tenant.id = :tenantId")
+        @Query("SELECT p FROM Project p JOIN FETCH p.createdBy JOIN FETCH p.tenant WHERE p.id = :id AND p.tenant.id = :tenantId")
         Optional<Project> findByIdAndTenantIdWithCreator(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
 }

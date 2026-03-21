@@ -10,11 +10,13 @@ import com.qronis.security.AuthenticatedUser;
 import com.qronis.service.TimeEntryService;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -53,10 +55,12 @@ public class TimeEntryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TimeEntryResponseDTO>> history() {
+    public ResponseEntity<Page<TimeEntryResponseDTO>> history(
+            @RequestParam(name = "projectId", required = false) UUID projectId,
+            @PageableDefault(size = 20, sort = "startTime", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
         AuthenticatedUser auth = AuthenticatedUser.fromContext();
-        List<TimeEntry> entries = timeEntryService.findByUserId(auth.userId());
-        return ResponseEntity.ok(timeEntryMapper.toResponseList(entries));
+        Page<TimeEntry> entries = timeEntryService.findByUserIdAndOptionalProjectId(auth.userId(), projectId, pageable);
+        return ResponseEntity.ok(entries.map(timeEntryMapper::toResponse));
     }
 
     @PostMapping

@@ -8,6 +8,8 @@ import com.qronis.exception.BusinessException;
 import com.qronis.exception.ResourceNotFoundException;
 import com.qronis.repository.TimeEntryRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -117,8 +119,11 @@ public class TimeEntryService {
         return timeEntryRepository.findActiveByUserId(userId);
     }
 
-    public List<TimeEntry> findByUserId(UUID userId) {
-        return timeEntryRepository.findByUserIdWithProject(userId);
+    public Page<TimeEntry> findByUserIdAndOptionalProjectId(UUID userId, UUID projectId, Pageable pageable) {
+        if (projectId != null) {
+            return timeEntryRepository.findByUserIdAndProjectIdWithProject(userId, projectId, pageable);
+        }
+        return timeEntryRepository.findByUserIdWithProject(userId, pageable);
     }
 
     public List<TimeEntry> findByProjectId(UUID projectId, UUID tenantId) {

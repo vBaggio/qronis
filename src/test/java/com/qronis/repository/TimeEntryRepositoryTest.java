@@ -18,9 +18,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Optional;
 
 @SpringBootTest
@@ -104,9 +106,9 @@ class TimeEntryRepositoryTest extends AbstractIntegrationTest {
         newer.setEndTime(now.minus(1, ChronoUnit.HOURS));
         timeEntryRepository.save(newer);
 
-        List<TimeEntry> result = timeEntryRepository.findByUserIdWithProject(user.getId());
+        Page<TimeEntry> result = timeEntryRepository.findByUserIdWithProject(user.getId(), PageRequest.of(0, 10));
 
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).getStartTime()).isAfter(result.get(1).getStartTime());
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent().get(0).getStartTime()).isAfter(result.getContent().get(1).getStartTime());
     }
 }
