@@ -15,9 +15,11 @@ interface ProjectSelectorProps {
     selectedProjectId: string | null;
     onSelect: (id: string | null) => void;
     disabled?: boolean;
+    allowCreate?: boolean;
+    size?: 'default' | 'compact';
 }
 
-export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ selectedProjectId, onSelect, disabled }) => {
+export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ selectedProjectId, onSelect, disabled, allowCreate = true, size = 'default' }) => {
     const [open, setOpen] = useState(false);
     const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(false);
@@ -62,6 +64,10 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ selectedProjec
 
     const selectedProject = projects.find(p => p.id === selectedProjectId);
 
+    const sizeClasses = size === 'compact'
+        ? 'h-10 md:h-12 px-4 text-sm'
+        : 'h-14 md:h-16 px-6';
+
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -70,7 +76,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ selectedProjec
                     role="combobox"
                     aria-expanded={open}
                     disabled={disabled}
-                    className="h-14 md:h-16 px-6 w-full sm:w-[250px] justify-between rounded-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 shrink-0"
+                    className={`${sizeClasses} w-full sm:w-[250px] justify-between rounded-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 shrink-0`}
                 >
                     <div className="flex items-center gap-2 truncate">
                         <Folder className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-500" />
@@ -83,7 +89,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ selectedProjec
                     <Input
                         id="projectSearch"
                         name="projectSearch"
-                        placeholder="Buscar ou criar novo..."
+                        placeholder={allowCreate ? "Buscar ou criar novo..." : "Buscar projeto..."}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="h-9 border-none bg-zinc-100 dark:bg-zinc-800 focus-visible:ring-0"
@@ -104,7 +110,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ selectedProjec
                                 {project.name}
                             </Button>
                         ))}
-                        {!loading && searchQuery.trim() && filteredProjects.length === 0 && (
+                        {allowCreate && !loading && searchQuery.trim() && filteredProjects.length === 0 && (
                             <Button
                                 variant="ghost"
                                 className="justify-start text-emerald-600 dark:text-emerald-500 font-medium"

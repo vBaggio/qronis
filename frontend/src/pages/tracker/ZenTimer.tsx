@@ -80,14 +80,14 @@ export const ZenTimer: React.FC = () => {
 
     if (isLoading) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+            <div className="flex min-h-screen items-center justify-center bg-white dark:bg-zinc-950">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent"></div>
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col min-h-screen bg-zinc-50 dark:bg-zinc-950 transition-colors duration-500 overflow-hidden">
+        <div className="flex flex-col min-h-screen bg-white dark:bg-zinc-950 transition-colors duration-500 overflow-hidden">
             {/* Navbar transitions out when Zen Mode is active */}
             <div className={`transition-all duration-700 ease-in-out origin-top ${isZenMode ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100 h-16'}`}>
                 <TopNav />

@@ -7,6 +7,8 @@ import { Landing } from './pages/public/Landing';
 
 import { ZenTimer } from './pages/tracker/ZenTimer';
 import { Projects } from './pages/projects/Projects';
+import { ProjectDetails } from './pages/projects/ProjectDetails';
+import { History } from './pages/history/History';
 
 const AppRoutes = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -39,6 +41,24 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Projects />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/projects/:id"
+        element={
+          <ProtectedRoute>
+            <ProjectDetails />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/history"
+        element={
+          <ProtectedRoute>
+            <History />
           </ProtectedRoute>
         }
       />

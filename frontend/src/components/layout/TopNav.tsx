@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../lib/auth-context';
-import { Clock, Briefcase, LogOut, Menu, UserCircle } from 'lucide-react';
+import { Clock, Briefcase, LogOut, Menu, UserCircle, ListTodo } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Link, useLocation } from 'react-router-dom';
 import {
@@ -59,6 +59,12 @@ export const TopNav: React.FC = () => {
                                         Projetos
                                     </Link>
                                 </Button>
+                                <Button asChild variant={location.pathname === '/history' ? 'secondary' : 'ghost'} className="justify-start text-base h-12" onClick={() => setIsOpen(false)}>
+                                    <Link to="/history">
+                                        <ListTodo className="mr-3 h-5 w-5" />
+                                        Histórico
+                                    </Link>
+                                </Button>
                             </nav>
 
                             {/* MOBILE USER PROFILE FOOTER */}
@@ -107,6 +113,12 @@ export const TopNav: React.FC = () => {
                         <Link to="/projects">
                             <Briefcase className="mr-2 h-4 w-4" />
                             Projetos
+                        </Link>
+                    </Button>
+                    <Button asChild variant={location.pathname === '/history' ? 'secondary' : 'ghost'} className="text-zinc-600 dark:text-zinc-400 font-medium hover:text-zinc-900 dark:hover:text-zinc-50">
+                        <Link to="/history">
+                            <ListTodo className="mr-2 h-4 w-4" />
+                            Histórico
                         </Link>
                     </Button>
                 </nav>

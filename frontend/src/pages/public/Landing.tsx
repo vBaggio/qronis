@@ -25,7 +25,7 @@ export const Landing: React.FC = () => {
 
       <main className="flex-1 w-full overflow-hidden">
         {/* ── 1. Split-Screen Hero ── */}
-        <section className="relative mx-auto max-w-7xl px-6 py-4 md:py-8 flex flex-col lg:flex-row items-center gap-12 lg:gap-8">
+        <section className="relative mx-auto max-w-7xl px-6 py-4 md:py-8 min-h-[calc(100vh-64px)] flex flex-col lg:flex-row items-center gap-12 lg:gap-8">
           {/* Background Accents (Subtle Gradients) */}
           <div className="absolute top-0 -left-1/4 h-[500px] w-[500px] rounded-full bg-emerald-400/10 blur-[100px] dark:bg-emerald-900/20 -z-10" />
 

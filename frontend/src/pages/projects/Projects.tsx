@@ -1,14 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '@/lib/api';
 import { TopNav } from '@/components/layout/TopNav';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+// Removed shadcn/ui table imports to apply the Zen Paradigm flat list
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -149,9 +143,7 @@ const NewProjectDialog: React.FC<NewProjectDialogProps> = ({ onCreated }) => {
         try {
             await api.post('/projects', { name: name.trim() });
             setName('');
-            setOpen(false);
-            onCreated();
-        } catch {
+            setOpen(false);ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
             setError('Não foi possível criar o projeto. Tente novamente.');
         } finally {
             setLoading(false);
@@ -218,6 +210,7 @@ const NewProjectDialog: React.FC<NewProjectDialogProps> = ({ onCreated }) => {
 const PAGE_SIZE = 15;
 
 export const Projects: React.FC = () => {
+    const navigate = useNavigate();
     const [projects, setProjects] = useState<Project[]>([]);
     const [totalElements, setTotalElements] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
@@ -288,7 +281,7 @@ export const Projects: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex flex-col">
+        <div className="min-h-screen bg-white dark:bg-zinc-950 flex flex-col">
             <TopNav />
 
             {/* Dialog de exclusão com confirmação visual */}
@@ -304,10 +297,10 @@ export const Projects: React.FC = () => {
                 {/* ── Unified Page Header & Search ── */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                     <div className="flex-1">
-                        <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
+                        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
                             Projetos
                         </h1>
-                        <p className="text-base text-zinc-500 dark:text-zinc-400 mt-1 font-medium">
+                        <p className="text-lg text-zinc-500 dark:text-zinc-400 mt-1 font-medium">
                             {totalElements > 0
                                 ? `${totalElements} projeto${totalElements !== 1 ? 's' : ''} no workspace`
                                 : 'Nenhum projeto criado ainda'}
@@ -337,112 +330,94 @@ export const Projects: React.FC = () => {
                     </div>
                 </div>
 
-                {/* ── Table ── */}
-                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm">
-                    <Table>
-                        <TableHeader>
-                            <TableRow className="bg-zinc-50/80 dark:bg-zinc-800/50 hover:bg-zinc-50/80 dark:hover:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800">
-                                <TableHead className="pl-6 w-[50%] text-sm font-medium text-zinc-500 dark:text-zinc-400">
-                                    Projeto
-                                </TableHead>
-                                <TableHead className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-                                    Data de criação
-                                </TableHead>
-                                <TableHead className="w-[80px] text-right pr-6"></TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {loading ? (
-                                <TableRow>
-                                    <TableCell colSpan={3} className="py-16 text-center">
-                                        <div className="flex items-center justify-center gap-2 text-zinc-500 dark:text-zinc-400">
-                                            <Loader2 className="h-5 w-5 animate-spin text-emerald-500" />
-                                            <span className="text-sm">Carregando projetos...</span>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            ) : projects.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={3} className="py-24 text-center">
-                                        <div className="flex flex-col items-center gap-3 text-zinc-400 dark:text-zinc-600">
-                                            <FolderOpen className="h-10 w-10 mb-1" />
-                                            <p className="text-sm font-medium text-zinc-600 dark:text-zinc-300">Nenhum projeto encontrado</p>
-                                            <p className="text-xs text-zinc-500 mb-2">
-                                                {debouncedSearch
-                                                    ? `Nenhum resultado para "${debouncedSearch}"`
-                                                    : 'Crie seu primeiro projeto para começar a rastrear o tempo.'}
-                                            </p>
-                                            {!debouncedSearch && (
-                                                <div className="mt-2">
-                                                    <NewProjectDialog onCreated={fetchProjects} />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                projects.map((project, index) => {
-                                    const accentColor = accentColorFor(project.id);
-                                    return (
-                                        <TableRow
-                                            key={project.id}
-                                            className="group border-zinc-100 dark:border-zinc-800 transition-colors duration-150 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 animate-in fade-in"
-                                            style={{
-                                                animationDelay: `${index * 40}ms`,
-                                                animationFillMode: 'both',
-                                                animationDuration: '300ms',
-                                            }}
-                                        >
-                                            {/* Indicador pill color interno sutil */}
-                                            <TableCell className="py-5 pl-6">
-                                                <div className="flex items-center gap-3">
-                                                    <span
-                                                        className="h-2.5 w-2.5 shrink-0 rounded-full shadow-sm"
-                                                        style={{ backgroundColor: accentColor }}
-                                                    />
-                                                    <span className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight leading-none pt-[2px]">
-                                                        {project.name}
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-
-                                            <TableCell className="py-5 text-sm text-zinc-500 dark:text-zinc-400">
-                                                {formatDate(project.createdAt)}
-                                            </TableCell>
-
-                                            <TableCell className="py-5 pr-6 text-right">
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button
-                                                            variant="ghost"
-                                                            className="h-8 w-8 p-0 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
-                                                        >
-                                                            <span className="sr-only">Abrir menu</span>
-                                                            <MoreVertical className="h-4 w-4" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="w-[160px]">
-                                                        <DropdownMenuItem
-                                                            className="text-rose-600 focus:text-rose-600 focus:bg-rose-50 dark:focus:bg-rose-900/20 cursor-pointer transition-colors"
-                                                            disabled={deletingId === project.id}
-                                                            onClick={() => setProjectToDelete(project)}
-                                                        >
-                                                            {deletingId === project.id ? (
-                                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                            ) : (
-                                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                            )}
-                                                            Excluir
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </TableCell>
-                                        </TableRow>
-                                    );
-                                })
+                {/* ── Continuous Stream (Flat List) ── */}
+                <div className="flex flex-col gap-2 w-full mt-2">
+                    {loading ? (
+                        <div className="py-16 flex flex-col items-center justify-center gap-2 text-zinc-500 dark:text-zinc-400">
+                            <Loader2 className="h-5 w-5 animate-spin text-emerald-500" />
+                            <span className="text-sm">Carregando projetos...</span>
+                        </div>
+                    ) : projects.length === 0 ? (
+                        <div className="py-24 flex flex-col items-center gap-3 text-zinc-400 dark:text-zinc-600">
+                            <FolderOpen className="h-10 w-10 mb-1" />
+                            <p className="text-sm font-medium text-zinc-600 dark:text-zinc-300">Nenhum projeto encontrado</p>
+                            <p className="text-xs text-zinc-500 mb-2">
+                                {debouncedSearch
+                                    ? `Nenhum resultado para "${debouncedSearch}"`
+                                    : 'Crie seu primeiro projeto para começar a rastrear o tempo.'}
+                            </p>
+                            {!debouncedSearch && (
+                                <div className="mt-2">
+                                    <NewProjectDialog onCreated={fetchProjects} />
+                                </div>
                             )}
-                        </TableBody>
-                    </Table>
+                        </div>
+                    ) : (
+                        projects.map((project, index) => {
+                            const accentColor = accentColorFor(project.id);
+                            return (
+                                <div
+                                    key={project.id}
+                                    onClick={() => navigate(`/projects/${project.id}`)}
+                                    className="group cursor-pointer relative flex items-center justify-between min-h-[56px] px-4 border-b border-zinc-100 dark:border-zinc-800/60 last:border-0 transition-all duration-200 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/30 animate-in fade-in"
+                                    style={{
+                                        animationDelay: `${index * 40}ms`,
+                                        animationFillMode: 'both',
+                                        animationDuration: '300ms',
+                                    }}
+                                >
+                                    <div className="flex items-center gap-4 flex-1 overflow-hidden">
+                                        {/* Color Dot */}
+                                        <span
+                                            className="h-2.5 w-2.5 shrink-0 rounded-full shadow-sm"
+                                            style={{ backgroundColor: accentColor }}
+                                        />
+
+                                        {/* Project Name */}
+                                        <span className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight truncate">
+                                            {project.name}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex items-center gap-6 justify-end shrink-0 pl-4 w-[200px]">
+                                        {/* Subtle Meta Data */}
+                                        <span className="text-sm font-medium text-zinc-400 dark:text-zinc-500 tracking-tight">
+                                            {formatDate(project.createdAt)}
+                                        </span>
+
+                                        {/* Actions Dropdown */}
+                                        <div onClick={(e) => e.stopPropagation()}>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="h-8 w-8 p-0 text-zinc-300 hover:text-zinc-600 dark:text-zinc-600 dark:hover:text-zinc-300 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                                                    >
+                                                        <span className="sr-only">Abrir menu</span>
+                                                        <MoreVertical className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="w-[160px]">
+                                                    <DropdownMenuItem
+                                                        className="text-rose-600 focus:text-rose-600 focus:bg-rose-50 dark:focus:bg-rose-900/20 cursor-pointer transition-colors"
+                                                        disabled={deletingId === project.id}
+                                                        onClick={() => setProjectToDelete(project)}
+                                                    >
+                                                        {deletingId === project.id ? (
+                                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        ) : (
+                                                            <Trash2 className="mr-2 h-4 w-4" />
+                                                        )}
+                                                        Excluir
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    )}
                 </div>
 
                 {/* ── Pagination ── */}

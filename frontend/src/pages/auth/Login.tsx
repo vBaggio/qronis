@@ -132,7 +132,7 @@ export const Login: React.FC = () => {
 
                         <Button
                             type="submit"
-                            className="w-full h-12 text-base font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-500/20 transition-all hover:ring-4 ring-emerald-500/20 active:scale-95"
+                            className="w-full h-12 text-base font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-lg shadow-emerald-500/20 transition-all hover:ring-4 ring-emerald-500/20 active:scale-95"
                             disabled={isLoading}
                         >
                             {isLoading ? 'Autenticando...' : 'Entrar na Plataforma'}
