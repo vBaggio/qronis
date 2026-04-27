@@ -1,13 +1,16 @@
 package com.qronis.service;
 
-import com.qronis.dto.TimeEntryPatchRequestDTO;
-import com.qronis.entity.Project;
-import com.qronis.entity.Tenant;
-import com.qronis.entity.TimeEntry;
-import com.qronis.entity.User;
-import com.qronis.exception.BusinessException;
-import com.qronis.exception.ResourceNotFoundException;
-import com.qronis.repository.TimeEntryRepository;
+import com.qronis.modules.tracker.api.dto.TimeEntryPatchRequestDTO;
+import com.qronis.modules.tracker.application.TimeEntryService;
+import com.qronis.modules.tracker.domain.entity.TimeEntry;
+import com.qronis.modules.tracker.domain.exception.ActiveTimerConflictException;
+import com.qronis.modules.tracker.domain.exception.InvalidTimeBoundsException;
+import com.qronis.modules.tracker.domain.exception.TimeEntryNotFoundException;
+import com.qronis.modules.tracker.application.repositories.TimeEntryRepository;
+import com.qronis.modules.project.domain.entity.Project;
+import com.qronis.modules.project.application.ProjectService;
+import com.qronis.modules.identity.domain.entity.Tenant;
+import com.qronis.modules.identity.domain.entity.User;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -89,7 +92,7 @@ class TimeEntryServiceTest {
         when(timeEntryRepository.findActiveByUserId(userId)).thenReturn(Optional.of(active));
 
         assertThatThrownBy(() -> timeEntryService.start(projectId, "Feature X", tenantId, userId))
-                .isInstanceOf(BusinessException.class)
+                .isInstanceOf(ActiveTimerConflictException.class)
                 .hasMessageContaining("timer ativo");
 
         verify(timeEntryRepository, never()).save(any());
@@ -119,7 +122,7 @@ class TimeEntryServiceTest {
         when(timeEntryRepository.findActiveByUserId(userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> timeEntryService.stop(userId))
-                .isInstanceOf(ResourceNotFoundException.class)
+                .isInstanceOf(TimeEntryNotFoundException.class)
                 .hasMessageContaining("Nenhum timer ativo");
     }
 
@@ -147,7 +150,7 @@ class TimeEntryServiceTest {
         Instant end = start.minus(1, ChronoUnit.HOURS);
 
         assertThatThrownBy(() -> timeEntryService.create(projectId, "Reunião", start, end, tenantId, userId))
-                .isInstanceOf(BusinessException.class)
+                .isInstanceOf(InvalidTimeBoundsException.class)
                 .hasMessageContaining("posterior ao de início");
     }
 
@@ -189,7 +192,7 @@ class TimeEntryServiceTest {
         TimeEntryPatchRequestDTO request = new TimeEntryPatchRequestDTO(null, null, badEnd, null);
 
         assertThatThrownBy(() -> timeEntryService.patch(entry.getId(), request, tenantId, userId))
-                .isInstanceOf(BusinessException.class)
+                .isInstanceOf(InvalidTimeBoundsException.class)
                 .hasMessageContaining("posterior ao de início");
     }
 
@@ -223,6 +226,6 @@ class TimeEntryServiceTest {
         when(timeEntryRepository.findByIdAndCreatedByIdWithProject(entry.getId(), userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> timeEntryService.delete(entry.getId(), userId))
-                .isInstanceOf(ResourceNotFoundException.class);
+                .isInstanceOf(TimeEntryNotFoundException.class);
     }
 }

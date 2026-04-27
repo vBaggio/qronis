@@ -1,11 +1,16 @@
 package com.qronis.repository;
 
-import com.qronis.entity.Project;
-import com.qronis.entity.Role;
-import com.qronis.entity.Tenant;
-import com.qronis.entity.TenantUser;
-import com.qronis.entity.TimeEntry;
-import com.qronis.entity.User;
+import com.qronis.modules.project.domain.entity.Project;
+import com.qronis.modules.project.application.repositories.ProjectRepository;
+import com.qronis.modules.identity.domain.enums.Role;
+import com.qronis.modules.identity.domain.entity.Tenant;
+import com.qronis.modules.identity.domain.entity.TenantUser;
+import com.qronis.modules.tracker.domain.entity.TimeEntry;
+import com.qronis.modules.tracker.application.repositories.TimeEntryRepository;
+import com.qronis.modules.identity.domain.entity.User;
+import com.qronis.modules.identity.application.repositories.TenantRepository;
+import com.qronis.modules.identity.application.repositories.UserRepository;
+import com.qronis.modules.identity.application.repositories.TenantUserRepository;
 import com.qronis.AbstractIntegrationTest;
 
 import static org.assertj.core.api.Assertions.assertThat;

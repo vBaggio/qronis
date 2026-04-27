@@ -1,11 +1,15 @@
 package com.qronis.service;
 
-import com.qronis.entity.Role;
-import com.qronis.entity.Tenant;
-import com.qronis.entity.TenantUser;
-import com.qronis.entity.User;
-import com.qronis.repository.TenantRepository;
-import com.qronis.repository.TenantUserRepository;
+import com.qronis.modules.auth.application.AuthService;
+import com.qronis.modules.auth.application.JwtService;
+import com.qronis.modules.auth.application.UserService;
+import com.qronis.modules.auth.domain.exception.InvalidCredentialsException;
+import com.qronis.modules.identity.domain.enums.Role;
+import com.qronis.modules.identity.domain.entity.Tenant;
+import com.qronis.modules.identity.domain.entity.TenantUser;
+import com.qronis.modules.identity.domain.entity.User;
+import com.qronis.modules.identity.application.repositories.TenantRepository;
+import com.qronis.modules.identity.application.repositories.TenantUserRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
@@ -108,7 +111,7 @@ class AuthServiceTest {
                                 .thenReturn(Optional.empty());
 
                 assertThatThrownBy(() -> authService.login("nao@existe.com", "123456"))
-                                .isInstanceOf(BadCredentialsException.class);
+                                .isInstanceOf(InvalidCredentialsException.class);
         }
 
         @Test
@@ -121,7 +124,7 @@ class AuthServiceTest {
                 when(passwordEncoder.matches("senha-errada", "encoded-password")).thenReturn(false);
 
                 assertThatThrownBy(() -> authService.login("vini@email.com", "senha-errada"))
-                                .isInstanceOf(BadCredentialsException.class);
+                                .isInstanceOf(InvalidCredentialsException.class);
 
                 verify(jwtService, never()).generateToken(any(), any(), any());
         }

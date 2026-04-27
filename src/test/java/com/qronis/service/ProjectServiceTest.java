@@ -1,10 +1,11 @@
 package com.qronis.service;
 
-import com.qronis.entity.Project;
-import com.qronis.entity.Tenant;
-import com.qronis.entity.User;
-import com.qronis.exception.ResourceNotFoundException;
-import com.qronis.repository.ProjectRepository;
+import com.qronis.modules.project.application.ProjectService;
+import com.qronis.modules.project.domain.entity.Project;
+import com.qronis.modules.project.domain.exception.ProjectNotFoundException;
+import com.qronis.modules.project.application.repositories.ProjectRepository;
+import com.qronis.modules.identity.domain.entity.Tenant;
+import com.qronis.modules.identity.domain.entity.User;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -115,8 +116,8 @@ class ProjectServiceTest {
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> projectService.findByIdAndTenantId(randomId, tenantId))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("Projeto não encontrado");
+                .isInstanceOf(ProjectNotFoundException.class)
+                .hasMessageContaining("Projeto não encontrado");
     }
 
     @Test
