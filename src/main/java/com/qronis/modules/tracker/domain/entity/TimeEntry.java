@@ -1,16 +1,12 @@
 package com.qronis.modules.tracker.domain.entity;
 
-import com.qronis.modules.identity.domain.entity.BaseEntity;
-import com.qronis.modules.identity.domain.entity.User;
-import com.qronis.modules.project.domain.entity.Project;
+import com.qronis.shared.entity.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import java.time.Instant;
@@ -33,13 +29,11 @@ public class TimeEntry extends BaseEntity {
     @Column(name = "end_time")
     private Instant endTime;
 
-    @ManyToOne
-    @JoinColumn(name = "project_id", nullable = false)
-    private Project project;
+    @Column(name = "project_id", nullable = false)
+    private UUID projectId;
 
-    @ManyToOne
-    @JoinColumn(name = "created_by", nullable = false)
-    private User createdBy;
+    @Column(name = "created_by", nullable = false)
+    private UUID userId;
 
     public TimeEntry() {}
 
@@ -51,10 +45,10 @@ public class TimeEntry extends BaseEntity {
     public void setStartTime(Instant startTime) { this.startTime = startTime; }
     public Instant getEndTime() { return endTime; }
     public void setEndTime(Instant endTime) { this.endTime = endTime; }
-    public Project getProject() { return project; }
-    public void setProject(Project project) { this.project = project; }
-    public User getCreatedBy() { return createdBy; }
-    public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
+    public UUID getProjectId() { return projectId; }
+    public void setProjectId(UUID projectId) { this.projectId = projectId; }
+    public UUID getUserId() { return userId; }
+    public void setUserId(UUID userId) { this.userId = userId; }
 
     public boolean isActive() { return this.endTime == null; }
 }

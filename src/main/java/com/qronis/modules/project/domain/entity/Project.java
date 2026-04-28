@@ -1,16 +1,12 @@
 package com.qronis.modules.project.domain.entity;
 
-import com.qronis.modules.identity.domain.entity.BaseEntity;
-import com.qronis.modules.identity.domain.entity.Tenant;
-import com.qronis.modules.identity.domain.entity.User;
+import com.qronis.shared.entity.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import java.util.UUID;
@@ -26,20 +22,18 @@ public class Project extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
-    @ManyToOne
-    @JoinColumn(name = "tenant_id", nullable = false)
-    private Tenant tenant;
+    @Column(name = "tenant_id", nullable = false)
+    private UUID tenantId;
 
-    @ManyToOne
-    @JoinColumn(name = "created_by", nullable = false)
-    private User createdBy;
+    @Column(name = "created_by", nullable = false)
+    private UUID userId;
 
     public Project() {}
 
-    public Project(String name, Tenant tenant, User createdBy) {
+    public Project(String name, UUID tenantId, UUID userId) {
         this.name = name;
-        this.tenant = tenant;
-        this.createdBy = createdBy;
+        this.tenantId = tenantId;
+        this.userId = userId;
     }
 
     public UUID getId() {
@@ -58,19 +52,19 @@ public class Project extends BaseEntity {
         this.name = name;
     }
 
-    public Tenant getTenant() {
-        return tenant;
+    public UUID getTenantId() {
+        return tenantId;
     }
 
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
+    public void setTenantId(UUID tenantId) {
+        this.tenantId = tenantId;
     }
 
-    public User getCreatedBy() {
-        return createdBy;
+    public UUID getUserId() {
+        return userId;
     }
 
-    public void setCreatedBy(User createdBy) {
-        this.createdBy = createdBy;
+    public void setUserId(UUID userId) {
+        this.userId = userId;
     }
 }

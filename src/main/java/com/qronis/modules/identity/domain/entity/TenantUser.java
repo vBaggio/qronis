@@ -1,5 +1,7 @@
 package com.qronis.modules.identity.domain.entity;
 
+import com.qronis.shared.entity.BaseEntity;
+
 import com.qronis.modules.identity.domain.enums.Role;
 
 import jakarta.persistence.Column;

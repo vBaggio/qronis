@@ -1,14 +1,8 @@
 package com.qronis.repository;
 
 import com.qronis.modules.project.domain.entity.Project;
-import com.qronis.modules.project.application.repositories.ProjectRepository;
-import com.qronis.modules.identity.domain.enums.Role;
-import com.qronis.modules.identity.domain.entity.Tenant;
-import com.qronis.modules.identity.domain.entity.TenantUser;
-import com.qronis.modules.identity.domain.entity.User;
-import com.qronis.modules.identity.application.repositories.TenantRepository;
-import com.qronis.modules.identity.application.repositories.UserRepository;
-import com.qronis.modules.identity.application.repositories.TenantUserRepository;
+import com.qronis.modules.project.infrastructure.persistence.ProjectRepository;
+import com.qronis.AbstractIntegrationTest;
 import com.qronis.AbstractIntegrationTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,6 +23,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
@@ -36,45 +32,41 @@ class ProjectRepositoryTest extends AbstractIntegrationTest {
 
     @Autowired
     private ProjectRepository projectRepository;
-    @Autowired
-    private TenantRepository tenantRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private TenantUserRepository tenantUserRepository;
+    private UUID tenantId;
+    private UUID userId;
 
-    private Tenant tenant;
-    private User user;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void setUp() {
-        tenant = tenantRepository.save(new Tenant("Qronis Test"));
-        user = userRepository.save(new User("test@email.com", "encoded", "Tester"));
-        tenantUserRepository.save(new TenantUser(tenant, user, Role.OWNER));
+        tenantId = UUID.randomUUID();
+        userId = UUID.randomUUID();
+        jdbcTemplate.update("INSERT INTO tenant (id, name, created_at, updated_at) VALUES (?, 'Test Tenant', now(), now())", tenantId);
+        jdbcTemplate.update("INSERT INTO users (id, email, password, name, created_at, updated_at) VALUES (?, 'test@test.com', 'pwd', 'Test User', now(), now())", userId);
     }
 
     @Test
     @DisplayName("findByTenantIdWithCreator paginado: deve retornar todos sem filtro de nome")
     void findByTenantIdWithCreator_paged_returnsAll() {
-        projectRepository.save(new Project("Alpha", tenant, user));
-        projectRepository.save(new Project("Beta", tenant, user));
+        projectRepository.save(new Project("Alpha", tenantId, userId));
+        projectRepository.save(new Project("Beta", tenantId, userId));
 
         Pageable pageable = PageRequest.of(0, 20);
-        Page<Project> result = projectRepository.findByTenantIdWithCreator(tenant.getId(), null, pageable);
+        Page<Project> result = projectRepository.findByTenantIdWithCreator(tenantId, null, pageable);
 
         assertThat(result.getContent()).hasSize(2);
         assertThat(result.getTotalElements()).isEqualTo(2);
-        assertThat(result.getContent().get(0).getCreatedBy().getName()).isEqualTo("Tester");
     }
 
     @Test
     @DisplayName("findByTenantIdWithCreator paginado: deve filtrar por nome parcial case-insensitive")
     void findByTenantIdWithCreator_paged_filterByName() {
-        projectRepository.save(new Project("Alpha", tenant, user));
-        projectRepository.save(new Project("Beta", tenant, user));
+        projectRepository.save(new Project("Alpha", tenantId, userId));
+        projectRepository.save(new Project("Beta", tenantId, userId));
 
         Pageable pageable = PageRequest.of(0, 20);
-        Page<Project> result = projectRepository.findByTenantIdWithCreator(tenant.getId(), "alph", pageable);
+        Page<Project> result = projectRepository.findByTenantIdWithCreator(tenantId, "alph", pageable);
 
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0).getName()).isEqualTo("Alpha");
@@ -83,10 +75,10 @@ class ProjectRepositoryTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("findByTenantIdWithCreator paginado: deve retornar vazio quando filtro não corresponde")
     void findByTenantIdWithCreator_paged_filterByName_noMatch() {
-        projectRepository.save(new Project("Alpha", tenant, user));
+        projectRepository.save(new Project("Alpha", tenantId, userId));
 
         Pageable pageable = PageRequest.of(0, 20);
-        Page<Project> result = projectRepository.findByTenantIdWithCreator(tenant.getId(), "xyz", pageable);
+        Page<Project> result = projectRepository.findByTenantIdWithCreator(tenantId, "xyz", pageable);
 
         assertThat(result.getContent()).isEmpty();
         assertThat(result.getTotalElements()).isZero();
@@ -95,24 +87,24 @@ class ProjectRepositoryTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("findByTenantIdWithCreator: deve retornar projetos do tenant com criador carregado")
     void findByTenantIdWithCreator_success() {
-        projectRepository.save(new Project("Alpha", tenant, user));
-        projectRepository.save(new Project("Beta", tenant, user));
+        projectRepository.save(new Project("Alpha", tenantId, userId));
+        projectRepository.save(new Project("Beta", tenantId, userId));
 
-        List<Project> result = projectRepository.findByTenantIdWithCreator(tenant.getId());
+        List<Project> result = projectRepository.findByTenantIdWithCreator(tenantId);
 
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).getCreatedBy().getName()).isEqualTo("Tester");
     }
 
     @Test
     @DisplayName("findByTenantIdWithCreator: não deve retornar projetos de outro tenant")
     void findByTenantIdWithCreator_otherTenant() {
-        Tenant other = tenantRepository.save(new Tenant("Outro Tenant"));
-        User otherUser = userRepository.save(new User("other@email.com", "encoded", "Outro"));
-        tenantUserRepository.save(new TenantUser(other, otherUser, Role.OWNER));
-        projectRepository.save(new Project("Projeto Alheio", other, otherUser));
+        UUID otherTenantId = UUID.randomUUID();
+        UUID otherUserId = UUID.randomUUID();
+        jdbcTemplate.update("INSERT INTO tenant (id, name, created_at, updated_at) VALUES (?, 'Other Tenant', now(), now())", otherTenantId);
+        jdbcTemplate.update("INSERT INTO users (id, email, password, name, created_at, updated_at) VALUES (?, 'other@test.com', 'pwd', 'Other User', now(), now())", otherUserId);
+        projectRepository.save(new Project("Projeto Alheio", otherTenantId, otherUserId));
 
-        List<Project> result = projectRepository.findByTenantIdWithCreator(tenant.getId());
+        List<Project> result = projectRepository.findByTenantIdWithCreator(tenantId);
 
         assertThat(result).isEmpty();
     }
@@ -120,9 +112,9 @@ class ProjectRepositoryTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("findByIdAndTenantIdWithCreator: deve encontrar projeto do tenant correto")
     void findByIdAndTenantIdWithCreator_success() {
-        Project p = projectRepository.save(new Project("Projeto X", tenant, user));
+        Project p = projectRepository.save(new Project("Projeto X", tenantId, userId));
 
-        Optional<Project> result = projectRepository.findByIdAndTenantIdWithCreator(p.getId(), tenant.getId());
+        Optional<Project> result = projectRepository.findByIdAndTenantIdWithCreator(p.getId(), tenantId);
 
         assertThat(result).isPresent();
         assertThat(result.get().getName()).isEqualTo("Projeto X");
@@ -131,7 +123,7 @@ class ProjectRepositoryTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("findByIdAndTenantIdWithCreator: deve retornar vazio para tenant errado")
     void findByIdAndTenantIdWithCreator_wrongTenant() {
-        Project p = projectRepository.save(new Project("Projeto X", tenant, user));
+        Project p = projectRepository.save(new Project("Projeto X", tenantId, userId));
 
         Optional<Project> result = projectRepository.findByIdAndTenantIdWithCreator(p.getId(), UUID.randomUUID());
 

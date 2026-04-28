@@ -1,12 +1,11 @@
 package com.qronis.modules.project.application;
 
-import com.qronis.modules.project.api.dto.ProjectSummaryResponseDTO;
 import com.qronis.modules.project.domain.entity.Project;
 import com.qronis.modules.project.domain.exception.ProjectNotFoundException;
-import com.qronis.modules.project.application.repositories.ProjectRepository;
+import com.qronis.modules.project.api.ProjectFacade;
+import com.qronis.modules.project.infrastructure.persistence.ProjectRepository;
 import com.qronis.modules.identity.domain.entity.Tenant;
 import com.qronis.modules.identity.domain.entity.User;
-import com.qronis.modules.tracker.application.repositories.TimeEntryRepository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,14 +16,11 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class ProjectService {
+public class ProjectService implements ProjectFacade {
 
     private final ProjectRepository projectRepository;
-    private final TimeEntryRepository timeEntryRepository;
-
-    public ProjectService(ProjectRepository projectRepository, TimeEntryRepository timeEntryRepository) {
+    public ProjectService(ProjectRepository projectRepository) {
         this.projectRepository = projectRepository;
-        this.timeEntryRepository = timeEntryRepository;
     }
 
     public Page<Project> findByTenantId(UUID tenantId, String name, Pageable pageable) {
@@ -42,13 +38,7 @@ public class ProjectService {
 
     @Transactional
     public Project create(String name, UUID tenantId, UUID userId) {
-        Tenant tenant = new Tenant();
-        tenant.setId(tenantId);
-
-        User user = new User();
-        user.setId(userId);
-
-        Project project = new Project(name, tenant, user);
+        Project project = new Project(name, tenantId, userId);
         return projectRepository.save(project);
     }
 
@@ -65,9 +55,16 @@ public class ProjectService {
         projectRepository.delete(project);
     }
 
-    public ProjectSummaryResponseDTO getProjectSummary(UUID projectId, UUID tenantId, UUID userId) {
+
+    @Override
+    public void validateProjectBelongsToTenant(UUID projectId, UUID tenantId) {
         findByIdAndTenantId(projectId, tenantId);
-        Long totalSeconds = timeEntryRepository.sumDurationSecondsByProjectIdAndUserId(projectId, userId);
-        return new ProjectSummaryResponseDTO(projectId, totalSeconds != null ? totalSeconds : 0L);
+    }
+
+    @Override
+    public String getProjectName(UUID projectId) {
+        return projectRepository.findById(projectId)
+                .map(Project::getName)
+                .orElse(null);
     }
 }

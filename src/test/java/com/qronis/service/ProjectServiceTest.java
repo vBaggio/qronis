@@ -3,9 +3,7 @@ package com.qronis.service;
 import com.qronis.modules.project.application.ProjectService;
 import com.qronis.modules.project.domain.entity.Project;
 import com.qronis.modules.project.domain.exception.ProjectNotFoundException;
-import com.qronis.modules.project.application.repositories.ProjectRepository;
-import com.qronis.modules.identity.domain.entity.Tenant;
-import com.qronis.modules.identity.domain.entity.User;
+import com.qronis.modules.project.infrastructure.persistence.ProjectRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,13 +47,7 @@ class ProjectServiceTest {
         tenantId = UUID.randomUUID();
         userId = UUID.randomUUID();
 
-        Tenant tenant = new Tenant("Qronis");
-        tenant.setId(tenantId);
-
-        User user = new User();
-        user.setId(userId);
-
-        project = new Project("Projeto Alpha", tenant, user);
+        project = new Project("Projeto Alpha", tenantId, userId);
         project.setId(UUID.randomUUID());
     }
 

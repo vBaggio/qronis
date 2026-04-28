@@ -1,5 +1,7 @@
 package com.qronis.modules.identity.domain.entity;
 
+import com.qronis.shared.entity.BaseEntity;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
