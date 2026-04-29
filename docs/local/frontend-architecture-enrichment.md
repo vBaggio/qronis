@@ -3,7 +3,7 @@
 **Projeto:** Qronis Frontend  
 **Branch:** `refactor/frontend-architecture-enrichment`  
 **Iniciado em:** 2026-04-29  
-**Status atual:** 🔵 Em andamento — Fase 4 (Refatorar Páginas)
+**Status atual:** 🔵 Em andamento — Fase 5 (Componentes e A11y)
 
 ---
 
@@ -208,28 +208,29 @@ Nenhum dos dois mostra feedback ao usuário.
 ### Fase 4 — Refatorar Páginas
 **Objetivo:** Substituir fetch manual pelos hooks; corrigir error handling e a11y nas páginas.
 
-- [ ] **4.1** `ZenTimer.tsx`
+- [x] **4.1** `ZenTimer.tsx`
   - Substituir `checkActiveTimer` + estados manuais por `useActiveTimer()`
   - Substituir `handleStart/handleStop` por `useStartTimer/useStopTimer`
   - Corrigir: `aria-label="Parar timer"` no Stop button
-  - Corrigir: placeholder com `…`
+  - Corrigir: placeholder com `…` via MESSAGES constant
 
-- [ ] **4.2** `Projects.tsx`
-  - Substituir fetch manual por `useProjects({ page, search: debouncedSearch })`
+- [x] **4.2** `Projects.tsx`
+  - Substituir fetch manual por `useProjects`, `useCreateProject`, `useDeleteProject`
   - Substituir `useEffect+setTimeout` por `useDeferredValue(searchQuery)`
-  - Substituir `handleDeleteConfirm` por `useDeleteProject()`
-  - Corrigir: `<div onClick>` → `<button>` com `role` e `onKeyDown`
-  - Corrigir: mostrar erro ao usuário (não silencioso)
-  - Mover `formatDate` para fora do componente
+  - Corrigir: `<div onClick>` → `<button>` semântico com `onKeyDown`
+  - Corrigir: `aria-label` por projeto no DropdownMenuTrigger
+  - Corrigir: banner de erro visível ao usuário
 
-- [ ] **4.3** `History.tsx`
-  - Substituir `fetchHistory` por `useTimeEntries` com `useInfiniteQuery`
+- [x] **4.3** `History.tsx`
+  - Substituir fetch manual por `useTimeEntries` (useInfiniteQuery)
   - Adicionar `aria-live="polite"` na região da lista
-  - Mostrar erro ao usuário
+  - Adicionar banner de erro ao usuário
 
-- [ ] **4.4** `ProjectDetails.tsx`
-  - Substituir fetches por `useProject(id)` + `useTimeEntries({ projectId: id })`
-  - Mesmas correções de error handling
+- [x] **4.4** `ProjectDetails.tsx`
+  - Substituir todos os fetches por `useProject`, `useProjectSummary`, `useTimeEntries`
+  - Substituir edição de nome manual por `useUpdateProject` mutation
+  - Substituir delete manual por `useDeleteTimeEntry` mutation
+  - Update otimista de entradas no cache via `setQueriesData`
 
 **Gate:** Todas as rotas funcionam, React Query DevTools mostra cache hits ao navegar de volta.
 
@@ -348,8 +349,15 @@ src/
   - Query keys estruturados hierarquicamente por domínio para invalidação precisa
   - Gate: `npm run build` — ✅ 0 erros TypeScript
 
+- **Fase 4 — Refatorar Páginas** (commit `f087cac`)
+  - `ZenTimer.tsx`: 160L → 105L, zero fetch manual, a11y corrigida
+  - `Projects.tsx`: `useDeferredValue` no lugar de `useEffect+setTimeout`, `<button>` semântico, error banner
+  - `History.tsx`: `useInfiniteQuery`, `aria-live`, error banner
+  - `ProjectDetails.tsx`: todos os fetches migrados, update otimista no cache, invalidação automática do summary
+  - Gate: `npm run build` — ✅ 0 erros TypeScript
+
 ### 🔵 Em Andamento
-- Fase 4 — Refatorar Páginas
+- Fase 5 — Componentes e A11y
 
 ### ⏳ Pendente
 - Fase 2 — React Query
