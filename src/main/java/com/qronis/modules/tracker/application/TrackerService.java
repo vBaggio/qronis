@@ -142,6 +142,9 @@ public class TrackerService implements TrackerFacade {
     }
 
     private Map<UUID, String> resolveNames(List<TimeEntry> entries) {
+        if (entries.isEmpty()) {
+            return Map.of();
+        }
         Set<UUID> ids = entries.stream()
                 .map(TimeEntry::getProjectId)
                 .collect(Collectors.toSet());
