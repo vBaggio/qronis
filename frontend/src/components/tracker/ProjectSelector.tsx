@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
 import type { Project } from '../../lib/types';
+import { cva } from 'class-variance-authority';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +9,19 @@ import { Folder, Plus, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export type { Project };
+
+const triggerVariants = cva(
+    'w-full justify-between rounded-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 shrink-0',
+    {
+        variants: {
+            size: {
+                default: 'h-14 md:h-16 px-6 sm:w-[250px]',
+                compact: 'h-10 md:h-12 px-4 text-sm sm:w-[200px]',
+            },
+        },
+        defaultVariants: { size: 'default' },
+    }
+);
 
 interface ProjectSelectorProps {
     selectedProjectId: string | null;
@@ -17,33 +31,26 @@ interface ProjectSelectorProps {
     size?: 'default' | 'compact';
 }
 
-export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ selectedProjectId, onSelect, disabled, allowCreate = true, size = 'default' }) => {
+export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
+    selectedProjectId,
+    onSelect,
+    disabled,
+    allowCreate = true,
+    size = 'default',
+}) => {
     const [open, setOpen] = useState(false);
     const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-    // Fetch server-side com debounce de 300ms — evita query por tecla
     useEffect(() => {
-        if (!open) return;
-        const timer = setTimeout(() => fetchProjects(searchQuery), 300);
-        return () => clearTimeout(timer);
-    }, [open, searchQuery]);
+        if (open) fetchProjects();
+    }, [open]);
 
-    // Resolve o nome do projeto selecionado para exibição no trigger
-    useEffect(() => {
-        if (!selectedProjectId) { setSelectedProject(null); return; }
-        const found = projects.find(p => p.id === selectedProjectId);
-        if (found) setSelectedProject(found);
-    }, [selectedProjectId, projects]);
-
-    const fetchProjects = async (query: string) => {
+    const fetchProjects = async () => {
         try {
             setLoading(true);
-            const params = new URLSearchParams({ size: '20' });
-            if (query.trim()) params.set('name', query.trim());
-            const res = await api.get(`/projects?${params.toString()}`);
+            const res = await api.get('/projects?size=100');
             setProjects(res.data.content || []);
         } catch (error) {
             console.error('Failed to fetch projects', error);
@@ -58,7 +65,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ selectedProjec
             setLoading(true);
             const res = await api.post('/projects', { name: searchQuery.trim() });
             const newProject = res.data;
-            setSelectedProject(newProject);
+            setProjects((prev) => [newProject, ...prev]);
             onSelect(newProject.id);
             setOpen(false);
             setSearchQuery('');
@@ -69,9 +76,10 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ selectedProjec
         }
     };
 
-    const sizeClasses = size === 'compact'
-        ? 'h-10 md:h-12 px-4 text-sm'
-        : 'h-14 md:h-16 px-6';
+    const filteredProjects = projects.filter((p) =>
+        p.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    const selectedProject = projects.find((p) => p.id === selectedProjectId);
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -80,12 +88,15 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ selectedProjec
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
+                    aria-label="Selecionar projeto"
                     disabled={disabled}
-                    className={`${sizeClasses} w-full sm:w-[250px] justify-between rounded-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 shrink-0`}
+                    className={cn(triggerVariants({ size }))}
                 >
                     <div className="flex items-center gap-2 truncate">
-                        <Folder className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-500" />
-                        <span className="truncate">{selectedProject ? selectedProject.name : 'Selecione um projeto...'}</span>
+                        <Folder className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-500" aria-hidden="true" />
+                        <span className="truncate">
+                            {selectedProject ? selectedProject.name : 'Selecione um projeto…'}
+                        </span>
                     </div>
                 </Button>
             </PopoverTrigger>
@@ -94,39 +105,43 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ selectedProjec
                     <Input
                         id="projectSearch"
                         name="projectSearch"
-                        placeholder={allowCreate ? "Buscar ou criar novo..." : "Buscar projeto..."}
+                        placeholder={allowCreate ? 'Buscar ou criar novo…' : 'Buscar projeto…'}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="h-9 border-none bg-zinc-100 dark:bg-zinc-800 focus-visible:ring-0"
                     />
                     <div className="max-h-[200px] overflow-y-auto pt-2 flex flex-col gap-1">
-                        {loading && <div className="text-sm text-center py-4 text-zinc-500">Carregando...</div>}
-                        {!loading && projects.map(project => (
+                        {loading && (
+                            <div className="text-sm text-center py-4 text-zinc-500">Carregando…</div>
+                        )}
+                        {!loading && filteredProjects.map((project) => (
                             <Button
                                 key={project.id}
                                 variant="ghost"
                                 className="justify-start font-normal"
-                                onClick={() => {
-                                    onSelect(project.id);
-                                    setOpen(false);
-                                }}
+                                onClick={() => { onSelect(project.id); setOpen(false); }}
                             >
-                                <Check className={cn("mr-2 h-4 w-4 text-emerald-600", selectedProjectId === project.id ? "opacity-100" : "opacity-0")} />
+                                <Check
+                                    className={cn('mr-2 h-4 w-4 text-emerald-600', selectedProjectId === project.id ? 'opacity-100' : 'opacity-0')}
+                                    aria-hidden="true"
+                                />
                                 {project.name}
                             </Button>
                         ))}
-                        {allowCreate && !loading && searchQuery.trim() && projects.length === 0 && (
+                        {allowCreate && !loading && searchQuery.trim() && filteredProjects.length === 0 && (
                             <Button
                                 variant="ghost"
                                 className="justify-start text-emerald-600 dark:text-emerald-500 font-medium"
                                 onClick={handleCreateProject}
                             >
-                                <Plus className="mr-2 h-4 w-4" />
+                                <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
                                 Criar projeto "{searchQuery}"
                             </Button>
                         )}
-                        {!loading && !searchQuery.trim() && projects.length === 0 && (
-                            <div className="text-sm text-center py-4 text-zinc-500">Nenhum projeto encontrado.</div>
+                        {!loading && !searchQuery.trim() && filteredProjects.length === 0 && (
+                            <div className="text-sm text-center py-4 text-zinc-500">
+                                Nenhum projeto encontrado.
+                            </div>
                         )}
                     </div>
                 </div>
