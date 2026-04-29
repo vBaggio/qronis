@@ -8,7 +8,6 @@ import com.qronis.modules.tracker.api.exception.TimeEntryNotFoundException;
 import com.qronis.modules.tracker.infrastructure.persistence.TimeEntryRepository;
 import com.qronis.modules.tracker.api.TrackerFacade;
 import com.qronis.modules.project.api.ProjectFacade;
-import com.qronis.modules.identity.domain.entity.User;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -1,6 +1,6 @@
 plugins {
     java
-    id("org.springframework.boot") version "4.0.3"
+    id("org.springframework.boot") version "4.0.6"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -17,13 +17,13 @@ repositories {
     mavenCentral()
 }
 
-val mapstructVersion = "1.6.3"
-
 dependencyManagement {
     imports {
         mavenBom("org.springframework.modulith:spring-modulith-bom:1.3.0")
     }
 }
+
+val mapstructVersion = "1.6.3"
 
 dependencies {
     // Spring Boot Starters

@@ -1,5 +1,8 @@
 package com.qronis.modules.project.api.exception;
 
+import org.springframework.modulith.NamedInterface;
+
+@NamedInterface("api")
 public class ProjectNotFoundException extends RuntimeException {
 
     public ProjectNotFoundException(String id) {

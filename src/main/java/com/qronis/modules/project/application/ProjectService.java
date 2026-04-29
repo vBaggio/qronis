@@ -4,8 +4,6 @@ import com.qronis.modules.project.domain.entity.Project;
 import com.qronis.modules.project.api.exception.ProjectNotFoundException;
 import com.qronis.modules.project.api.ProjectFacade;
 import com.qronis.modules.project.infrastructure.persistence.ProjectRepository;
-import com.qronis.modules.identity.domain.entity.Tenant;
-import com.qronis.modules.identity.domain.entity.User;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +17,7 @@ import java.util.UUID;
 public class ProjectService implements ProjectFacade {
 
     private final ProjectRepository projectRepository;
+
     public ProjectService(ProjectRepository projectRepository) {
         this.projectRepository = projectRepository;
     }
@@ -54,7 +53,6 @@ public class ProjectService implements ProjectFacade {
         Project project = findByIdAndTenantId(id, tenantId);
         projectRepository.delete(project);
     }
-
 
     @Override
     public void validateProjectBelongsToTenant(UUID projectId, UUID tenantId) {

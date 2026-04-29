@@ -3,14 +3,15 @@ package com.qronis.modules.auth.api.security;
 import org.springframework.modulith.NamedInterface;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
 /**
- * Utilitário para extrair dados do usuário autenticado a partir do SecurityContext.
+ * Utilitário para extrair dados do usuário autenticado a partir do
+ * SecurityContext.
  *
- * Preferir @AuthenticationPrincipal Jwt jwt como parâmetro de método no controller
+ * Preferir @AuthenticationPrincipal Jwt jwt como parâmetro de método no
+ * controller
  * quando possível — mais explícito e mais fácil de testar.
  *
  * Este helper continua disponível para cenários onde a injeção via parâmetro

@@ -3,16 +3,19 @@ package com.qronis.shared.exception;
 import java.time.Instant;
 import java.util.Map;
 
+import org.springframework.modulith.NamedInterface;
+
 /**
  * Contrato padrão de resposta de erro da API.
  *
  * Campos:
- * - status:    código HTTP numérico
- * - error:     código de erro em UPPER_SNAKE_CASE (ex: "PROJECT_NOT_FOUND")
- * - message:   mensagem legível voltada ao desenvolvedor/usuário
- * - errors:    mapa de erros por campo (usado em VALIDATION_ERROR)
+ * - status: código HTTP numérico
+ * - error: código de erro em UPPER_SNAKE_CASE (ex: "PROJECT_NOT_FOUND")
+ * - message: mensagem legível voltada ao desenvolvedor/usuário
+ * - errors: mapa de erros por campo (usado em VALIDATION_ERROR)
  * - timestamp: momento do erro (UTC)
  */
+@NamedInterface("api")
 public record ErrorResponseDTO(
         int status,
         String error,
@@ -44,7 +47,7 @@ public record ErrorResponseDTO(
             case 404 -> "NOT_FOUND";
             case 409 -> "CONFLICT";
             case 500 -> "INTERNAL_SERVER_ERROR";
-            default  -> "ERROR";
+            default -> "ERROR";
         };
     }
 }

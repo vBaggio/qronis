@@ -3,7 +3,6 @@ package com.qronis.repository;
 import com.qronis.modules.project.domain.entity.Project;
 import com.qronis.modules.project.infrastructure.persistence.ProjectRepository;
 import com.qronis.AbstractIntegrationTest;
-import com.qronis.AbstractIntegrationTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,8 +41,12 @@ class ProjectRepositoryTest extends AbstractIntegrationTest {
     void setUp() {
         tenantId = UUID.randomUUID();
         userId = UUID.randomUUID();
-        jdbcTemplate.update("INSERT INTO tenant (id, name, created_at, updated_at) VALUES (?, 'Test Tenant', now(), now())", tenantId);
-        jdbcTemplate.update("INSERT INTO users (id, email, password, name, created_at, updated_at) VALUES (?, 'test@test.com', 'pwd', 'Test User', now(), now())", userId);
+        jdbcTemplate.update(
+                "INSERT INTO tenant (id, name, created_at, updated_at) VALUES (?, 'Test Tenant', now(), now())",
+                tenantId);
+        jdbcTemplate.update(
+                "INSERT INTO users (id, email, password, name, created_at, updated_at) VALUES (?, 'test@test.com', 'pwd', 'Test User', now(), now())",
+                userId);
     }
 
     @Test
@@ -100,8 +103,12 @@ class ProjectRepositoryTest extends AbstractIntegrationTest {
     void findByTenantId_otherTenant() {
         UUID otherTenantId = UUID.randomUUID();
         UUID otherUserId = UUID.randomUUID();
-        jdbcTemplate.update("INSERT INTO tenant (id, name, created_at, updated_at) VALUES (?, 'Other Tenant', now(), now())", otherTenantId);
-        jdbcTemplate.update("INSERT INTO users (id, email, password, name, created_at, updated_at) VALUES (?, 'other@test.com', 'pwd', 'Other User', now(), now())", otherUserId);
+        jdbcTemplate.update(
+                "INSERT INTO tenant (id, name, created_at, updated_at) VALUES (?, 'Other Tenant', now(), now())",
+                otherTenantId);
+        jdbcTemplate.update(
+                "INSERT INTO users (id, email, password, name, created_at, updated_at) VALUES (?, 'other@test.com', 'pwd', 'Other User', now(), now())",
+                otherUserId);
         projectRepository.save(new Project("Projeto Alheio", otherTenantId, otherUserId));
 
         List<Project> result = projectRepository.findByTenantId(tenantId);
