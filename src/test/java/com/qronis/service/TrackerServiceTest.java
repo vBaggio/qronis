@@ -10,6 +10,7 @@ import com.qronis.modules.tracker.api.exception.InvalidTimeBoundsException;
 import com.qronis.modules.tracker.api.exception.TimeEntryNotFoundException;
 import com.qronis.modules.tracker.infrastructure.persistence.TimeEntryRepository;
 import com.qronis.modules.project.api.ProjectFacade;
+import com.qronis.modules.project.api.exception.ProjectNotFoundException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -194,6 +195,77 @@ class TrackerServiceTest {
         ArgumentCaptor<TimeEntry> captor = ArgumentCaptor.forClass(TimeEntry.class);
         verify(timeEntryRepository).save(captor.capture());
         assertThat(captor.getValue().getDescription()).isEqualTo("Atualizada");
+    }
+
+    @Test
+    @DisplayName("patch: deve validar novo projectId contra o tenant antes de aplicar")
+    void patch_newProjectId_validTenant() {
+        UUID newProjectId = UUID.randomUUID();
+        TimeEntry entry = new TimeEntry();
+        entry.setId(UUID.randomUUID());
+        entry.setProjectId(projectId);
+        entry.setUserId(userId);
+        entry.setStartTime(Instant.now().minus(1, ChronoUnit.HOURS));
+        entry.setEndTime(Instant.now());
+
+        when(timeEntryRepository.findByIdAndUserId(entry.getId(), userId))
+                .thenReturn(Optional.of(entry));
+        when(timeEntryRepository.save(any(TimeEntry.class))).thenAnswer(inv -> inv.getArgument(0));
+        stubMapSingle(newProjectId);
+
+        TimeEntryPatchRequestDTO request = new TimeEntryPatchRequestDTO(null, null, null, newProjectId);
+        trackerService.patch(entry.getId(), request, tenantId, userId);
+
+        verify(projectFacade).validateProjectBelongsToTenant(newProjectId, tenantId);
+        ArgumentCaptor<TimeEntry> captor = ArgumentCaptor.forClass(TimeEntry.class);
+        verify(timeEntryRepository).save(captor.capture());
+        assertThat(captor.getValue().getProjectId()).isEqualTo(newProjectId);
+    }
+
+    @Test
+    @DisplayName("patch: deve rejeitar projectId de outro tenant — vetor de cross-tenant")
+    void patch_newProjectId_foreignTenant() {
+        UUID foreignProjectId = UUID.randomUUID();
+        TimeEntry entry = new TimeEntry();
+        entry.setId(UUID.randomUUID());
+        entry.setProjectId(projectId);
+        entry.setUserId(userId);
+        entry.setStartTime(Instant.now().minus(1, ChronoUnit.HOURS));
+        entry.setEndTime(Instant.now());
+
+        when(timeEntryRepository.findByIdAndUserId(entry.getId(), userId))
+                .thenReturn(Optional.of(entry));
+        doThrow(new ProjectNotFoundException(foreignProjectId.toString()))
+                .when(projectFacade).validateProjectBelongsToTenant(foreignProjectId, tenantId);
+
+        TimeEntryPatchRequestDTO request = new TimeEntryPatchRequestDTO(null, null, null, foreignProjectId);
+
+        assertThatThrownBy(() -> trackerService.patch(entry.getId(), request, tenantId, userId))
+                .isInstanceOf(ProjectNotFoundException.class);
+
+        verify(timeEntryRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("patch: sem projectId não deve chamar validateProjectBelongsToTenant")
+    void patch_noProjectId_doesNotValidate() {
+        TimeEntry entry = new TimeEntry();
+        entry.setId(UUID.randomUUID());
+        entry.setProjectId(projectId);
+        entry.setUserId(userId);
+        entry.setStartTime(Instant.now().minus(1, ChronoUnit.HOURS));
+        entry.setEndTime(Instant.now());
+        entry.setDescription("Original");
+
+        when(timeEntryRepository.findByIdAndUserId(entry.getId(), userId))
+                .thenReturn(Optional.of(entry));
+        when(timeEntryRepository.save(any(TimeEntry.class))).thenAnswer(inv -> inv.getArgument(0));
+        stubMapSingle(projectId);
+
+        TimeEntryPatchRequestDTO request = new TimeEntryPatchRequestDTO("Atualizada", null, null, null);
+        trackerService.patch(entry.getId(), request, tenantId, userId);
+
+        verify(projectFacade, never()).validateProjectBelongsToTenant(any(), any());
     }
 
     @Test

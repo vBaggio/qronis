@@ -97,6 +97,7 @@ public class TrackerService implements TrackerFacade {
             entry.setEndTime(request.endTime());
         }
         if (request.projectId() != null) {
+            projectFacade.validateProjectBelongsToTenant(request.projectId(), tenantId);
             entry.setProjectId(request.projectId());
         }
 
