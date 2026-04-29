@@ -1,6 +1,5 @@
 package com.qronis.modules.auth.api.security;
 
-import org.springframework.modulith.NamedInterface;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 
@@ -17,7 +16,6 @@ import java.util.UUID;
  * Este helper continua disponível para cenários onde a injeção via parâmetro
  * não é prática (ex: filtros, interceptors, camadas intermediárias).
  */
-@NamedInterface("api")
 public record AuthenticatedUser(UUID userId, UUID tenantId, String email, String role) {
 
     public static AuthenticatedUser fromContext() {

@@ -3,8 +3,6 @@ package com.qronis.shared.exception;
 import java.time.Instant;
 import java.util.Map;
 
-import org.springframework.modulith.NamedInterface;
-
 /**
  * Contrato padrão de resposta de erro da API.
  *
@@ -15,7 +13,6 @@ import org.springframework.modulith.NamedInterface;
  * - errors: mapa de erros por campo (usado em VALIDATION_ERROR)
  * - timestamp: momento do erro (UTC)
  */
-@NamedInterface("api")
 public record ErrorResponseDTO(
         int status,
         String error,
