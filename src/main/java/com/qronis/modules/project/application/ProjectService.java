@@ -11,7 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ProjectService implements ProjectFacade {
@@ -64,5 +67,14 @@ public class ProjectService implements ProjectFacade {
         return projectRepository.findById(projectId)
                 .map(Project::getName)
                 .orElse(null);
+    }
+
+    @Override
+    public Map<UUID, String> getProjectNames(Set<UUID> projectIds) {
+        if (projectIds == null || projectIds.isEmpty()) {
+            return Map.of();
+        }
+        return projectRepository.findAllById(projectIds).stream()
+                .collect(Collectors.toMap(Project::getId, Project::getName));
     }
 }

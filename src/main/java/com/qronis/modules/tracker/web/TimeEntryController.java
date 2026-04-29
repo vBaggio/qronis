@@ -4,9 +4,7 @@ import com.qronis.modules.tracker.web.dto.TimeEntryCreateRequestDTO;
 import com.qronis.modules.tracker.web.dto.TimeEntryPatchRequestDTO;
 import com.qronis.modules.tracker.web.dto.TimeEntryResponseDTO;
 import com.qronis.modules.tracker.web.dto.TimeEntryStartRequestDTO;
-import com.qronis.modules.tracker.application.TimeEntryMapper;
 import com.qronis.modules.tracker.application.TrackerService;
-import com.qronis.modules.tracker.domain.entity.TimeEntry;
 
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -26,11 +24,9 @@ import java.util.UUID;
 public class TimeEntryController {
 
     private final TrackerService trackerService;
-    private final TimeEntryMapper timeEntryMapper;
 
-    public TimeEntryController(TrackerService trackerService, TimeEntryMapper timeEntryMapper) {
+    public TimeEntryController(TrackerService trackerService) {
         this.trackerService = trackerService;
-        this.timeEntryMapper = timeEntryMapper;
     }
 
     @PostMapping("/start")
@@ -38,22 +34,21 @@ public class TimeEntryController {
             @AuthenticationPrincipal Jwt jwt) {
         UUID tenantId = UUID.fromString(jwt.getClaimAsString("tenantId"));
         UUID userId = UUID.fromString(jwt.getSubject());
-        TimeEntry entry = trackerService.start(request.projectId(), request.description(), tenantId, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(timeEntryMapper.toResponse(entry));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(trackerService.start(request.projectId(), request.description(), tenantId, userId));
     }
 
     @PutMapping("/stop")
     public ResponseEntity<TimeEntryResponseDTO> stop(@AuthenticationPrincipal Jwt jwt) {
         UUID userId = UUID.fromString(jwt.getSubject());
-        TimeEntry entry = trackerService.stop(userId);
-        return ResponseEntity.ok(timeEntryMapper.toResponse(entry));
+        return ResponseEntity.ok(trackerService.stop(userId));
     }
 
     @GetMapping("/active")
     public ResponseEntity<TimeEntryResponseDTO> active(@AuthenticationPrincipal Jwt jwt) {
         UUID userId = UUID.fromString(jwt.getSubject());
         return trackerService.findActive(userId)
-                .map(entry -> ResponseEntity.ok(timeEntryMapper.toResponse(entry)))
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.noContent().build());
     }
 
@@ -63,8 +58,7 @@ public class TimeEntryController {
             @PageableDefault(size = 20, sort = "startTime", direction = Sort.Direction.DESC) Pageable pageable,
             @AuthenticationPrincipal Jwt jwt) {
         UUID userId = UUID.fromString(jwt.getSubject());
-        Page<TimeEntry> entries = trackerService.findByUserIdAndOptionalProjectId(userId, projectId, pageable);
-        return ResponseEntity.ok(entries.map(timeEntryMapper::toResponse));
+        return ResponseEntity.ok(trackerService.findPageByUser(userId, projectId, pageable));
     }
 
     @PostMapping
@@ -72,11 +66,10 @@ public class TimeEntryController {
             @AuthenticationPrincipal Jwt jwt) {
         UUID tenantId = UUID.fromString(jwt.getClaimAsString("tenantId"));
         UUID userId = UUID.fromString(jwt.getSubject());
-        TimeEntry entry = trackerService.create(
+        return ResponseEntity.status(HttpStatus.CREATED).body(trackerService.create(
                 request.projectId(), request.description(),
                 request.startTime(), request.endTime(),
-                tenantId, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(timeEntryMapper.toResponse(entry));
+                tenantId, userId));
     }
 
     @PatchMapping("/{id}")
@@ -85,8 +78,7 @@ public class TimeEntryController {
             @AuthenticationPrincipal Jwt jwt) {
         UUID tenantId = UUID.fromString(jwt.getClaimAsString("tenantId"));
         UUID userId = UUID.fromString(jwt.getSubject());
-        TimeEntry entry = trackerService.patch(id, request, tenantId, userId);
-        return ResponseEntity.ok(timeEntryMapper.toResponse(entry));
+        return ResponseEntity.ok(trackerService.patch(id, request, tenantId, userId));
     }
 
     @DeleteMapping("/{id}")
