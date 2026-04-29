@@ -26,9 +26,6 @@ public interface TimeEntryRepository extends JpaRepository<TimeEntry, UUID> {
     Page<TimeEntry> findByUserIdAndProjectId(@Param("userId") UUID userId,
             @Param("projectId") UUID projectId, Pageable pageable);
 
-    @Query("SELECT te FROM TimeEntry te WHERE te.projectId = :projectId ORDER BY te.startTime DESC")
-    List<TimeEntry> findByProjectId(@Param("projectId") UUID projectId);
-
     @Query("SELECT te FROM TimeEntry te WHERE te.id = :id AND te.userId = :userId")
     Optional<TimeEntry> findByIdAndUserId(@Param("id") UUID id, @Param("userId") UUID userId);
 

@@ -39,7 +39,6 @@ interface Project {
     id: string;
     name: string;
     tenantId: string;
-    createdByName: string;
     createdAt: string;
 }
 
@@ -143,7 +142,9 @@ const NewProjectDialog: React.FC<NewProjectDialogProps> = ({ onCreated }) => {
         try {
             await api.post('/projects', { name: name.trim() });
             setName('');
-            setOpen(false);ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+            setOpen(false);
+            onCreated();
+        } catch {
             setError('Não foi possível criar o projeto. Tente novamente.');
         } finally {
             setLoading(false);

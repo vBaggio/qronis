@@ -11,7 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ProjectService implements ProjectFacade {
@@ -22,14 +25,17 @@ public class ProjectService implements ProjectFacade {
         this.projectRepository = projectRepository;
     }
 
+    @Transactional(readOnly = true)
     public Page<Project> findByTenantId(UUID tenantId, String name, Pageable pageable) {
         return projectRepository.findByTenantId(tenantId, name, pageable);
     }
 
+    @Transactional(readOnly = true)
     public List<Project> findByTenantId(UUID tenantId) {
         return projectRepository.findByTenantId(tenantId);
     }
 
+    @Transactional(readOnly = true)
     public Project findByIdAndTenantId(UUID id, UUID tenantId) {
         return projectRepository.findByIdAndTenantId(id, tenantId)
                 .orElseThrow(() -> new ProjectNotFoundException(id.toString()));
@@ -60,9 +66,20 @@ public class ProjectService implements ProjectFacade {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public String getProjectName(UUID projectId) {
         return projectRepository.findById(projectId)
                 .map(Project::getName)
                 .orElse(null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<UUID, String> getProjectNames(Set<UUID> projectIds) {
+        if (projectIds == null || projectIds.isEmpty()) {
+            return Map.of();
+        }
+        return projectRepository.findAllById(projectIds).stream()
+                .collect(Collectors.toMap(Project::getId, Project::getName));
     }
 }

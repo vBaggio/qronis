@@ -2,6 +2,7 @@ package com.qronis.modules.identity.web;
 
 import com.qronis.modules.identity.web.dto.UserResponseDTO;
 import com.qronis.modules.identity.domain.entity.TenantUser;
+import com.qronis.modules.identity.domain.exception.UserNotFoundException;
 import com.qronis.modules.identity.infrastructure.persistence.TenantUserRepository;
 
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,7 @@ public class UserController {
         UUID userId = UUID.fromString(jwt.getSubject());
 
         TenantUser tenantUser = tenantUserRepository.findByUserIdWithUserAndTenant(userId)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new UserNotFoundException(userId.toString()));
 
         return ResponseEntity.ok(new UserResponseDTO(
                 tenantUser.getUser().getId(),

@@ -1,8 +1,11 @@
 package com.qronis.modules.project.api;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public interface ProjectFacade {
     void validateProjectBelongsToTenant(UUID projectId, UUID tenantId);
     String getProjectName(UUID projectId);
+    Map<UUID, String> getProjectNames(Set<UUID> projectIds);
 }

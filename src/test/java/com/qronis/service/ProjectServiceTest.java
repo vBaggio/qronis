@@ -18,7 +18,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -144,5 +147,51 @@ class ProjectServiceTest {
         projectService.delete(project.getId(), tenantId);
 
         verify(projectRepository).delete(project);
+    }
+
+    // --- GET PROJECT NAMES (batch) ---
+
+    @Test
+    @DisplayName("getProjectNames: deve retornar mapa id→nome para IDs encontrados")
+    void getProjectNames_success() {
+        UUID idA = UUID.randomUUID();
+        UUID idB = UUID.randomUUID();
+        Project projA = new Project("Alpha", tenantId, userId);
+        projA.setId(idA);
+        Project projB = new Project("Beta", tenantId, userId);
+        projB.setId(idB);
+
+        when(projectRepository.findAllById(Set.of(idA, idB))).thenReturn(List.of(projA, projB));
+
+        Map<UUID, String> result = projectService.getProjectNames(Set.of(idA, idB));
+
+        assertThat(result).hasSize(2);
+        assertThat(result).containsEntry(idA, "Alpha");
+        assertThat(result).containsEntry(idB, "Beta");
+    }
+
+    @Test
+    @DisplayName("getProjectNames: deve retornar mapa parcial se algum ID não existe")
+    void getProjectNames_partialMatch() {
+        UUID existingId = UUID.randomUUID();
+        UUID missingId = UUID.randomUUID();
+        Project existing = new Project("Alpha", tenantId, userId);
+        existing.setId(existingId);
+
+        when(projectRepository.findAllById(Set.of(existingId, missingId))).thenReturn(List.of(existing));
+
+        Map<UUID, String> result = projectService.getProjectNames(Set.of(existingId, missingId));
+
+        assertThat(result).hasSize(1).containsEntry(existingId, "Alpha");
+        assertThat(result).doesNotContainKey(missingId);
+    }
+
+    @Test
+    @DisplayName("getProjectNames: conjunto vazio não deve consultar o repositório")
+    void getProjectNames_emptySet() {
+        Map<UUID, String> result = projectService.getProjectNames(Set.of());
+
+        assertThat(result).isEmpty();
+        verify(projectRepository, never()).findAllById(any());
     }
 }

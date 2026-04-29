@@ -7,6 +7,5 @@ public record ProjectResponseDTO(
         UUID id,
         String name,
         UUID tenantId,
-        String createdByName,
         Instant createdAt) {
 }

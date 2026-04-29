@@ -24,17 +24,28 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ selectedProjec
     const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
+    // Fetch server-side com debounce de 300ms — evita query por tecla
     useEffect(() => {
-        if (open) {
-            fetchProjects();
-        }
-    }, [open]);
+        if (!open) return;
+        const timer = setTimeout(() => fetchProjects(searchQuery), 300);
+        return () => clearTimeout(timer);
+    }, [open, searchQuery]);
 
-    const fetchProjects = async () => {
+    // Resolve o nome do projeto selecionado para exibição no trigger
+    useEffect(() => {
+        if (!selectedProjectId) { setSelectedProject(null); return; }
+        const found = projects.find(p => p.id === selectedProjectId);
+        if (found) setSelectedProject(found);
+    }, [selectedProjectId, projects]);
+
+    const fetchProjects = async (query: string) => {
         try {
             setLoading(true);
-            const res = await api.get('/projects?size=100');
+            const params = new URLSearchParams({ size: '20' });
+            if (query.trim()) params.set('name', query.trim());
+            const res = await api.get(`/projects?${params.toString()}`);
             setProjects(res.data.content || []);
         } catch (error) {
             console.error('Failed to fetch projects', error);
@@ -49,7 +60,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ selectedProjec
             setLoading(true);
             const res = await api.post('/projects', { name: searchQuery.trim() });
             const newProject = res.data;
-            setProjects(prev => [newProject, ...prev]);
+            setSelectedProject(newProject);
             onSelect(newProject.id);
             setOpen(false);
             setSearchQuery('');
@@ -59,10 +70,6 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ selectedProjec
             setLoading(false);
         }
     };
-
-    const filteredProjects = projects.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    const selectedProject = projects.find(p => p.id === selectedProjectId);
 
     const sizeClasses = size === 'compact'
         ? 'h-10 md:h-12 px-4 text-sm'
@@ -96,7 +103,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ selectedProjec
                     />
                     <div className="max-h-[200px] overflow-y-auto pt-2 flex flex-col gap-1">
                         {loading && <div className="text-sm text-center py-4 text-zinc-500">Carregando...</div>}
-                        {!loading && filteredProjects.map(project => (
+                        {!loading && projects.map(project => (
                             <Button
                                 key={project.id}
                                 variant="ghost"
@@ -110,7 +117,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ selectedProjec
                                 {project.name}
                             </Button>
                         ))}
-                        {allowCreate && !loading && searchQuery.trim() && filteredProjects.length === 0 && (
+                        {allowCreate && !loading && searchQuery.trim() && projects.length === 0 && (
                             <Button
                                 variant="ghost"
                                 className="justify-start text-emerald-600 dark:text-emerald-500 font-medium"
@@ -120,7 +127,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ selectedProjec
                                 Criar projeto "{searchQuery}"
                             </Button>
                         )}
-                        {!loading && !searchQuery.trim() && filteredProjects.length === 0 && (
+                        {!loading && !searchQuery.trim() && projects.length === 0 && (
                             <div className="text-sm text-center py-4 text-zinc-500">Nenhum projeto encontrado.</div>
                         )}
                     </div>

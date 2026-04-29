@@ -1,6 +1,7 @@
 package com.qronis.modules.tracker.application;
 
 import com.qronis.modules.tracker.web.dto.TimeEntryPatchRequestDTO;
+import com.qronis.modules.tracker.web.dto.TimeEntryResponseDTO;
 import com.qronis.modules.tracker.domain.entity.TimeEntry;
 import com.qronis.modules.tracker.api.exception.ActiveTimerConflictException;
 import com.qronis.modules.tracker.api.exception.InvalidTimeBoundsException;
@@ -16,22 +17,29 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class TrackerService implements TrackerFacade {
 
     private final TimeEntryRepository timeEntryRepository;
     private final ProjectFacade projectFacade;
+    private final TimeEntryMapper timeEntryMapper;
 
-    public TrackerService(TimeEntryRepository timeEntryRepository, ProjectFacade projectFacade) {
+    public TrackerService(TimeEntryRepository timeEntryRepository,
+                          ProjectFacade projectFacade,
+                          TimeEntryMapper timeEntryMapper) {
         this.timeEntryRepository = timeEntryRepository;
         this.projectFacade = projectFacade;
+        this.timeEntryMapper = timeEntryMapper;
     }
 
     @Transactional
-    public TimeEntry start(UUID projectId, String description, UUID tenantId, UUID userId) {
+    public TimeEntryResponseDTO start(UUID projectId, String description, UUID tenantId, UUID userId) {
         projectFacade.validateProjectBelongsToTenant(projectId, tenantId);
 
         timeEntryRepository.findActiveByUserId(userId).ifPresent(active -> {
@@ -44,20 +52,20 @@ public class TrackerService implements TrackerFacade {
         entry.setStartTime(Instant.now());
         entry.setDescription(description);
 
-        return timeEntryRepository.save(entry);
+        return mapSingle(timeEntryRepository.save(entry));
     }
 
     @Transactional
-    public TimeEntry stop(UUID userId) {
+    public TimeEntryResponseDTO stop(UUID userId) {
         TimeEntry entry = timeEntryRepository.findActiveByUserId(userId)
                 .orElseThrow(() -> new TimeEntryNotFoundException("Nenhum timer ativo encontrado"));
 
         entry.setEndTime(Instant.now());
-        return timeEntryRepository.save(entry);
+        return mapSingle(timeEntryRepository.save(entry));
     }
 
     @Transactional
-    public TimeEntry create(UUID projectId, String description, Instant startTime, Instant endTime,
+    public TimeEntryResponseDTO create(UUID projectId, String description, Instant startTime, Instant endTime,
             UUID tenantId, UUID userId) {
         if (!endTime.isAfter(startTime)) {
             throw new InvalidTimeBoundsException();
@@ -72,11 +80,11 @@ public class TrackerService implements TrackerFacade {
         entry.setEndTime(endTime);
         entry.setDescription(description);
 
-        return timeEntryRepository.save(entry);
+        return mapSingle(timeEntryRepository.save(entry));
     }
 
     @Transactional
-    public TimeEntry patch(UUID id, TimeEntryPatchRequestDTO request, UUID tenantId, UUID userId) {
+    public TimeEntryResponseDTO patch(UUID id, TimeEntryPatchRequestDTO request, UUID tenantId, UUID userId) {
         TimeEntry entry = findByIdAndUserId(id, userId);
 
         if (request.description() != null) {
@@ -89,6 +97,7 @@ public class TrackerService implements TrackerFacade {
             entry.setEndTime(request.endTime());
         }
         if (request.projectId() != null) {
+            projectFacade.validateProjectBelongsToTenant(request.projectId(), tenantId);
             entry.setProjectId(request.projectId());
         }
 
@@ -96,7 +105,7 @@ public class TrackerService implements TrackerFacade {
             throw new InvalidTimeBoundsException();
         }
 
-        return timeEntryRepository.save(entry);
+        return mapSingle(timeEntryRepository.save(entry));
     }
 
     @Transactional
@@ -105,20 +114,19 @@ public class TrackerService implements TrackerFacade {
         timeEntryRepository.delete(entry);
     }
 
-    public Optional<TimeEntry> findActive(UUID userId) {
-        return timeEntryRepository.findActiveByUserId(userId);
+    @Transactional(readOnly = true)
+    public Optional<TimeEntryResponseDTO> findActive(UUID userId) {
+        return timeEntryRepository.findActiveByUserId(userId).map(this::mapSingle);
     }
 
-    public Page<TimeEntry> findByUserIdAndOptionalProjectId(UUID userId, UUID projectId, Pageable pageable) {
-        if (projectId != null) {
-            return timeEntryRepository.findByUserIdAndProjectId(userId, projectId, pageable);
-        }
-        return timeEntryRepository.findByUserId(userId, pageable);
-    }
+    @Transactional(readOnly = true)
+    public Page<TimeEntryResponseDTO> findPageByUser(UUID userId, UUID projectId, Pageable pageable) {
+        Page<TimeEntry> page = (projectId != null)
+                ? timeEntryRepository.findByUserIdAndProjectId(userId, projectId, pageable)
+                : timeEntryRepository.findByUserId(userId, pageable);
 
-    public List<TimeEntry> findByProjectId(UUID projectId, UUID tenantId) {
-        projectFacade.validateProjectBelongsToTenant(projectId, tenantId);
-        return timeEntryRepository.findByProjectId(projectId);
+        Map<UUID, String> names = resolveNames(page.getContent());
+        return page.map(e -> timeEntryMapper.toResponse(e, names));
     }
 
     private TimeEntry findByIdAndUserId(UUID id, UUID userId) {
@@ -126,7 +134,23 @@ public class TrackerService implements TrackerFacade {
                 .orElseThrow(TimeEntryNotFoundException::new);
     }
 
+    private TimeEntryResponseDTO mapSingle(TimeEntry entry) {
+        Map<UUID, String> names = projectFacade.getProjectNames(Set.of(entry.getProjectId()));
+        return timeEntryMapper.toResponse(entry, names);
+    }
+
+    private Map<UUID, String> resolveNames(List<TimeEntry> entries) {
+        if (entries.isEmpty()) {
+            return Map.of();
+        }
+        Set<UUID> ids = entries.stream()
+                .map(TimeEntry::getProjectId)
+                .collect(Collectors.toSet());
+        return projectFacade.getProjectNames(ids);
+    }
+
     @Override
+    @Transactional(readOnly = true)
     public Long getTotalTimeSecondsByProject(UUID projectId, UUID userId) {
         return timeEntryRepository.sumDurationSecondsByProjectIdAndUserId(projectId, userId);
     }
