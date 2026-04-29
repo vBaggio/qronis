@@ -6,7 +6,7 @@ import org.springframework.modulith.docs.Documenter;
 
 class QronisArchitectureTest {
 
-    ApplicationModules modules = ApplicationModules.of("com.qronis.modules");
+    ApplicationModules modules = ApplicationModules.of(QronisApplication.class);
 
     @Test
     void verifyModulithArchitecture() {

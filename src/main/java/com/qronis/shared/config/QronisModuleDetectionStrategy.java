@@ -11,7 +11,11 @@ public class QronisModuleDetectionStrategy implements ApplicationModuleDetection
 
     @Override
     public Stream<JavaPackage> getModuleBasePackages(JavaPackage basePackage) {
-        return basePackage.getDirectSubPackages().stream();
+        return basePackage.getDirectSubPackages().stream()
+                .filter(pkg -> pkg.getName().endsWith(".modules"))
+                .findFirst()
+                .map(modulesPkg -> modulesPkg.getDirectSubPackages().stream())
+                .orElseGet(() -> basePackage.getDirectSubPackages().stream());
     }
 
     @Override
