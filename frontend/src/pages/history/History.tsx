@@ -1,56 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { api } from '../../lib/api';
-import type { TimeEntry, PageResponse } from '../../lib/types';
-
-type TimeEntryPage = PageResponse<TimeEntry>;
+import React, { useState } from 'react';
 import { TopNav } from '../../components/layout/TopNav';
 import { TimeEntryList } from '../../components/history/TimeEntryList';
 import { ProjectSelector } from '../../components/tracker/ProjectSelector';
 import { Button } from '@/components/ui/button';
 import { Loader2, X } from 'lucide-react';
+import { useTimeEntries } from '../../hooks/useTimeEntries';
 
 export const History: React.FC = () => {
-    const [entries, setEntries] = useState<TimeEntry[]>([]);
-    const [page, setPage] = useState(0);
-    const [isLastPage, setIsLastPage] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isLoadingMore, setIsLoadingMore] = useState(false);
-
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
-    const fetchHistory = async (pageNumber: number, append = false) => {
-        const loadingSetter = append ? setIsLoadingMore : setIsLoading;
-        loadingSetter(true);
-        try {
-            // Force 20 items per page. Always chronological decrescent.
-            const projectQuery = selectedProjectId ? `&projectId=${selectedProjectId}` : '';
-            const res = await api.get<TimeEntryPage>(`/time-entries?page=${pageNumber}&size=20&sort=startTime,desc${projectQuery}`);
+    const {
+        data,
+        isLoading,
+        isFetchingNextPage,
+        hasNextPage,
+        fetchNextPage,
+        isError,
+    } = useTimeEntries({ projectId: selectedProjectId });
 
-            if (append) {
-                setEntries(prev => [...prev, ...res.data.content]);
-            } else {
-                setEntries(res.data.content);
-            }
-
-            setIsLastPage(res.data.last);
-            setPage(res.data.number);
-        } catch (error) {
-            console.error('Failed to fetch history:', error);
-        } finally {
-            loadingSetter(false);
-        }
-    };
-
-    // Initial load or filter change
-    useEffect(() => {
-        fetchHistory(0, false);
-    }, [selectedProjectId]);
-
-    const handleLoadMore = () => {
-        if (!isLastPage) {
-            fetchHistory(page + 1, true);
-        }
-    };
+    const entries = data?.pages.flatMap((p) => p.content) ?? [];
 
     return (
         <div className="min-h-screen bg-white dark:bg-zinc-950 transition-colors duration-500">
@@ -58,7 +26,6 @@ export const History: React.FC = () => {
 
             <main className="container mx-auto px-4 md:px-8 py-10 max-w-5xl">
 
-                {/* Header Section (Typographic Brutalism) */}
                 <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
                     <div>
                         <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
@@ -66,7 +33,6 @@ export const History: React.FC = () => {
                         </h1>
                     </div>
 
-                    {/* Filter Strip */}
                     <div className="flex items-center gap-3">
                         {selectedProjectId && (
                             <Button
@@ -75,7 +41,7 @@ export const History: React.FC = () => {
                                 onClick={() => setSelectedProjectId(null)}
                                 className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 px-3 h-10 md:h-12 rounded-full hidden sm:flex"
                             >
-                                <X className="h-4 w-4 mr-1" /> Limpar
+                                <X className="h-4 w-4 mr-1" aria-hidden="true" /> Limpar
                             </Button>
                         )}
                         <ProjectSelector
@@ -87,28 +53,32 @@ export const History: React.FC = () => {
                     </div>
                 </header>
 
-                {/* Main List */}
-                <div className="w-full">
+                {isError && (
+                    <div className="mb-6 rounded-lg bg-red-50 dark:bg-red-900/30 p-4 text-sm text-red-600 dark:text-red-400">
+                        Falha ao carregar o histórico. Tente recarregar a página.
+                    </div>
+                )}
+
+                <div className="w-full" aria-live="polite" aria-atomic="false">
                     <TimeEntryList
                         entries={entries}
                         isReadOnly={true}
                         groupByDay={true}
-                        isLoading={isLoading && page === 0}
+                        isLoading={isLoading}
                     />
 
-                    {/* Load More Trigger */}
-                    {!isLoading && !isLastPage && entries.length > 0 && (
+                    {!isLoading && hasNextPage && entries.length > 0 && (
                         <div className="mt-8 flex justify-center">
                             <Button
                                 variant="ghost"
-                                onClick={handleLoadMore}
-                                disabled={isLoadingMore}
+                                onClick={() => fetchNextPage()}
+                                disabled={isFetchingNextPage}
                                 className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
                             >
-                                {isLoadingMore ? (
+                                {isFetchingNextPage ? (
                                     <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Carregando...
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                                        Carregando…
                                     </>
                                 ) : (
                                     'Carregar mais'
