@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
+import type { Project } from '../../lib/types';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Folder, Plus, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export interface Project {
-    id: string;
-    name: string;
-}
+export type { Project };
 
 interface ProjectSelectorProps {
     selectedProjectId: string | null;

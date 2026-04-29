@@ -1,19 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
+import type { TimeEntry, PageResponse } from '../../lib/types';
+
+type TimeEntryPage = PageResponse<TimeEntry>;
 import { TopNav } from '../../components/layout/TopNav';
 import { TimeEntryList } from '../../components/history/TimeEntryList';
-import type { TimeEntry } from '../../components/history/TimeEntryRow';
 import { ProjectSelector } from '../../components/tracker/ProjectSelector';
 import { Button } from '@/components/ui/button';
 import { Loader2, X } from 'lucide-react';
-
-interface PageResponse {
-    content: TimeEntry[];
-    last: boolean;
-    totalPages: number;
-    totalElements: number;
-    number: number;
-}
 
 export const History: React.FC = () => {
     const [entries, setEntries] = useState<TimeEntry[]>([]);
@@ -30,7 +24,7 @@ export const History: React.FC = () => {
         try {
             // Force 20 items per page. Always chronological decrescent.
             const projectQuery = selectedProjectId ? `&projectId=${selectedProjectId}` : '';
-            const res = await api.get<PageResponse>(`/time-entries?page=${pageNumber}&size=20&sort=startTime,desc${projectQuery}`);
+            const res = await api.get<TimeEntryPage>(`/time-entries?page=${pageNumber}&size=20&sort=startTime,desc${projectQuery}`);
 
             if (append) {
                 setEntries(prev => [...prev, ...res.data.content]);

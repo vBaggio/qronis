@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { formatSmartDuration, formatTimeRange, formatTimeOnly } from '../../lib/time-utils';
 import { api } from '../../lib/api';
+import { accentColorFor, accentBgFor } from '../../lib/colors';
+import type { TimeEntry } from '../../lib/types';
 import { Trash2, Loader2, Clock } from 'lucide-react';
 import { parseISO, format } from 'date-fns';
 import {
@@ -12,14 +14,7 @@ import {
 } from '../ui/dialog';
 import { Button } from '../ui/button';
 
-export interface TimeEntry {
-    id: string;
-    description: string;
-    startTime: string;
-    endTime: string | null;
-    projectId: string | null;
-    projectName: string | null;
-}
+export type { TimeEntry };
 
 interface TimeEntryRowProps {
     entry: TimeEntry;
@@ -28,21 +23,6 @@ interface TimeEntryRowProps {
     showProjectBadge?: boolean;
     onDelete?: (id: string) => void;
     onUpdate?: (updatedEntry: TimeEntry) => void;
-}
-
-// ─── Unified accent color algorithm (same as Projects.tsx) ────────────────────
-const ACCENT_COLORS = [
-    '#10b981', '#0ea5e9', '#f59e0b', '#f43f5e',
-    '#6366f1', '#f97316', '#14b8a6', '#d946ef',
-];
-
-function accentColorFor(id: string): string {
-    const hash = id.slice(0, 8).split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-    return ACCENT_COLORS[hash % ACCENT_COLORS.length];
-}
-
-function accentBgFor(hex: string): string {
-    return `${hex}1A`;
 }
 
 // ─── Time helpers ─────────────────────────────────────────────────────────────

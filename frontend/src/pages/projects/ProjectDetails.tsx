@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '@/lib/api';
+import type { TimeEntry, PageResponse, Project, ProjectSummary } from '@/lib/types';
+
+type TimeEntryPage = PageResponse<TimeEntry>;
 import { TopNav } from '@/components/layout/TopNav';
 import { TimeEntryList } from '@/components/history/TimeEntryList';
-import type { TimeEntry } from '@/components/history/TimeEntryRow';
 import { Button } from '@/components/ui/button';
 import { Loader2, ArrowLeft, Plus, Pencil } from 'lucide-react';
 import { formatSmartDuration } from '@/lib/time-utils';
@@ -16,24 +18,6 @@ import {
     DialogDescription,
     DialogFooter,
 } from '@/components/ui/dialog';
-
-interface PageResponse {
-    content: TimeEntry[];
-    last: boolean;
-    totalPages: number;
-    totalElements: number;
-    number: number;
-}
-
-interface ProjectSummary {
-    projectId: string;
-    totalDurationSeconds: number;
-}
-
-interface Project {
-    id: string;
-    name: string;
-}
 
 export const ProjectDetails: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -81,7 +65,7 @@ export const ProjectDetails: React.FC = () => {
         if (!append) loadingSetter(true);
 
         try {
-            const res = await api.get<PageResponse>(`/time-entries?page=${pageNumber}&size=20&sort=startTime,${sortDirection}&projectId=${id}`);
+            const res = await api.get<TimeEntryPage>(`/time-entries?page=${pageNumber}&size=20&sort=startTime,${sortDirection}&projectId=${id}`);
 
             if (append) {
                 setEntries(prev => [...prev, ...res.data.content]);

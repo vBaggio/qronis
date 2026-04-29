@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '@/lib/api';
+import { accentColorFor } from '@/lib/colors';
+import { PAGE_SIZE } from '@/lib/constants';
+import type { Project, PageResponse } from '@/lib/types';
+
+type ProjectPage = PageResponse<Project>;
 import { TopNav } from '@/components/layout/TopNav';
 // Removed shadcn/ui table imports to apply the Zen Paradigm flat list
 import { Button } from '@/components/ui/button';
@@ -32,44 +37,6 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface Project {
-    id: string;
-    name: string;
-    tenantId: string;
-    createdAt: string;
-}
-
-interface Page<T> {
-    content: T[];
-    totalElements: number;
-    totalPages: number;
-    size: number;
-    number: number;
-    first: boolean;
-    last: boolean;
-}
-
-// ─── Accent colors — border-left (Linear/Notion style) ───────────────────────
-// Mapeados como hex para garantir compatibilidade com inline style.
-// A cor é determinística: mesma cor sempre para o mesmo UUID de projeto.
-const ACCENT_COLORS = [
-    '#10b981', // emerald-500
-    '#0ea5e9', // sky-500
-    '#f59e0b', // amber-500
-    '#f43f5e', // rose-500
-    '#6366f1', // indigo-500
-    '#f97316', // orange-500
-    '#14b8a6', // teal-500
-    '#d946ef', // fuchsia-500
-];
-
-function accentColorFor(id: string): string {
-    const hash = id.slice(0, 8).split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-    return ACCENT_COLORS[hash % ACCENT_COLORS.length];
-}
 
 // ─── Delete Confirm Dialog ────────────────────────────────────────────────────
 
@@ -208,7 +175,13 @@ const NewProjectDialog: React.FC<NewProjectDialogProps> = ({ onCreated }) => {
 
 // ─── Projects Page ─────────────────────────────────────────────────────────────
 
-const PAGE_SIZE = 15;
+const formatDate = (iso: string) => {
+    try {
+        return format(new Date(iso), "dd 'de' MMM 'de' yyyy", { locale: ptBR });
+    } catch {
+        return iso;
+    }
+};
 
 export const Projects: React.FC = () => {
     const navigate = useNavigate();
@@ -240,11 +213,11 @@ export const Projects: React.FC = () => {
         try {
             const params: Record<string, unknown> = {
                 page,
-                size: PAGE_SIZE,
+                size: PAGE_SIZE.projects,
                 sort: 'createdAt,desc',
             };
             if (debouncedSearch) params.name = debouncedSearch;
-            const { data } = await api.get<Page<Project>>('/projects', { params });
+            const { data } = await api.get<ProjectPage>('/projects', { params });
             setProjects(data.content);
             setTotalElements(data.totalElements);
             setTotalPages(data.totalPages);
@@ -270,14 +243,6 @@ export const Projects: React.FC = () => {
             setProjectToDelete(null);
         } finally {
             setDeletingId(null);
-        }
-    };
-
-    const formatDate = (iso: string) => {
-        try {
-            return format(new Date(iso), "dd 'de' MMM 'de' yyyy", { locale: ptBR });
-        } catch {
-            return iso;
         }
     };
 
@@ -383,7 +348,7 @@ export const Projects: React.FC = () => {
                                     <div className="flex items-center gap-6 justify-end shrink-0 pl-4 w-[200px]">
                                         {/* Subtle Meta Data */}
                                         <span className="text-sm font-medium text-zinc-400 dark:text-zinc-500 tracking-tight">
-                                            {formatDate(project.createdAt)}
+                                            {project.createdAt ? formatDate(project.createdAt) : '—'}
                                         </span>
 
                                         {/* Actions Dropdown */}
