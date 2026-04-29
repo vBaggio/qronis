@@ -3,7 +3,7 @@
 **Projeto:** Qronis Frontend  
 **Branch:** `refactor/frontend-architecture-enrichment`  
 **Iniciado em:** 2026-04-29  
-**Status atual:** 🔵 Em andamento — Fase 3 (Custom Hooks)
+**Status atual:** 🔵 Em andamento — Fase 4 (Refatorar Páginas)
 
 ---
 
@@ -187,21 +187,19 @@ Nenhum dos dois mostra feedback ao usuário.
 ### Fase 3 — Custom Hooks com React Query
 **Objetivo:** Criar a camada de data fetching reutilizável.
 
-- [ ] **3.1** Criar `src/hooks/useProjects.ts`
-  - `useProjects({ page, search })` → `useQuery`
-  - `useCreateProject()` → `useMutation` + `invalidateQueries(['projects'])`
-  - `useDeleteProject()` → `useMutation` + `invalidateQueries(['projects'])`
-  - `useProject(id)` → `useQuery(['project', id])`
+- [x] **3.1** Criar `src/hooks/useProjects.ts`
+  - `useProjects({ page, search })` → `useQuery` paginado
+  - `useProject(id)`, `useProjectSummary(id)` → `useQuery`
+  - `useCreateProject()`, `useUpdateProject(id)`, `useDeleteProject()` → `useMutation`
 
-- [ ] **3.2** Criar `src/hooks/useTimeEntries.ts`
-  - `useTimeEntries({ projectId? })` → `useInfiniteQuery`
-  - `usePatchTimeEntry()` → `useMutation` + invalidate
-  - `useDeleteTimeEntry()` → `useMutation` + invalidate
+- [x] **3.2** Criar `src/hooks/useTimeEntries.ts`
+  - `useTimeEntries({ projectId?, sort? })` → `useInfiniteQuery`
+  - `usePatchTimeEntry()`, `useDeleteTimeEntry()` → `useMutation` + invalidate
 
-- [ ] **3.3** Criar `src/hooks/useTimer.ts`
-  - `useActiveTimer()` → `useQuery(['timer/active'], { staleTime: 5_000 })`
-  - `useStartTimer()` → `useMutation` + `invalidateQueries(['timer/active'])`
-  - `useStopTimer()` → `useMutation` + `invalidateQueries(['timer/active', 'timeEntries'])`
+- [x] **3.3** Criar `src/hooks/useTimer.ts`
+  - `useActiveTimer()` → `useQuery` com `staleTime: 5s` e `retry: false`
+  - `useStartTimer()` → `useMutation` + `setQueryData` otimista
+  - `useStopTimer()` → `useMutation` + invalidate timeEntries
 
 **Gate:** Hooks criados, importáveis, TypeScript compila.
 
@@ -342,8 +340,16 @@ src/
   - `ReactQueryDevtools` disponível em dev (botão flutuante no canto)
   - Gate: `npm run build` — ✅ 0 erros TypeScript
 
+- **Fase 3 — Custom Hooks** (commit `5a5f07b`)
+  - `src/hooks/useProjects.ts`: 6 hooks (list, detail, summary, create, update, delete)
+  - `src/hooks/useTimeEntries.ts`: 3 hooks (infinite list, patch, delete)
+  - `src/hooks/useTimer.ts`: 3 hooks (active, start, stop)
+  - AbortController integrado via `signal` do React Query em todas as `queryFn`
+  - Query keys estruturados hierarquicamente por domínio para invalidação precisa
+  - Gate: `npm run build` — ✅ 0 erros TypeScript
+
 ### 🔵 Em Andamento
-- Fase 3 — Custom Hooks
+- Fase 4 — Refatorar Páginas
 
 ### ⏳ Pendente
 - Fase 2 — React Query
