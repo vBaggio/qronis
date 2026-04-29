@@ -25,14 +25,17 @@ public class ProjectService implements ProjectFacade {
         this.projectRepository = projectRepository;
     }
 
+    @Transactional(readOnly = true)
     public Page<Project> findByTenantId(UUID tenantId, String name, Pageable pageable) {
         return projectRepository.findByTenantId(tenantId, name, pageable);
     }
 
+    @Transactional(readOnly = true)
     public List<Project> findByTenantId(UUID tenantId) {
         return projectRepository.findByTenantId(tenantId);
     }
 
+    @Transactional(readOnly = true)
     public Project findByIdAndTenantId(UUID id, UUID tenantId) {
         return projectRepository.findByIdAndTenantId(id, tenantId)
                 .orElseThrow(() -> new ProjectNotFoundException(id.toString()));
@@ -63,6 +66,7 @@ public class ProjectService implements ProjectFacade {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public String getProjectName(UUID projectId) {
         return projectRepository.findById(projectId)
                 .map(Project::getName)
@@ -70,6 +74,7 @@ public class ProjectService implements ProjectFacade {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Map<UUID, String> getProjectNames(Set<UUID> projectIds) {
         if (projectIds == null || projectIds.isEmpty()) {
             return Map.of();

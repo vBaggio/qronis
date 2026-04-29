@@ -114,10 +114,12 @@ public class TrackerService implements TrackerFacade {
         timeEntryRepository.delete(entry);
     }
 
+    @Transactional(readOnly = true)
     public Optional<TimeEntryResponseDTO> findActive(UUID userId) {
         return timeEntryRepository.findActiveByUserId(userId).map(this::mapSingle);
     }
 
+    @Transactional(readOnly = true)
     public Page<TimeEntryResponseDTO> findPageByUser(UUID userId, UUID projectId, Pageable pageable) {
         Page<TimeEntry> page = (projectId != null)
                 ? timeEntryRepository.findByUserIdAndProjectId(userId, projectId, pageable)
@@ -127,9 +129,11 @@ public class TrackerService implements TrackerFacade {
         return page.map(e -> timeEntryMapper.toResponse(e, names));
     }
 
-    public List<TimeEntry> findByProjectId(UUID projectId, UUID tenantId) {
+    @Transactional(readOnly = true)
+    public List<TimeEntryResponseDTO> findByProjectId(UUID projectId, UUID tenantId) {
         projectFacade.validateProjectBelongsToTenant(projectId, tenantId);
-        return timeEntryRepository.findByProjectId(projectId);
+        List<TimeEntry> entries = timeEntryRepository.findByProjectId(projectId);
+        return timeEntryMapper.toResponseList(entries, resolveNames(entries));
     }
 
     private TimeEntry findByIdAndUserId(UUID id, UUID userId) {
@@ -153,6 +157,7 @@ public class TrackerService implements TrackerFacade {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Long getTotalTimeSecondsByProject(UUID projectId, UUID userId) {
         return timeEntryRepository.sumDurationSecondsByProjectIdAndUserId(projectId, userId);
     }
