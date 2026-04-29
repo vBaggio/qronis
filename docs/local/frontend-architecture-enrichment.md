@@ -3,7 +3,7 @@
 **Projeto:** Qronis Frontend  
 **Branch:** `refactor/frontend-architecture-enrichment`  
 **Iniciado em:** 2026-04-29  
-**Status atual:** 🔵 Em andamento — Fase 1 (Fundação)
+**Status atual:** 🔵 Em andamento — Fase 2 (React Query)
 
 ---
 
@@ -161,11 +161,12 @@ Nenhum dos dois mostra feedback ao usuário.
 ### Fase 1 — Fundação: Tipos, Cores, Constantes
 **Objetivo:** Eliminar duplicação sem mudar comportamento. Zero risco de regressão.
 
-- [ ] **1.1** Criar `src/lib/types.ts` — centralizar `Project`, `TimeEntry`, `PageResponse<T>`, `User`
-- [ ] **1.2** Criar `src/lib/colors.ts` — `ACCENT_COLORS`, `accentColorFor()`, `accentBgFor()`
-- [ ] **1.3** Criar `src/lib/constants.ts` — `PAGE_SIZE`, `MESSAGES`
-- [ ] **1.4** Atualizar todos os imports nos arquivos consumidores
-- [ ] **1.5** Corrigir código corrompido em `Projects.tsx:146`
+- [x] **1.1** Criar `src/lib/types.ts` — centralizar `Project`, `TimeEntry`, `PageResponse<T>`, `User`
+- [x] **1.2** Criar `src/lib/colors.ts` — `ACCENT_COLORS`, `accentColorFor()`, `accentBgFor()`
+- [x] **1.3** Criar `src/lib/constants.ts` — `PAGE_SIZE`, `MESSAGES`
+- [x] **1.4** Atualizar todos os imports nos arquivos consumidores
+- [x] **1.5** Corrigir código corrompido em `Projects.tsx` (catch block ausente + caracteres inválidos)
+- [x] **1.6** Mover `formatDate` para fora do componente (evitar recriação a cada render)
 
 **Gate:** `npm run build` sem erros TypeScript.
 
@@ -325,10 +326,17 @@ src/
 ## 7. Progresso
 
 ### ✅ Concluído
-*(nenhuma etapa concluída ainda — iniciando Fase 1)*
+- **Fase 1 — Fundação** (commit `15a5a72`)
+  - `src/lib/types.ts` criado — fonte de verdade para todas as interfaces
+  - `src/lib/colors.ts` criado — `accentColorFor`, `accentBgFor`, `ACCENT_COLORS`
+  - `src/lib/constants.ts` criado — `PAGE_SIZE`, `MESSAGES`
+  - Todos os consumers atualizados: `Projects.tsx`, `History.tsx`, `ProjectDetails.tsx`, `TimeEntryRow.tsx`, `ProjectSelector.tsx`, `auth-context.tsx`
+  - Bug crítico corrigido: `Projects.tsx` handleCreate com código corrompido e catch ausente
+  - `formatDate` movida para escopo de módulo (fora do componente)
+  - Gate: `npm run build` — ✅ 0 erros TypeScript
 
 ### 🔵 Em Andamento
-- Fase 1 — Fundação
+- Fase 2 — React Query
 
 ### ⏳ Pendente
 - Fase 2 — React Query
