@@ -56,9 +56,12 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({ isOpen, onClose,
             setDescription('');
             onSuccess();
             onClose();
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Failed to create manual entry:', err);
-            setError(err.response?.data?.message || 'Erro ao salvar o lançamento');
+            const message = err instanceof Error
+                ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+                : undefined;
+            setError(message || 'Erro ao salvar o lançamento');
         } finally {
             setIsSubmitting(false);
         }
@@ -76,9 +79,11 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({ isOpen, onClose,
                         <Label htmlFor="description">O que foi feito?</Label>
                         <Input
                             id="description"
-                            placeholder="Descreva a atividade..."
+                            name="description"
+                            placeholder="Descreva a atividade…"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
+                            autoComplete="off"
                         />
                     </div>
 
