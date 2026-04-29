@@ -4,6 +4,14 @@ Qronis é um SaaS de Time Tracker projetado para oferecer um fluxo sem atritos, 
 
 ## Tecnologias Utilizadas
 
+### Backend
+- Java 21 (LTS)
+- Spring Boot **3.5.14** + Spring Modulith **1.4.1**
+- PostgreSQL 16
+- Gradle e Flyway (Migrations)
+- Spring Security (OAuth2 Resource Server / JWT HS256)
+- MapStruct + Lombok
+
 ### Frontend
 - React 19
 - TypeScript
@@ -11,57 +19,74 @@ Qronis é um SaaS de Time Tracker projetado para oferecer um fluxo sem atritos, 
 - Tailwind CSS v4
 - Shadcn UI
 
-### Backend
-- Java 21 (LTS)
-- Spring Boot 4.0.3
-- PostgreSQL 16
-- Gradle e Flyway (Migrations)
-- Spring Security (OAuth2 JWT)
-
 ## Arquitetura e Estrutura
 
 O sistema opera em um modelo SPA (Single Page Application) acoplado a uma REST API totalmente stateless.
 
+### Backend — Monólito Modular
+O núcleo de serviços é um **Monólito Modular** validado em teste pelo Spring Modulith (`QronisArchitectureTest`).
+
+Módulos em `src/main/java/com/qronis/modules/`:
+- `identity` — usuários, tenants, provisão de identidade
+- `project` — projetos e seus aggregates
+- `tracker` — time entries, timers ativos, histórico
+
+Regras de encapsulamento:
+- Cada módulo expõe apenas o que está em seu subpacote `api/` (ex: `modules.tracker.api.TrackerFacade`).
+- Comunicação entre módulos ocorre exclusivamente via Facades no pacote `api/`.
+- O pacote `shared/` contém código transversal (não é um módulo Modulith — é acessível globalmente).
+
+Outras regras de domínio:
+- **Soberania do UTC:** datas persistidas e trafegadas exclusivamente em UTC.
+- **Exclusividade de Timer:** apenas 1 timer ativo por usuário (garantido por Partial Unique Index no PostgreSQL).
+- **Isolamento de Tenant:** projetos e registros isolados logicamente por tenant.
+- **DTOs imutáveis:** Java Records com sufixo `DTO`, mapeados via MapStruct.
+- **Global Exception Handler:** nenhum stacktrace exposto. Erros padronizados em `ErrorResponseDTO`.
+
 ### Frontend
-A interface é guiada pelo minimalismo e redução de carga cognitiva:
 - Interface mutável: elementos secundários desaparecem quando o cronômetro é iniciado.
-- As atualizações de histórico e edição de tarefas ocorrem em tempo real via eventos "on blur", sem a necessidade de botões de salvamento explícitos.
-- O cronômetro do Tracker não utiliza estados renderizados em massa (como setSeconds). A diferença é calculada nativamente entre a data UTC inicial do servidor e o relógio local do navegador, evitando problemas com o event loop.
+- Atualizações de histórico via eventos "on blur" — sem botão de salvar explícito.
+- Cronômetro calculado como `Date.now() - startTime` (UTC do servidor), imune a gargalos do event loop.
 
-### Backend
-O núcleo de serviços é orquestrado sob uma arquitetura de **Monólito Modular** (validada via Spring Modulith), seguindo regras de domínio imutáveis:
-- **Share-Nothing:** Módulos independentes (`auth`, `identity`, `project`, `tracker`) não compartilham código infraestrutural nem se comunicam diretamente através de repositórios cruzados. Toda comunicação é feita via Facades protegidas.
-- Soberania do UTC: todas as datas e registros de tempo são calculados, transferidos e persistidos estritamente em fuso UTC.
-- Exclusividade de Timer: o sistema valida e permite apenas uma tarefa em andamento por usuário de cada vez.
-- Isolamento de Tenant: todos os projetos e registros são agrupados com isolamento lógico de Tenant, mesmo com infraestrutura single-database.
-- Performance e Modelagem: mapeamentos são protegidos contra problemas N+1 usando JOIN FETCH explicitamente. A comunicação ocorre exclusivamente através de Java Records imutáveis convertidos com MapStruct.
-- Global Exception Handler: nenhum stacktrace ou erro nativo é exposto. Falhas são uniformizadas através de um Data Transfer Object de erro padrão em JSON.
+## Documentação
 
-## Instruções para Execução Local
+| Arquivo | Conteúdo |
+|---|---|
+| `docs/architecture.md` | Arquitetura técnica detalhada, Spring Modulith, pacotes, padrões |
+| `docs/rules.md` | Regras invioláveis do projeto (backend, frontend, modularização) |
+| `docs/memories.md` | ADRs — decisões arquiteturais e o porquê de cada uma |
+| `docs/context.md` | Contexto do produto, regras de negócio, público-alvo |
+| `docs/api.md` | Contrato da API REST (endpoints, payloads, respostas) |
+
+## Execução Local
 
 ### Pré-requisitos
 - Docker e Docker Compose
-- Java 21+ instalado
-- Node.js 22 ou superior
+- Java 21+
+- Node.js 22+
 
-### 1. Iniciar Banco de Dados
-A infraestrutura local de dados é suportada via container PostgreSQL. Na raiz do projeto, execute:
+### 1. Banco de Dados
 ```bash
 docker-compose up -d
 ```
 
-### 2. Iniciar Backend (API)
-Ainda na raiz do projeto, inicie o servidor Spring Boot. As migrações Flyway irão sincronizar o schema automaticamente durante a inicialização:
+### 2. Backend (API)
 ```bash
 ./gradlew bootRun
 ```
 
-### 3. Iniciar Frontend (UI)
-Abra um novo terminal acessando a pasta específica do frontend para instalar dependências e rodar o servidor de desenvolvimento:
+As migrações Flyway sincronizam o schema automaticamente na inicialização.
+
+### 3. Frontend (UI)
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Acesso da aplicação frontend estará disponível por padrão na porta orientada pelo Vite (geralmente localizável em `http://localhost:5173`). O backend estará operando e aceitando rotas de integração primárias.
+Frontend disponível em `http://localhost:5173`. Backend na porta `8080`.
+
+### Testes Arquiteturais
+```bash
+./gradlew test --tests "com.qronis.QronisArchitectureTest"
+```

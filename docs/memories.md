@@ -52,23 +52,34 @@ Este documento registra decisões arquiteturais cruciais para que o contexto de 
 
 ---
 
-## ADR 006: Compatibilidade com Spring Boot 4
+## ADR 006: Versões de Spring Boot e Spring Modulith (Decisão de Compatibilidade)
 **Status:** Aceito
-**Contexto:** O upgrade prematuro para o recém-lançado Spring Boot 4 quebrou o ecossistema padrão de testes que usava flyway nativo (`flyway-core`).
+**Contexto:** Ao implementar Spring Modulith com detecção automática de pacotes `api/` via `ApplicationModuleDetectionStrategy`, foi necessário avaliar a compatibilidade entre Spring Boot e Spring Modulith. A tentativa de usar Spring Boot 4.x com Modulith 1.4.x resultou em `NoSuchMethodError` em runtime:
+- `ConfigDataEnvironmentPostProcessor.applyTo()` existe com assinatura de **1 argumento** no Spring Boot 3.5.x, e foi **removido** no Spring Boot 4.x.
+- Modulith 1.4.x é compilado contra o Spring Boot 3.5.x e invoca esse método com 4 argumentos — que tampouco existe no Spring Boot 4.x.
+- Modulith 2.x (projetado para Spring Boot 4.x) estava disponível apenas como SNAPSHOT no momento desta decisão.
+
 **Decisão:**
-- Como o projeto migrou a autoconfiguração do flyway para um wrapper, fomos forçados a importar o módulo `spring-boot-starter-flyway` explícito no `build.gradle.kts` e ajustar a parametrização do `ddl-auto` no profile de testes com Testcontainers.
+- Manter **Spring Boot 3.5.14** + **Spring Modulith 1.4.1**. Esta é a combinação testada e estável.
+- Não usar Spring Boot 4.x até que Modulith 2.x seja GA (Generally Available).
+- Flyway deve ser importado via `org.flywaydb:flyway-core` — o artefato `spring-boot-starter-flyway` só existe no Spring Boot 4.x e não no 3.5.x.
+
+**Custo da decisão:** Nenhuma mudança nos arquivos Java foi necessária ao reverter para 3.5.14. A API de Spring Security, JWT e Resource Server é idêntica entre 3.5.x e 4.x.
 
 ---
 
-## ADR 007: Vulnerabilidade N+1 no endpoint PATCH de TimeEntry (Conhecida)
-**Status:** Adiado / Mapeado
-**Contexto:** Durante a revisão profunda da base de código para geração das documentações de arquitetura, foi identificado um ponto cego nas Regras Estritas de mapeamento prático. O método `TimeEntryService.patch()` utiliza o método padrão do JpaRepository (`findById`), que carrega a entidade `TimeEntry` de forma estrita (Lazy Loader ativado). No entanto, o retorno deste service é convertido para um `TimeEntryResponseDTO` pelo MapStruct no `TimeEntryController`.
-- Como o DTO exige os campos `projectId` e `projectName`, e o `Project` não foi carregado via `JOIN FETCH` na origem da busca pelo ID, o Hibernate dispara uma **Query N+1** de forma implícita durante a conversão do MapStruct.
-**Tentativa de Correção:**
-- Foi tentada a criação de um método `findByIdAndCreatedByIdWithProject` abusando de `JOIN FETCH` diretamente no `TimeEntryRepository` e substituí-lo na service.
-- **Motivo do Rollback:** A alteração na camada de persistência introduziu quebras colaterais em vários testes unitários sensíveis (`TimeEntryServiceTest`), requerendo a reescrita massiva de Mocks e injeções de dependência que não estavam no escopo do momento.
-**Decisão Atual:**
-- O código-fonte Java sofreu `git restore` e voltou ao estado funcional com cobertura 100%. A query N+1 nesse fluxo específico é aceitável por ora (dado o impacto controlado de apenas buscar 1 projeto e não realizar paginação em lote do DTO individual). A refatoração foi anotada para ser corrigida apenas quando as suítes E2E de Controller estiverem totalmente maduras e seguras.
+## ADR 007: Detecção Automática de Módulos via QronisModuleDetectionStrategy
+**Status:** Aceito
+**Contexto:** O Spring Modulith precisa saber (a) onde estão os módulos e (b) o que cada módulo expõe publicamente. A abordagem padrão do Modulith trata cada subpacote direto do pacote raiz da aplicação como um módulo, o que causava o `shared/` ser tratado como módulo com regras de encapsulamento — tornando `ErrorResponseDTO` inacessível de fora.
+
+**Decisão:**
+- Implementar `QronisModuleDetectionStrategy` em `com.qronis.shared.config`.
+- `getModuleBasePackages()`: procura um subpacote cujo nome termina em `.modules` e retorna **seus** subpacotes como módulos. O `shared/` nunca aparece como módulo — é código de infraestrutura da aplicação root.
+- `detectNamedInterfaces()`: usa `NamedInterfaces.builder(basePackage).recursive().matching("api").build()` — qualquer subpacote chamado `api` dentro de um módulo é automaticamente elevado a `NamedInterface`. Zero anotações individuais nas classes.
+- A estratégia é registrada em `application.yml`: `spring.modulith.detection-strategy: com.qronis.shared.config.QronisModuleDetectionStrategy`.
+- O teste arquitetural usa `ApplicationModules.of(QronisApplication.class)` para garantir que o mesmo `application.yml` seja lido em runtime e em teste.
+
+**Resultado:** Adicionar qualquer tipo ao pacote `modules.X.api` o torna automaticamente público. Não há `package-info.java` nem `@NamedInterface` necessários.
 
 ---
 
@@ -78,7 +89,7 @@ Este documento registra decisões arquiteturais cruciais para que o contexto de 
 **Decisão:**
 - O cronômetro visual é estritamente derivativo e "stateless" em relação à contagem temporal.
 - A matemática adotada é ancorada em carimbo absoluto: `Date.now() - startTime` (onde `startTime` é o ISO Time real retornado pelo backend).
-- O React apenas guarda o resultado do delta em segundos no estado para forçar o re-render, mas essa soma nunca é feita de forma recursiva a partir de si mesmo. As abas podem dormir ou processar lags sem afetar a verdade do cronômetro.
+- O React apenas guarda o resultado do delta em segundos no estado para forçar o re-render, mas essa soma nunca é feita de forma recursiva a partir de si mesmo.
 
 ---
 
@@ -87,7 +98,7 @@ Este documento registra decisões arquiteturais cruciais para que o contexto de 
 **Contexto:** Nos formulários de autenticação (Login/Register) deparamo-nos com componentes ocultos condicionalmente (mensagens de texto vermelho `{error && ...}`). O uso utilitário do Tailwind `space-y-*` forçava a injeção falha de top-margins baseada em seletores sibling `> * + *`, que não calculam a abstração do React.
 **Decisão:**
 - Formações de tela com caixas escondíveis/condicionais aboliram categoricamente a utilidade `space-y-*`.
-- Adotou-se o modelo inviolável em container pai: `flex flex-col gap-*`. O Gap lida inerentemente com a ausência de componentes no DOM e distribui os elásticos perfeitamente, sem "margins" vazadas.
+- Adotou-se o modelo inviolável em container pai: `flex flex-col gap-*`.
 
 ---
 
@@ -95,70 +106,69 @@ Este documento registra decisões arquiteturais cruciais para que o contexto de 
 **Status:** Aceito
 **Contexto:** Como forçar que uma Task pertença a um `Project`, se o usuário não tiver aquele determinado projeto criado ainda? Uma rota de escape para `/projetos/novo` assassinaria completamente o senso prático do Tracker.
 **Decisão:**
-- Abordagem unificada: O filtro do `<ComboBox>` monitora a String livre.
-- Se os resultados para o Array retornarem Length 0 e a query for válida, injecta-se um *Action Button* transparente na lista para "Criar novo projeto [Query]".
-- Isso perfura o fluxo, joga um `POST /api/projects` no backend e recupera o ID simultaneamente atrelando ao Timer. O Foco não se quebra.
+- O filtro do `<ComboBox>` monitora a String livre.
+- Se os resultados para o Array retornarem Length 0 e a query for válida, injecta-se um *Action Button* na lista para "Criar novo projeto [Query]".
+- Isso perfura o fluxo, joga um `POST /api/projects` no backend e recupera o ID simultaneamente atrelando ao Timer.
 
 ---
 
 ## ADR 011: Travas de Viewport em Páginas de Setup (Auth)
 **Status:** Aceito
-**Contexto:** Nas páginas de Login e Register, em monitores com baixa resolução vertical (ex: notebooks antigos 1024x768), o uso de `min-h-screen` com flexbox e paddings internos extensos forçava o texto ou formulário para além do rodapé, ativando um scroll desconfortável que quebrava o "Zen Paradigm" imersivo.
+**Contexto:** Nas páginas de Login e Register, em monitores com baixa resolução vertical, o uso de `min-h-screen` com flexbox e paddings internos extensos forçava o scroll — quebrando o "Zen Paradigm".
 **Decisão:**
-- Arquitetura "App-like Strict": Telas de entrada agora herdam a restrição `h-screen overflow-hidden` na tag pai.
-- Isso impede categoricamente o scroll da janela.
-- Os paddings flexíveis centrais (`flex-1 min-h-0`) assumem a função de absorvedores de choque: a arte central encolhe microscopicamente para garantir que a tipografia e logo ancorados caibam em 100% dos cenários dentro do viewport visualizado do usuário.
+- Arquitetura "App-like Strict": telas de entrada herdam `h-screen overflow-hidden` na tag pai.
+- Os paddings flexíveis centrais (`flex-1 min-h-0`) absorvem o espaço restante sem gerar scroll.
 
 ---
 
 ## ADR 012: Identificação Pragmática de Servidor Offline (Axios)
 **Status:** Aceito
-**Contexto:** O erro padrão capturado em falhas do backend disparava a lógica genérica de `|| "Credenciais inválidas"` porque o objeto `err.response` retornava nulo quando o backend Java nem sequer estava rodando. Isso passava uma falsa impressão de senha incorreta para o usuário ao invés de um problema da plataforma.
+**Contexto:** O erro padrão capturado em falhas do backend disparava a lógica genérica de `|| "Credenciais inválidas"` porque o objeto `err.response` retornava nulo quando o backend não estava rodando.
 **Decisão:**
-- Adotar o padrão de inspeção de handshake do Axios: `if (!err.response && err.request)` em vez de focar apenas no `.data.message`.
-- O lado cliente não deduz mais motivos funcionais se o handshake nem se consolidou. Erros onde a *request* saiu, mas a *response* não voltou, são categoricamente classificados como falha de rede ou "Servidor indisponível", garantindo Transparência de Status do Sistema (Heurística de Nielsen).
-
----
-
-## ADR 011: Plano de Evolução UI/UX em 3 Camadas (Grade de Projetos)
-**Status:** Aceito
-**Contexto:** Após a entrega funcional da Grade de Projetos (`/projects`), foi realizada uma análise profunda de UI/UX cruzando agentes (`frontend-specialist`, `performance-optimizer`), skills (`react-best-practices`, `web-design-guidelines`, `performance-profiling`, `i18n-localization`, `frontend-design`) e toda a documentação do produto para elevar o frontend de "funcional" para "produto de primeira linha".
-**Decisão:**
-- **Camada 1 (Quick Wins):** Dialog de exclusão customizado, busca live com debounce + filtro backend por nome, accent colors via `border-l-4` (estilo Linear/Notion), coesão visual `rounded-full`, hover com elevação e stagger animation nas rows.
-- **Camada 2 (Identidade Visual):** Toast notifications via `sonner`, skeleton loading, empty state humanizado, refinamento TopNav, tipografia Inter, dark mode toggle.
-- **Camada 3 (Infraestrutura):** Lazy loading de rotas (`React.lazy`), Error Boundary global, acessibilidade (a11y), preparação estrutural i18n.
-- **Filosofia:** Todas as decisões respeitam o DNA Zen/Minimalista do Qronis — polimento, não adição de complexidade.
-
----
-
-## ADR 012: @RequestParam Requer `name` Explícito (Spring Boot / Gradle)
-**Status:** Aceito
-**Contexto:** Ao adicionar o parâmetro de busca `?name=` ao endpoint `GET /api/projects`, o método do Controller foi anotado com `@RequestParam(required = false) String name`. O backend passou a retornar **400 Bad Request** em todas as chamadas ao endpoint — inclusive sem o parâmetro `name` — com a mensagem: *"Name for argument of type [java.lang.String] not specified, and parameter name information not available via reflection. Ensure that the compiler uses the '-parameters' flag."*
-**Causa Raiz:** O compilador Java, por padrão no Gradle sem configuração adicional, não preserva os nomes dos argumentos de método no bytecode. O Spring tenta inferir o nome do `@RequestParam` via reflection, mas falha sem a flag `-parameters`. Isso quebrou todo o endpoint `GET /api/projects` (o frontend recebia 400 e limpava a lista para `[]` no `catch` block).
-**Decisão:**
-- **Regra inviolável:** Todo `@RequestParam`, `@PathVariable` e `@RequestHeader` no projeto **deve** declarar o atributo `name` (ou `value`) de forma explícita.
-- Correto: `@RequestParam(name = "name", required = false) String name`
-- Incorreto: `@RequestParam(required = false) String name`
-- Alternativa sistêmica (não adotada por ora): adicionar `compileJava { options.compilerArgs << "-parameters" }` no `build.gradle.kts`.
+- Adotar `if (!err.response && err.request)` para categorizar falhas de handshake como "Servidor indisponível" — separando erros de rede de erros de aplicação.
 
 ---
 
 ## ADR 013: Agregação de Horas via Native Query PostgreSQL
 **Status:** Aceito
-**Contexto:** A tela de detalhes do projeto (`/projects/:id`) exibe um "Mini-Dash" com o total de horas investidas. Precisávamos decidir entre calcular no client-side (baixar todas as pages) ou no banco.
+**Contexto:** A tela de detalhes do projeto exibe o total de horas investidas. Precisávamos calcular no banco, não no client-side.
 **Decisão:**
-- Criada uma **native query** PostgreSQL no `TimeEntryRepository`: `SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (te.end_time - te.start_time))), 0) FROM time_entry te WHERE te.project_id = CAST(:projectId AS uuid) AND te.created_by = CAST(:userId AS uuid) AND te.end_time IS NOT NULL`.
-- Retorna `Long` (total em segundos) processado em O(1) pelo banco — zero transferência de dados desnecessários.
-- O `CAST(:param AS uuid)` é necessário para compatibilidade com Spring Data JPA native queries + PostgreSQL UUID type.
-- **Cuidado com nomes de tabelas:** O Hibernate mapeia `@Table(name = "time_entry")` (singular). A query nativa deve usar esse nome exato, não plurais inventados.
+- Native query no `TimeEntryRepository`: `SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (te.end_time - te.start_time))), 0) FROM time_entry te WHERE te.project_id = CAST(:projectId AS uuid) AND te.created_by = CAST(:userId AS uuid) AND te.end_time IS NOT NULL`.
+- Retorna `Long` (total em segundos). O `CAST(:param AS uuid)` é necessário para compatibilidade PostgreSQL + Spring Data JPA.
+- **Cuidado:** A query nativa deve usar o nome exato da tabela conforme `@Table(name = "time_entry")` — nunca plurais inventados.
 
 ---
 
 ## ADR 014: Blindagem de UUID.fromString() nos Controllers
 **Status:** Aceito
-**Contexto:** O React Router pode temporariamente despachar IDs inválidos (ex: string `"undefined"`) durante transições de rota. Sem proteção, `UUID.fromString("undefined")` lança `IllegalArgumentException` não-tratada, resultando em **500 Internal Server Error** — violando o contrato de erros previsíveis do produto.
+**Contexto:** O React Router pode despachar IDs inválidos (ex: `"undefined"`) durante transições de rota. `UUID.fromString("undefined")` lança `IllegalArgumentException` não-tratada → 500.
 **Decisão:**
-- Todos os métodos do `ProjectController` que recebem `@PathVariable("id") String id` agora encapsulam `UUID.fromString(id)` em `try-catch(IllegalArgumentException)`.
-- Em caso de falha, lançam `ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Project ID format")` — retornando 400 limpo.
-- O frontend também aplica early-return (`if (!id || id === 'undefined') return`) para evitar chamadas desnecessárias.
+- Controllers que recebem `@PathVariable("id") String id` encapsulam `UUID.fromString(id)` em `try-catch(IllegalArgumentException)` → `ResponseStatusException(BAD_REQUEST)`.
 
+---
+
+## ADR 015: @RequestParam Requer `name` Explícito (Spring Boot / Gradle)
+**Status:** Aceito
+**Contexto:** `@RequestParam(required = false) String name` causava 400 em todas as chamadas porque o Gradle não preserva nomes de argumentos no bytecode sem a flag `-parameters`.
+**Decisão:**
+- **Regra inviolável:** Todo `@RequestParam`, `@PathVariable` e `@RequestHeader` deve declarar o atributo `name` explicitamente: `@RequestParam(name = "name", required = false) String name`.
+- Nota: o `build.gradle.kts` já possui `-parameters` em `compileArgs` (adicionado posteriormente). A declaração explícita permanece como reforço defensivo.
+
+---
+
+## ADR 016: Vulnerabilidade N+1 no endpoint PATCH de TimeEntry (Conhecida)
+**Status:** Adiado / Mapeado
+**Contexto:** `TimeEntryService.patch()` usa `findById` (lazy). O MapStruct, ao converter para `TimeEntryResponseDTO`, precisa de `projectName`, o que dispara uma query implícita N+1.
+**Tentativa de Correção:** Criado `findByIdAndCreatedByIdWithProject` com JOIN FETCH, mas a alteração quebrou vários mocks de testes unitários.
+**Decisão Atual:** `git restore` para estado funcional. A N+1 é aceitável (1 projeto, não paginação em lote). Corrigir apenas quando a suíte E2E de Controller estiver madura.
+
+---
+
+## ADR 017: Plano de Evolução UI/UX em 3 Camadas (Grade de Projetos)
+**Status:** Aceito
+**Contexto:** Após a entrega funcional da Grade de Projetos, foi realizada análise profunda de UI/UX para elevar o frontend de "funcional" para "produto de primeira linha".
+**Decisão:**
+- **Camada 1 (Quick Wins):** Dialog de exclusão customizado, busca live com debounce, accent colors, coesão visual `rounded-full`, hover com elevação e stagger animation.
+- **Camada 2 (Identidade Visual):** Toast notifications via `sonner`, skeleton loading, empty state humanizado, refinamento TopNav.
+- **Camada 3 (Infraestrutura):** Lazy loading de rotas, Error Boundary global, acessibilidade (a11y), preparação i18n.
+- **Filosofia:** Todas as decisões respeitam o DNA Zen/Minimalista do Qronis.

@@ -1,13 +1,13 @@
 # Regras Técnicas (Constituição do Projeto)
 
-## 🏗️ Tech Stack Oficial e Versões
+## Tech Stack Oficial e Versões
 O Qronis deve respeitar as versões estipuladas abaixo para garantir estabilidade e previsibilidade.
 
 ### Backend
 - **Linguagem:** Java 21 (LTS).
-- **Framework:** Spring Boot 4.0.3 (arquitetura modularizada).
+- **Framework:** Spring Boot **3.5.14** + Spring Modulith **1.4.1**.
 - **Banco de Dados:** PostgreSQL 16 (na porta local 5434).
-- **Ferramental:** Gradle, Flyway (Migrations).
+- **Ferramental:** Gradle, Flyway (Migrations via `org.flywaydb:flyway-core`).
 - **Segurança:** Spring Security com OAuth2 Resource Server para validação JWT stateless.
 
 ### Frontend
@@ -37,6 +37,37 @@ Estas são as regras invioláveis para o desenvolvimento do lado servidor.
 
 5. **Assinatura Protegida JWT:**
    - Módulo construído sobre o `NimbusJwtEncoder`/`NimbusJwtDecoder`. Tokens são gerados utilizando o algoritmo HMAC (HS256) em conformidade com o Resource Server padrão do Spring `oauth2ResourceServer`.
+
+---
+
+## Leis de Modularização (Spring Modulith — Invioláveis)
+
+O projeto é um **Monólito Modular** validado pelo Spring Modulith. Estas regras são verificadas automaticamente pelo teste `QronisArchitectureTest.verifyModulithArchitecture()`.
+
+### Onde vivem os módulos
+- Os módulos estão em `src/main/java/com/qronis/modules/`.
+- Cada subpacote direto de `.modules` é um módulo: `identity`, `project`, `tracker`.
+- A detecção é feita por `QronisModuleDetectionStrategy` — **não há arquivo `package-info.java` nem anotação `@NamedInterface` necessária nas classes**.
+
+### O pacote `shared/`
+- `com.qronis.shared` **não é um módulo Modulith**.
+- Tipos em `shared/` são globalmente acessíveis por qualquer módulo sem restrição.
+- Use `shared/` para: `ErrorResponseDTO`, utilitários JWT (`AuthenticatedUser`), configurações transversais.
+- **Não coloque lógica de domínio em `shared/`**. Se algo pertence a um bounded context, pertence ao módulo.
+
+### Interface pública de cada módulo (`api/`)
+- Tudo que um módulo expõe para os demais **deve** estar em `modules.<nome>.api`.
+- Exemplos corretos: `TrackerFacade`, `ProjectFacade`, `IdentityFacade`, exceções de domínio exportadas.
+- Qualquer tipo **fora** do pacote `api/` é privado ao módulo. Outros módulos que referenciem tipos internos causam falha no teste arquitetural.
+
+### Comunicação entre módulos
+- Permitido: chamar uma `Facade` de `modules.X.api` a partir de outro módulo.
+- Proibido: injetar `Repository`, `Service` ou qualquer tipo interno de outro módulo.
+- Proibido: relações `@ManyToOne` entre entidades de módulos distintos. Use coluna UUID + FK via Flyway.
+
+### Adicionando novos tipos exportáveis
+- Criar a classe dentro de `modules.<nome>.api.*`.
+- **Nenhuma anotação adicional é necessária.** A estratégia detecta automaticamente qualquer subpacote `api` como interface nomeada.
 
 ---
 
