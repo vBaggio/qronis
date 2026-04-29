@@ -44,6 +44,18 @@ Esta fase blinda regressões para futuros refactorings.
 - [ ] Construir o teste supremo de fluxo (`QronisIntegrationTest`) abrangendo o flow real com WebMock: Cadastro -> Puxa Perfil (`/me`) -> Gera e gerencia Projetos -> Brinca com Timers (Live Action + Manual + Patchs).
 - [ ] Extender os Controller Tests para todas as APIs injetando segurança e claims customizados via MockMvc.
 
+### Fase 3.6: Monólito Modular e Desacoplamento (Finalizado)
+- [x] Resolução de Ciclos de Dependência: Desacoplar `project` e `tracker` transferindo lógica de agregação (`ProjectSummaryController`) para orquestração via Facades.
+- [x] Ocultação de Informação (Encapsulamento): Implementar `@NamedInterface` via arquivos `package-info.java` para fechar o acesso a pacotes internos.
+- [x] Estabilização de Testes de Integração: Popular dependências cruzadas (Tenant e User) via `JdbcTemplate` nos Repositories Tests, resolvendo as constraints de Foreign Key perdidas com a remoção dos relacionamentos de JPA multidomínio.
+
+### Fase 3.7: Desacoplamento Extremo "Share-Nothing" (Finalizado)
+- [x] Remoção do boilerplate de `package-info.java` substituindo por `@NamedInterface` nativo no nível da classe para exposição de limites granulares sem poluição de diretórios.
+- [x] Realocar todas as Exceptions propagadas e DTOs de saída estritamente para o pacote `api` de seus respectivos módulos.
+- [x] Eliminar a `BaseEntity` do pacote `shared/entity`, substituindo sua herança por atributos duplicados diretamente nas entidades usando **Lombok**.
+- [x] Transferir o `SecurityConfig` (e `AuthenticatedUser`) para dentro do escopo do módulo `auth`, isolando completamente a segurança.
+- [x] Refinar o pacote `shared/exception` para possuir **apenas** o `ErrorResponseDTO` e o `GlobalExceptionHandler` para captura de exceções de infraestrutura do framework (`MethodArgumentNotValidException`, etc).
+
 ---
 
 ### Fase 4: Autenticação e Layout (Front-end Pragmático MVP)

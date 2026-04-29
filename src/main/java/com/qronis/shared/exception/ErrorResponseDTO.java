@@ -7,10 +7,10 @@ import java.util.Map;
  * Contrato padrão de resposta de erro da API.
  *
  * Campos:
- * - status:    código HTTP numérico
- * - error:     código de erro em UPPER_SNAKE_CASE (ex: "PROJECT_NOT_FOUND")
- * - message:   mensagem legível voltada ao desenvolvedor/usuário
- * - errors:    mapa de erros por campo (usado em VALIDATION_ERROR)
+ * - status: código HTTP numérico
+ * - error: código de erro em UPPER_SNAKE_CASE (ex: "PROJECT_NOT_FOUND")
+ * - message: mensagem legível voltada ao desenvolvedor/usuário
+ * - errors: mapa de erros por campo (usado em VALIDATION_ERROR)
  * - timestamp: momento do erro (UTC)
  */
 public record ErrorResponseDTO(
@@ -44,7 +44,7 @@ public record ErrorResponseDTO(
             case 404 -> "NOT_FOUND";
             case 409 -> "CONFLICT";
             case 500 -> "INTERNAL_SERVER_ERROR";
-            default  -> "ERROR";
+            default -> "ERROR";
         };
     }
 }

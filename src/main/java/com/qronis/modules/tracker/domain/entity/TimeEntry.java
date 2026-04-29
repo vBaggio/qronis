@@ -1,24 +1,35 @@
 package com.qronis.modules.tracker.domain.entity;
 
-import com.qronis.modules.identity.domain.entity.BaseEntity;
-import com.qronis.modules.identity.domain.entity.User;
-import com.qronis.modules.project.domain.entity.Project;
-
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import java.time.Instant;
 import java.util.UUID;
 
+@Getter
+@Setter
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "time_entry")
-public class TimeEntry extends BaseEntity {
+public class TimeEntry {
+
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -33,28 +44,14 @@ public class TimeEntry extends BaseEntity {
     @Column(name = "end_time")
     private Instant endTime;
 
-    @ManyToOne
-    @JoinColumn(name = "project_id", nullable = false)
-    private Project project;
+    @Column(name = "project_id", nullable = false)
+    private UUID projectId;
 
-    @ManyToOne
-    @JoinColumn(name = "created_by", nullable = false)
-    private User createdBy;
+    @Column(name = "created_by", nullable = false)
+    private UUID userId;
 
     public TimeEntry() {}
 
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    public Instant getStartTime() { return startTime; }
-    public void setStartTime(Instant startTime) { this.startTime = startTime; }
-    public Instant getEndTime() { return endTime; }
-    public void setEndTime(Instant endTime) { this.endTime = endTime; }
-    public Project getProject() { return project; }
-    public void setProject(Project project) { this.project = project; }
-    public User getCreatedBy() { return createdBy; }
-    public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
 
     public boolean isActive() { return this.endTime == null; }
 }

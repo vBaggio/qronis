@@ -1,5 +1,12 @@
 package com.qronis.modules.identity.domain.entity;
 
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import jakarta.persistence.EntityListeners;
+import java.time.Instant;
 import com.qronis.modules.identity.domain.enums.Role;
 
 import jakarta.persistence.Column;
@@ -12,9 +19,20 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 
+@Getter
+@Setter
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "tenant_user")
-public class TenantUser extends BaseEntity {
+public class TenantUser {
+
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 
     @EmbeddedId
     private TenantUserId id;
@@ -40,37 +58,5 @@ public class TenantUser extends BaseEntity {
         this.user = user;
         this.role = role;
         this.id = new TenantUserId(tenant.getId(), user.getId());
-    }
-
-    public TenantUserId getId() {
-        return id;
-    }
-
-    public void setId(TenantUserId id) {
-        this.id = id;
-    }
-
-    public Tenant getTenant() {
-        return tenant;
-    }
-
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
     }
 }

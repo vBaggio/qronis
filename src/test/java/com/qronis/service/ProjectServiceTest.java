@@ -2,10 +2,8 @@ package com.qronis.service;
 
 import com.qronis.modules.project.application.ProjectService;
 import com.qronis.modules.project.domain.entity.Project;
-import com.qronis.modules.project.domain.exception.ProjectNotFoundException;
-import com.qronis.modules.project.application.repositories.ProjectRepository;
-import com.qronis.modules.identity.domain.entity.Tenant;
-import com.qronis.modules.identity.domain.entity.User;
+import com.qronis.modules.project.api.exception.ProjectNotFoundException;
+import com.qronis.modules.project.infrastructure.persistence.ProjectRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,13 +47,7 @@ class ProjectServiceTest {
         tenantId = UUID.randomUUID();
         userId = UUID.randomUUID();
 
-        Tenant tenant = new Tenant("Qronis");
-        tenant.setId(tenantId);
-
-        User user = new User();
-        user.setId(userId);
-
-        project = new Project("Projeto Alpha", tenant, user);
+        project = new Project("Projeto Alpha", tenantId, userId);
         project.setId(UUID.randomUUID());
     }
 
@@ -64,13 +56,13 @@ class ProjectServiceTest {
     void findByTenantId_paged_withoutFilter() {
         Pageable pageable = PageRequest.of(0, 20);
         Page<Project> page = new PageImpl<>(List.of(project), pageable, 1);
-        when(projectRepository.findByTenantIdWithCreator(eq(tenantId), isNull(), eq(pageable))).thenReturn(page);
+        when(projectRepository.findByTenantId(eq(tenantId), isNull(), eq(pageable))).thenReturn(page);
 
         Page<Project> result = projectService.findByTenantId(tenantId, null, pageable);
 
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getTotalElements()).isEqualTo(1);
-        verify(projectRepository).findByTenantIdWithCreator(tenantId, null, pageable);
+        verify(projectRepository).findByTenantId(tenantId, null, pageable);
     }
 
     @Test
@@ -78,18 +70,18 @@ class ProjectServiceTest {
     void findByTenantId_paged_withNameFilter() {
         Pageable pageable = PageRequest.of(0, 20);
         Page<Project> page = new PageImpl<>(List.of(project), pageable, 1);
-        when(projectRepository.findByTenantIdWithCreator(eq(tenantId), eq("alpha"), eq(pageable))).thenReturn(page);
+        when(projectRepository.findByTenantId(eq(tenantId), eq("alpha"), eq(pageable))).thenReturn(page);
 
         Page<Project> result = projectService.findByTenantId(tenantId, "alpha", pageable);
 
         assertThat(result.getContent()).hasSize(1);
-        verify(projectRepository).findByTenantIdWithCreator(tenantId, "alpha", pageable);
+        verify(projectRepository).findByTenantId(tenantId, "alpha", pageable);
     }
 
     @Test
     @DisplayName("findByTenantId: deve retornar projetos do tenant")
     void findByTenantId_success() {
-        when(projectRepository.findByTenantIdWithCreator(tenantId)).thenReturn(List.of(project));
+        when(projectRepository.findByTenantId(tenantId)).thenReturn(List.of(project));
 
         List<Project> result = projectService.findByTenantId(tenantId);
 
@@ -100,7 +92,7 @@ class ProjectServiceTest {
     @Test
     @DisplayName("findByIdAndTenantId: deve encontrar projeto do tenant")
     void findByIdAndTenantId_success() {
-        when(projectRepository.findByIdAndTenantIdWithCreator(project.getId(), tenantId))
+        when(projectRepository.findByIdAndTenantId(project.getId(), tenantId))
                 .thenReturn(Optional.of(project));
 
         Project result = projectService.findByIdAndTenantId(project.getId(), tenantId);
@@ -112,7 +104,7 @@ class ProjectServiceTest {
     @DisplayName("findByIdAndTenantId: deve lançar exceção se projeto não existe no tenant")
     void findByIdAndTenantId_notFound() {
         UUID randomId = UUID.randomUUID();
-        when(projectRepository.findByIdAndTenantIdWithCreator(randomId, tenantId))
+        when(projectRepository.findByIdAndTenantId(randomId, tenantId))
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> projectService.findByIdAndTenantId(randomId, tenantId))
@@ -134,7 +126,7 @@ class ProjectServiceTest {
     @Test
     @DisplayName("update: deve atualizar nome do projeto")
     void update_success() {
-        when(projectRepository.findByIdAndTenantIdWithCreator(project.getId(), tenantId))
+        when(projectRepository.findByIdAndTenantId(project.getId(), tenantId))
                 .thenReturn(Optional.of(project));
         when(projectRepository.save(any(Project.class))).thenReturn(project);
 
@@ -146,7 +138,7 @@ class ProjectServiceTest {
     @Test
     @DisplayName("delete: deve excluir projeto do tenant")
     void delete_success() {
-        when(projectRepository.findByIdAndTenantIdWithCreator(project.getId(), tenantId))
+        when(projectRepository.findByIdAndTenantId(project.getId(), tenantId))
                 .thenReturn(Optional.of(project));
 
         projectService.delete(project.getId(), tenantId);

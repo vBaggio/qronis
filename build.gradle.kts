@@ -1,6 +1,6 @@
 plugins {
     java
-    id("org.springframework.boot") version "4.0.3"
+    id("org.springframework.boot") version "3.5.14"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -17,6 +17,12 @@ repositories {
     mavenCentral()
 }
 
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.modulith:spring-modulith-bom:1.4.1")
+    }
+}
+
 val mapstructVersion = "1.6.3"
 
 dependencies {
@@ -26,20 +32,25 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+    implementation("org.springframework.modulith:spring-modulith-starter-core")
+    implementation("org.springframework.modulith:spring-modulith-core")
 
     // Database
     runtimeOnly("org.postgresql:postgresql")
-    implementation("org.springframework.boot:spring-boot-starter-flyway")
+    implementation("org.flywaydb:flyway-core")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
 
-    // MapStruct
+    // MapStruct & Lombok
     implementation("org.mapstruct:mapstruct:$mapstructVersion")
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
     annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
 
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
     testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("org.springframework.modulith:spring-modulith-starter-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation(platform("org.testcontainers:testcontainers-bom:1.20.4"))
     testImplementation("org.testcontainers:postgresql")
