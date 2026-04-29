@@ -1,7 +1,7 @@
 package com.qronis.modules.auth.web;
 
 import com.qronis.modules.auth.domain.exception.InvalidCredentialsException;
-import com.qronis.modules.identity.domain.exception.UserAlreadyExistsException;
+import com.qronis.modules.identity.api.exception.UserAlreadyExistsException;
 import com.qronis.shared.exception.ErrorResponseDTO;
 
 import org.springframework.http.HttpStatus;

@@ -17,6 +17,8 @@ src/main/java/com/qronis/
 ├── shared/                          # Infraestrutura transversal
 │   ├── config/
 │   │   └── SecurityConfig.java      # Configuração Spring Security + JWT
+│   ├── entity/
+│   │   └── BaseEntity.java          # Entidade base JPA
 │   ├── exception/
 │   │   ├── ErrorResponseDTO.java    # Contrato único de resposta de erro
 │   │   └── GlobalExceptionHandler.java  # Fallback global
@@ -25,67 +27,82 @@ src/main/java/com/qronis/
 │
 └── modules/
     ├── auth/                        # Contexto: Autenticação & Autorização
-    │   ├── api/
-    │   │   ├── AuthController.java
-    │   │   ├── AuthExceptionHandler.java
-    │   │   ├── UserController.java
-    │   │   └── dto/
     │   ├── application/
     │   │   ├── AuthService.java
-    │   │   ├── JwtService.java
-    │   │   └── UserService.java
+    │   │   └── JwtService.java
     │   ├── config/
     │   │   ├── JwtConfig.java
     │   │   └── JwtProperties.java
-    │   └── domain/exception/
-    │       └── InvalidCredentialsException.java
+    │   ├── domain/exception/
+    │   │   └── InvalidCredentialsException.java
+    │   └── web/
+    │       ├── AuthController.java
+    │       ├── AuthExceptionHandler.java
+    │       └── dto/
     │
     ├── identity/                    # Contexto: Identidade & Multi-Tenancy
-    │   ├── application/repositories/
+    │   ├── api/
+    │   │   ├── IdentityFacade.java
+    │   │   ├── package-info.java    # Exposição Modulith (@NamedInterface)
+    │   │   └── dto/
+    │   ├── application/
+    │   │   └── IdentityService.java
+    │   ├── domain/
+    │   │   ├── entity/
+    │   │   │   ├── Tenant.java
+    │   │   │   ├── TenantUser.java
+    │   │   │   ├── TenantUserId.java
+    │   │   │   └── User.java
+    │   │   ├── enums/
+    │   │   │   └── Role.java
+    │   │   └── exception/
+    │   │       └── UserAlreadyExistsException.java
+    │   ├── infrastructure/persistence/
     │   │   ├── TenantRepository.java
     │   │   ├── TenantUserRepository.java
     │   │   └── UserRepository.java
-    │   └── domain/
-    │       ├── entity/
-    │       │   ├── BaseEntity.java
-    │       │   ├── Tenant.java
-    │       │   ├── TenantUser.java
-    │       │   ├── TenantUserId.java
-    │       │   └── User.java
-    │       └── enums/
-    │           └── Role.java
+    │   └── web/
+    │       ├── UserController.java
+    │       └── dto/
     │
     ├── project/                     # Contexto: Gestão de Projetos
     │   ├── api/
-    │   │   ├── ProjectController.java
-    │   │   ├── ProjectExceptionHandler.java
-    │   │   └── dto/
+    │   │   ├── ProjectFacade.java
+    │   │   └── package-info.java
     │   ├── application/
     │   │   ├── ProjectMapper.java
-    │   │   ├── ProjectService.java
-    │   │   └── repositories/
-    │   │       └── ProjectRepository.java
-    │   └── domain/
-    │       ├── entity/Project.java
-    │       └── exception/
-    │           └── ProjectNotFoundException.java
+    │   │   └── ProjectService.java
+    │   ├── domain/
+    │   │   ├── entity/Project.java
+    │   │   └── exception/
+    │   │       └── ProjectNotFoundException.java
+    │   ├── infrastructure/persistence/
+    │   │   └── ProjectRepository.java
+    │   └── web/
+    │       ├── ProjectController.java
+    │       ├── ProjectExceptionHandler.java
+    │       └── dto/
     │
     └── tracker/                     # Contexto: Rastreamento de Tempo
         ├── api/
-        │   ├── TimeEntryController.java
-        │   ├── TrackerExceptionHandler.java
-        │   └── dto/
+        │   ├── TrackerFacade.java
+        │   └── package-info.java
         ├── application/
         │   ├── TimeEntryMapper.java
-        │   ├── TimeEntryService.java
-        │   └── repositories/
-        │       └── TimeEntryRepository.java
-        └── domain/
-            ├── entity/TimeEntry.java
-            └── exception/
-                ├── ActiveTimerConflictException.java
-                ├── InvalidTimeBoundsException.java
-                └── TimeEntryNotFoundException.java
+        │   └── TrackerService.java
+        ├── domain/
+        │   ├── entity/TimeEntry.java
+        │   └── exception/
+        │       ├── ActiveTimerConflictException.java
+        │       ├── InvalidTimeBoundsException.java
+        │       └── TimeEntryNotFoundException.java
+        ├── infrastructure/persistence/
+        │   └── TimeEntryRepository.java
+        └── web/
+            ├── ProjectSummaryController.java
+            ├── TimeEntryController.java
+            ├── TrackerExceptionHandler.java
+            └── dto/
 ```
 
 ---
@@ -96,16 +113,18 @@ Cada módulo segue a mesma estrutura de três camadas:
 
 | Camada | Pacote | Responsabilidade |
 |--------|--------|-----------------|
-| **API** | `api/` | Controllers REST, DTOs de entrada/saída, Exception Handlers |
-| **Application** | `application/` | Services (casos de uso), Mappers (MapStruct), Repositórios (interfaces JPA) |
-| **Domain** | `domain/` | Entidades JPA, Exceções de domínio semânticas, Enums |
+| **API** | `api/` | Contratos públicos, Facades, DTOs e Exceptions expostos (vigiado pelo Modulith) |
+| **Web** | `web/` | Controllers REST, DTOs de HTTP, Exception Handlers específicos |
+| **Application** | `application/` | Services (casos de uso) e Mappers (MapStruct) |
+| **Domain** | `domain/` | Entidades JPA, Exceções de domínio internas, Enums |
+| **Infrastructure** | `infrastructure/` | Repositórios (interfaces JPA) |
 
 ---
 
 ## Bounded Contexts
 
 ### `identity/` — Identidade & Multi-Tenancy
-Gerencia o modelo de usuários e o isolamento multi-tenant. Não expõe controllers próprios — suas entidades (`Tenant`, `User`, `TenantUser`) são usadas pelos outros módulos via repositório.
+Gerencia o modelo de usuários e o isolamento multi-tenant. Expõe o `IdentityFacade` para provisionamento de tenants e contas.
 
 **Dependências de saída:** nenhuma (módulo base)
 
@@ -115,14 +134,14 @@ Responsável por registro, login e emissão de JWTs. Produz tokens com claims `s
 **Dependências de saída:** `identity/` (repositórios de User e Tenant)
 
 ### `project/` — Gestão de Projetos
-CRUD de projetos com escopo por tenant. Inclui sumarização de horas por projeto.
+CRUD de projetos com escopo por tenant. Expõe o `ProjectFacade` para validação de acesso.
 
-**Dependências de saída:** `identity/` (entidades), `tracker/` (repositório TimeEntry para sumário)
+**Dependências de saída:** `identity/` (via banco)
 
 ### `tracker/` — Rastreamento de Tempo
-Timer start/stop, lançamentos manuais e histórico paginado de entradas de tempo.
+Timer start/stop, lançamentos manuais e histórico paginado de entradas de tempo. Também hospeda o `ProjectSummaryController` para agregar horas por projeto.
 
-**Dependências de saída:** `identity/` (User), `project/` (ProjectService para validação de tenant)
+**Dependências de saída:** `identity/` (via banco), `project/` (ProjectFacade)
 
 ---
 
@@ -199,8 +218,8 @@ Em erros de validação (`400 VALIDATION_ERROR`), o campo `errors` contém um ma
 | ADR-016 | `JwtConfig` e `JwtProperties` pertencem ao módulo `auth/` (não a `shared/`) |
 | ADR-017 | Exception Handlers com `basePackages` por módulo em vez de handler global único |
 | ADR-018 | Exceções de domínio semânticas por módulo em vez de `BusinessException`/`ResourceNotFoundException` genéricos |
-| ADR-019 | Services dependem de repositórios de outros módulos diretamente (não de services), para evitar acoplamento circular |
-| ADR-020 | `@AuthenticationPrincipal Jwt` injetado nos controllers em vez de `AuthenticatedUser.fromContext()` estático |
+| ADR-019 | Comunicação inter-módulo exclusiva via **Facades** e pacotes `api/` (Spring Modulith `@NamedInterface`) em vez de acesso direto a Repositories/Services |
+| ADR-020 | Desacoplamento físico de chaves estrangeiras: substituição de `@ManyToOne` entre domínios cruzados por puro `UUID` |
 
 ---
 

@@ -1,8 +1,11 @@
 package com.qronis.modules.identity.domain.entity;
 
-import com.qronis.shared.entity.BaseEntity;
-
-import com.qronis.modules.identity.domain.enums.Role;
+import lombok.Getter;
+import lombok.Setter;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import java.time.Instant;
+import com.qronis.modules.identity.api.enums.Role;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
@@ -14,9 +17,28 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "tenant_user")
-public class TenantUser extends BaseEntity {
+public class TenantUser {
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = Instant.now();
+        this.updatedAt = Instant.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = Instant.now();
+    }
 
     @EmbeddedId
     private TenantUserId id;
@@ -42,37 +64,5 @@ public class TenantUser extends BaseEntity {
         this.user = user;
         this.role = role;
         this.id = new TenantUserId(tenant.getId(), user.getId());
-    }
-
-    public TenantUserId getId() {
-        return id;
-    }
-
-    public void setId(TenantUserId id) {
-        this.id = id;
-    }
-
-    public Tenant getTenant() {
-        return tenant;
-    }
-
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
     }
 }

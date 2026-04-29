@@ -1,6 +1,6 @@
 package com.qronis.modules.project.web;
 
-import com.qronis.modules.project.domain.exception.ProjectNotFoundException;
+import com.qronis.modules.project.api.exception.ProjectNotFoundException;
 import com.qronis.shared.exception.ErrorResponseDTO;
 
 import org.springframework.http.HttpStatus;

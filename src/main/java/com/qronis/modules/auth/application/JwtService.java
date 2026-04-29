@@ -1,7 +1,7 @@
 package com.qronis.modules.auth.application;
 
 import com.qronis.modules.auth.config.JwtProperties;
-import com.qronis.modules.identity.domain.enums.Role;
+import com.qronis.modules.identity.api.enums.Role;
 
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;

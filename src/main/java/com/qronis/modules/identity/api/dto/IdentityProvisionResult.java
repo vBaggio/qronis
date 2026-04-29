@@ -1,8 +1,10 @@
 package com.qronis.modules.identity.api.dto;
 
-import com.qronis.modules.identity.domain.enums.Role;
+import com.qronis.modules.identity.api.enums.Role;
+import org.springframework.modulith.NamedInterface;
 import java.util.UUID;
 
+@NamedInterface("api")
 public record IdentityProvisionResult(
     UUID userId,
     String name,

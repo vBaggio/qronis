@@ -29,7 +29,8 @@ A interface é guiada pelo minimalismo e redução de carga cognitiva:
 - O cronômetro do Tracker não utiliza estados renderizados em massa (como setSeconds). A diferença é calculada nativamente entre a data UTC inicial do servidor e o relógio local do navegador, evitando problemas com o event loop.
 
 ### Backend
-O núcleo de serviços segue regras de domínio imutáveis:
+O núcleo de serviços é orquestrado sob uma arquitetura de **Monólito Modular** (validada via Spring Modulith), seguindo regras de domínio imutáveis:
+- **Share-Nothing:** Módulos independentes (`auth`, `identity`, `project`, `tracker`) não compartilham código infraestrutural nem se comunicam diretamente através de repositórios cruzados. Toda comunicação é feita via Facades protegidas.
 - Soberania do UTC: todas as datas e registros de tempo são calculados, transferidos e persistidos estritamente em fuso UTC.
 - Exclusividade de Timer: o sistema valida e permite apenas uma tarefa em andamento por usuário de cada vez.
 - Isolamento de Tenant: todos os projetos e registros são agrupados com isolamento lógico de Tenant, mesmo com infraestrutura single-database.

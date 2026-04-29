@@ -5,7 +5,7 @@ import com.qronis.modules.auth.application.JwtService;
 import com.qronis.modules.identity.application.IdentityService;
 import com.qronis.modules.identity.api.dto.TenantUserAuthDTO;
 import com.qronis.modules.auth.domain.exception.InvalidCredentialsException;
-import com.qronis.modules.identity.domain.enums.Role;
+import com.qronis.modules.identity.api.enums.Role;
 import com.qronis.modules.identity.domain.entity.Tenant;
 import com.qronis.modules.identity.domain.entity.TenantUser;
 import com.qronis.modules.identity.domain.entity.User;
@@ -79,10 +79,10 @@ class AuthServiceTest {
         @DisplayName("register: deve rejeitar email duplicado")
         void register_duplicateEmail() {
                 when(identityService.provisionTenant(any(), any(), any(), any()))
-                        .thenThrow(new com.qronis.modules.identity.domain.exception.UserAlreadyExistsException("Email já cadastrado"));
+                        .thenThrow(new com.qronis.modules.identity.api.exception.UserAlreadyExistsException("Email já cadastrado"));
 
                 assertThatThrownBy(() -> authService.register("Vinicius", "vini@email.com", "123456", "Qronis"))
-                                .isInstanceOf(com.qronis.modules.identity.domain.exception.UserAlreadyExistsException.class)
+                                .isInstanceOf(com.qronis.modules.identity.api.exception.UserAlreadyExistsException.class)
                                 .hasMessageContaining("Email já cadastrado");
         }
 

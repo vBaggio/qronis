@@ -4,9 +4,9 @@ import com.qronis.modules.tracker.application.TrackerService;
 import com.qronis.modules.tracker.web.dto.TimeEntryPatchRequestDTO;
 import com.qronis.modules.tracker.application.TimeEntryMapper;
 import com.qronis.modules.tracker.domain.entity.TimeEntry;
-import com.qronis.modules.tracker.domain.exception.ActiveTimerConflictException;
-import com.qronis.modules.tracker.domain.exception.InvalidTimeBoundsException;
-import com.qronis.modules.tracker.domain.exception.TimeEntryNotFoundException;
+import com.qronis.modules.tracker.api.exception.ActiveTimerConflictException;
+import com.qronis.modules.tracker.api.exception.InvalidTimeBoundsException;
+import com.qronis.modules.tracker.api.exception.TimeEntryNotFoundException;
 import com.qronis.modules.tracker.infrastructure.persistence.TimeEntryRepository;
 import com.qronis.modules.project.application.ProjectService;
 

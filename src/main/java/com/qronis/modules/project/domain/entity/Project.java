@@ -1,7 +1,10 @@
 package com.qronis.modules.project.domain.entity;
 
-import com.qronis.shared.entity.BaseEntity;
-
+import lombok.Getter;
+import lombok.Setter;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import java.time.Instant;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,9 +14,28 @@ import jakarta.persistence.Table;
 
 import java.util.UUID;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "project")
-public class Project extends BaseEntity {
+public class Project {
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = Instant.now();
+        this.updatedAt = Instant.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = Instant.now();
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -33,38 +55,6 @@ public class Project extends BaseEntity {
     public Project(String name, UUID tenantId, UUID userId) {
         this.name = name;
         this.tenantId = tenantId;
-        this.userId = userId;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public UUID getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(UUID tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public UUID getUserId() {
-        return userId;
-    }
-
-    public void setUserId(UUID userId) {
         this.userId = userId;
     }
 }

@@ -3,7 +3,7 @@ package com.qronis.modules.identity.web;
 import com.qronis.modules.identity.web.dto.UserResponseDTO;
 import com.qronis.modules.identity.domain.entity.TenantUser;
 import com.qronis.modules.identity.infrastructure.persistence.TenantUserRepository;
-import com.qronis.shared.security.AuthenticatedUser;
+import com.qronis.modules.auth.api.security.AuthenticatedUser;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

@@ -1,7 +1,9 @@
 package com.qronis.modules.tracker.domain.entity;
 
-import com.qronis.shared.entity.BaseEntity;
-
+import lombok.Getter;
+import lombok.Setter;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,9 +14,28 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "time_entry")
-public class TimeEntry extends BaseEntity {
+public class TimeEntry {
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = Instant.now();
+        this.updatedAt = Instant.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = Instant.now();
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -37,18 +58,6 @@ public class TimeEntry extends BaseEntity {
 
     public TimeEntry() {}
 
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    public Instant getStartTime() { return startTime; }
-    public void setStartTime(Instant startTime) { this.startTime = startTime; }
-    public Instant getEndTime() { return endTime; }
-    public void setEndTime(Instant endTime) { this.endTime = endTime; }
-    public UUID getProjectId() { return projectId; }
-    public void setProjectId(UUID projectId) { this.projectId = projectId; }
-    public UUID getUserId() { return userId; }
-    public void setUserId(UUID userId) { this.userId = userId; }
 
     public boolean isActive() { return this.endTime == null; }
 }

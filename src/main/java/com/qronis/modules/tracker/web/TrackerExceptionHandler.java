@@ -1,8 +1,8 @@
 package com.qronis.modules.tracker.web;
 
-import com.qronis.modules.tracker.domain.exception.ActiveTimerConflictException;
-import com.qronis.modules.tracker.domain.exception.InvalidTimeBoundsException;
-import com.qronis.modules.tracker.domain.exception.TimeEntryNotFoundException;
+import com.qronis.modules.tracker.api.exception.ActiveTimerConflictException;
+import com.qronis.modules.tracker.api.exception.InvalidTimeBoundsException;
+import com.qronis.modules.tracker.api.exception.TimeEntryNotFoundException;
 import com.qronis.shared.exception.ErrorResponseDTO;
 
 import org.springframework.http.HttpStatus;

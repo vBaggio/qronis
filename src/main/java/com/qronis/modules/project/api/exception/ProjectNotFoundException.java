@@ -1,4 +1,4 @@
-package com.qronis.modules.project.domain.exception;
+package com.qronis.modules.project.api.exception;
 
 public class ProjectNotFoundException extends RuntimeException {
 

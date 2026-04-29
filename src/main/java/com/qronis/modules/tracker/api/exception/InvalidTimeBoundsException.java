@@ -1,4 +1,4 @@
-package com.qronis.modules.tracker.domain.exception;
+package com.qronis.modules.tracker.api.exception;
 
 public class InvalidTimeBoundsException extends RuntimeException {
     public InvalidTimeBoundsException() {

@@ -21,7 +21,7 @@ val mapstructVersion = "1.6.3"
 
 dependencyManagement {
     imports {
-        mavenBom("org.springframework.modulith:spring-modulith-bom:1.2.0")
+        mavenBom("org.springframework.modulith:spring-modulith-bom:1.3.0")
     }
 }
 
@@ -39,8 +39,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-flyway")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
 
-    // MapStruct
+    // MapStruct & Lombok
     implementation("org.mapstruct:mapstruct:$mapstructVersion")
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
     annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
 
     // Test

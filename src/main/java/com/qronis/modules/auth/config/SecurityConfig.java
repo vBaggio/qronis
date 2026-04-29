@@ -1,4 +1,4 @@
-package com.qronis.shared.config;
+package com.qronis.modules.auth.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

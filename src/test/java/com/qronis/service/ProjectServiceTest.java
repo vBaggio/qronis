@@ -2,7 +2,7 @@ package com.qronis.service;
 
 import com.qronis.modules.project.application.ProjectService;
 import com.qronis.modules.project.domain.entity.Project;
-import com.qronis.modules.project.domain.exception.ProjectNotFoundException;
+import com.qronis.modules.project.api.exception.ProjectNotFoundException;
 import com.qronis.modules.project.infrastructure.persistence.ProjectRepository;
 
 import org.junit.jupiter.api.BeforeEach;
