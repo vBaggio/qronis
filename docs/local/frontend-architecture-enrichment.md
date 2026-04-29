@@ -3,7 +3,7 @@
 **Projeto:** Qronis Frontend  
 **Branch:** `refactor/frontend-architecture-enrichment`  
 **Iniciado em:** 2026-04-29  
-**Status atual:** 🔵 Em andamento — Fase 6 (Limpeza Final)
+**Status atual:** ✅ Concluído — todas as 6 fases entregues
 
 ---
 
@@ -263,11 +263,12 @@ Nenhum dos dois mostra feedback ao usuário.
 ### Fase 6 — Limpeza Final
 **Objetivo:** Remover resíduos; garantir consistência total.
 
-- [ ] **6.1** Remover `import axios from 'axios'` direto de `ZenTimer.tsx` (só usar `api`)
-- [ ] **6.2** Garantir `catch (err: unknown)` em todos os handlers (`TimeEntryModal.tsx` usa `any`)
-- [ ] **6.3** Verificar inputs de auth: `autocomplete="email"`, `autocomplete="current-password"`
-- [ ] **6.4** Adicionar `aria-hidden="true"` em ícones decorativos onde faltam
-- [ ] **6.5** Remover código morto identificado no diagnóstico
+- [x] **6.1** `import axios from 'axios'` removido de `ZenTimer.tsx` (já eliminado na Fase 4)
+- [x] **6.2** `TimeEntryModal.tsx`: `catch (err: any)` → `catch (err: unknown)` com type guard
+- [x] **6.3** `Login.tsx`: `autocomplete="email"` + `autocomplete="current-password"` + `spellCheck={false}`
+- [x] **6.3** `Register.tsx`: `autocomplete` em todos os 5 campos (name, organization, email, new-password ×2)
+- [x] **6.4** `aria-hidden="true"` aplicado em todos os ícones decorativos nas fases anteriores
+- [x] **6.5** Código corrompido de `Projects.tsx` removido na Fase 1
 
 **Gate final:** `npm run build` limpo + auditoria manual em todas as rotas.
 
@@ -365,8 +366,13 @@ src/
   - `ProjectSelector`: variantes CVA, `aria-label` no trigger
   - Gate: `npm run build` — ✅ 0 erros TypeScript
 
-### 🔵 Em Andamento
-- Fase 6 — Limpeza Final
+- **Fase 6 — Limpeza Final** (commit `dc57d16`)
+  - `TimeEntryModal`: `any` → `unknown` com type guard, `autocomplete`, placeholder com `…`
+  - `Login`: `autocomplete="email"` + `autocomplete="current-password"` + `spellCheck={false}`
+  - `Register`: `autocomplete` em todos os 5 campos do formulário
+  - Gate: `npm run build` — ✅ 0 erros TypeScript
+
+### ✅ Refatoração Completa
 
 ### ⏳ Pendente
 - Fase 2 — React Query
