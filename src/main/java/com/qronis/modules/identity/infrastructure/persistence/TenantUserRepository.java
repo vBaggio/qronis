@@ -12,8 +12,6 @@ import java.util.UUID;
 
 public interface TenantUserRepository extends JpaRepository<TenantUser, TenantUserId> {
 
-    Optional<TenantUser> findByUserId(UUID userId);
-
     @Query("SELECT tu FROM TenantUser tu JOIN FETCH tu.user JOIN FETCH tu.tenant WHERE tu.user.email = :email")
     Optional<TenantUser> findByUserEmailWithUser(@Param("email") String email);
 
