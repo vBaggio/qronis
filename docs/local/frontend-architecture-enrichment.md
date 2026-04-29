@@ -3,7 +3,7 @@
 **Projeto:** Qronis Frontend  
 **Branch:** `refactor/frontend-architecture-enrichment`  
 **Iniciado em:** 2026-04-29  
-**Status atual:** 🔵 Em andamento — Fase 2 (React Query)
+**Status atual:** 🔵 Em andamento — Fase 3 (Custom Hooks)
 
 ---
 
@@ -175,10 +175,10 @@ Nenhum dos dois mostra feedback ao usuário.
 ### Fase 2 — Instalar e Configurar React Query
 **Objetivo:** Adicionar a infraestrutura de cache antes de refatorar os componentes.
 
-- [ ] **2.1** `npm install @tanstack/react-query @tanstack/react-query-devtools`
-- [ ] **2.2** Configurar `QueryClient` com `staleTime: 30_000`, `retry: 1`
-- [ ] **2.3** Envolver `<App>` com `<QueryClientProvider>` em `src/main.tsx`
-- [ ] **2.4** Adicionar `<ReactQueryDevtools>` em modo development
+- [x] **2.1** `npm install @tanstack/react-query @tanstack/react-query-devtools`
+- [x] **2.2** Configurar `QueryClient` com `staleTime: 30_000`, `retry: 1`
+- [x] **2.3** Envolver `<App>` com `<QueryClientProvider>` em `src/main.tsx`
+- [x] **2.4** Adicionar `<ReactQueryDevtools>` (visível apenas em dev)
 
 **Gate:** App continua funcionando identicamente (nenhum componente usa React Query ainda).
 
@@ -335,8 +335,15 @@ src/
   - `formatDate` movida para escopo de módulo (fora do componente)
   - Gate: `npm run build` — ✅ 0 erros TypeScript
 
+- **Fase 2 — React Query** (commit `35e14a1`)
+  - `@tanstack/react-query` + `@tanstack/react-query-devtools` instalados
+  - `QueryClient` configurado: `staleTime: 30s`, `retry: 1`
+  - `QueryClientProvider` envolvendo toda a app em `main.tsx`
+  - `ReactQueryDevtools` disponível em dev (botão flutuante no canto)
+  - Gate: `npm run build` — ✅ 0 erros TypeScript
+
 ### 🔵 Em Andamento
-- Fase 2 — React Query
+- Fase 3 — Custom Hooks
 
 ### ⏳ Pendente
 - Fase 2 — React Query
