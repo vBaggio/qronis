@@ -11,7 +11,6 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ProjectMapper {
 
-    @Mapping(target = "createdByName", ignore = true)
     ProjectResponseDTO toResponse(Project project);
 
     List<ProjectResponseDTO> toResponseList(List<Project> projects);

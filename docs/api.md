@@ -74,7 +74,6 @@ Este documento descreve as assinaturas mapeadas dos serviços expostos. Todos os
       "id": "a1b2...",
       "name": "Projeto Alpha",
       "tenantId": "c3d4...",
-      "createdByName": "Jane Doe",
       "createdAt": "2026-02-21T09:00:00Z"
     }
   ],
@@ -102,7 +101,6 @@ Este documento descreve as assinaturas mapeadas dos serviços expostos. Todos os
   "id": "a1b2...",
   "name": "Projeto Alpha",
   "tenantId": "c3d4...",
-  "createdByName": "Jane Doe",
   "createdAt": "2026-02-21T09:00:00Z"
 }
 ```

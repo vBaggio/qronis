@@ -39,7 +39,6 @@ interface Project {
     id: string;
     name: string;
     tenantId: string;
-    createdByName: string;
     createdAt: string;
 }
 
