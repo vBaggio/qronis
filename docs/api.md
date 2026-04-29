@@ -110,10 +110,6 @@ Mapeamento secundário padrão (Buscar, Atualizar, Deletar):
 - `PUT /api/projects/{id}` (Body: `{"name":"Novo Nome"}`)
 - `DELETE /api/projects/{id}`
 
-### Listar Time Entries de um Projeto Específico
-- **GET** `/api/projects/{id}/time-entries`
-- **Output (200 OK):** Retorna array de `TimeEntryResponseDTO`.
-
 ### Resumo Agregado do Projeto
 - **GET** `/api/projects/{id}/summary`
 - **Security:** Bearer Token

@@ -129,13 +129,6 @@ public class TrackerService implements TrackerFacade {
         return page.map(e -> timeEntryMapper.toResponse(e, names));
     }
 
-    @Transactional(readOnly = true)
-    public List<TimeEntryResponseDTO> findByProjectId(UUID projectId, UUID tenantId) {
-        projectFacade.validateProjectBelongsToTenant(projectId, tenantId);
-        List<TimeEntry> entries = timeEntryRepository.findByProjectId(projectId);
-        return timeEntryMapper.toResponseList(entries, resolveNames(entries));
-    }
-
     private TimeEntry findByIdAndUserId(UUID id, UUID userId) {
         return timeEntryRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(TimeEntryNotFoundException::new);
