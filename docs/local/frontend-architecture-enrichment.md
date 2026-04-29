@@ -3,7 +3,7 @@
 **Projeto:** Qronis Frontend  
 **Branch:** `refactor/frontend-architecture-enrichment`  
 **Iniciado em:** 2026-04-29  
-**Status atual:** 🔵 Em andamento — Fase 5 (Componentes e A11y)
+**Status atual:** 🔵 Em andamento — Fase 6 (Limpeza Final)
 
 ---
 
@@ -239,19 +239,22 @@ Nenhum dos dois mostra feedback ao usuário.
 ### Fase 5 — Componentes: Extrair, Corrigir A11y
 **Objetivo:** Quebrar componentes god; eliminar re-renders desnecessários.
 
-- [ ] **5.1** `TimeEntryRow.tsx`
-  - Substituir `useState(isHovered)` por CSS `group-hover:` (eliminar 40 re-renders por hover)
+- [x] **5.1** `TimeEntryRow.tsx`
+  - Remover `useState(isHovered)` — CSS `group-hover:` elimina ~40 re-renders por hover
   - Adicionar `aria-label="Descrição do registro"` no input inline
-  - Adicionar `htmlFor` nos `<label>` do dialog de horário
+  - Adicionar `aria-label` descritivo no botão de horário
   - Extrair `<TimeEditDialog>` → `src/components/history/TimeEditDialog.tsx`
+  - `htmlFor` em todos os `<label>` do dialog (`edit-start-time`, `edit-end-time`)
 
-- [ ] **5.2** Criar `src/components/error/ErrorBoundary.tsx`
-  - Componente class `ErrorBoundary` com fallback UI
-  - Envolver em `App.tsx` → `<ErrorBoundary><AuthProvider>...</AuthProvider></ErrorBoundary>`
+- [x] **5.2** Criar `src/components/error/ErrorBoundary.tsx`
+  - Componente class com `getDerivedStateFromError` + `componentDidCatch`
+  - Fallback UI com botão "Recarregar" e mensagem amigável em PT-BR
+  - Envolve toda a app em `App.tsx` (fora de `BrowserRouter`)
 
-- [ ] **5.3** `ProjectSelector.tsx`
-  - Avaliar: extrair variante `<ProjectSelectorCompact>` em vez de `size="compact"` prop
-  - Ou usar CVA (class-variance-authority, já disponível via shadcn)
+- [x] **5.3** `ProjectSelector.tsx`
+  - Variantes `size` implementadas com CVA (class-variance-authority)
+  - Adicionado `aria-label="Selecionar projeto"` no trigger
+  - `aria-hidden` em ícones decorativos
 
 **Gate:** Lighthouse a11y score melhora; re-renders de hover eliminados (verificar com React DevTools Profiler).
 
@@ -356,8 +359,14 @@ src/
   - `ProjectDetails.tsx`: todos os fetches migrados, update otimista no cache, invalidação automática do summary
   - Gate: `npm run build` — ✅ 0 erros TypeScript
 
+- **Fase 5 — Componentes e A11y** (commit `96d10db`)
+  - `TimeEntryRow`: removido `useState(isHovered)`, `TimeEditDialog` extraído, a11y completa
+  - `ErrorBoundary`: criado e conectado em `App.tsx`
+  - `ProjectSelector`: variantes CVA, `aria-label` no trigger
+  - Gate: `npm run build` — ✅ 0 erros TypeScript
+
 ### 🔵 Em Andamento
-- Fase 5 — Componentes e A11y
+- Fase 6 — Limpeza Final
 
 ### ⏳ Pendente
 - Fase 2 — React Query
