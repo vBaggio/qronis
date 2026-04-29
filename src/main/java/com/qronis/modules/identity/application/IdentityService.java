@@ -6,7 +6,7 @@ import com.qronis.modules.identity.api.dto.TenantUserAuthDTO;
 import com.qronis.modules.identity.domain.entity.Tenant;
 import com.qronis.modules.identity.domain.entity.TenantUser;
 import com.qronis.modules.identity.domain.entity.User;
-import com.qronis.modules.identity.api.enums.Role;
+import com.qronis.modules.identity.domain.enums.Role;
 import com.qronis.modules.identity.api.exception.UserAlreadyExistsException;
 import com.qronis.modules.identity.infrastructure.persistence.TenantRepository;
 import com.qronis.modules.identity.infrastructure.persistence.TenantUserRepository;
@@ -46,7 +46,7 @@ public class IdentityService implements IdentityFacade {
         TenantUser tenantUser = new TenantUser(tenant, user, Role.OWNER);
         tenantUserRepository.save(tenantUser);
 
-        return new IdentityProvisionResult(user.getId(), user.getName(), user.getEmail(), tenant.getId(), Role.OWNER);
+        return new IdentityProvisionResult(user.getId(), user.getName(), user.getEmail(), tenant.getId(), Role.OWNER.name());
     }
 
     @Override
@@ -58,7 +58,7 @@ public class IdentityService implements IdentityFacade {
                         tu.getUser().getEmail(),
                         tu.getUser().getPassword(),
                         tu.getId().getTenantId(),
-                        tu.getRole()
+                        tu.getRole().name()
                 ));
     }
 

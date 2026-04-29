@@ -1,7 +1,7 @@
 package com.qronis.modules.auth.application;
 
 import com.qronis.modules.auth.config.JwtProperties;
-import com.qronis.modules.identity.api.enums.Role;
+
 
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
@@ -25,7 +25,7 @@ public class JwtService {
         this.jwtProperties = jwtProperties;
     }
 
-    public String generateToken(UUID userId, String name, String email, UUID tenantId, Role role) {
+    public String generateToken(UUID userId, String name, String email, UUID tenantId, String role) {
         Instant now = Instant.now();
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
@@ -36,7 +36,7 @@ public class JwtService {
                 .claim("email", email)
                 .claim("name", name)
                 .claim("tenantId", tenantId.toString())
-                .claim("role", role.name())
+                .claim("role", role)
                 .build();
 
         JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();

@@ -5,7 +5,8 @@ import com.qronis.modules.auth.application.JwtService;
 import com.qronis.modules.identity.application.IdentityService;
 import com.qronis.modules.identity.api.dto.TenantUserAuthDTO;
 import com.qronis.modules.auth.domain.exception.InvalidCredentialsException;
-import com.qronis.modules.identity.api.enums.Role;
+
+import com.qronis.modules.identity.domain.enums.Role;
 import com.qronis.modules.identity.domain.entity.Tenant;
 import com.qronis.modules.identity.domain.entity.TenantUser;
 import com.qronis.modules.identity.domain.entity.User;
@@ -64,15 +65,15 @@ class AuthServiceTest {
         @DisplayName("register: deve criar user, tenant, tenant_user e retornar JWT")
         void register_success() {
                 when(identityService.provisionTenant(any(), any(), any(), any()))
-                                .thenReturn(new com.qronis.modules.identity.api.dto.IdentityProvisionResult(user.getId(), "Vinicius", "vini@email.com", tenant.getId(), Role.OWNER));
+                                .thenReturn(new com.qronis.modules.identity.api.dto.IdentityProvisionResult(user.getId(), "Vinicius", "vini@email.com", tenant.getId(), "OWNER"));
                 when(passwordEncoder.encode("123456")).thenReturn("encoded-password");
-                when(jwtService.generateToken(any(UUID.class), any(String.class), any(String.class), any(UUID.class), any(Role.class)))
+                when(jwtService.generateToken(any(UUID.class), any(String.class), any(String.class), any(UUID.class), any(String.class)))
                                 .thenReturn("jwt-token");
 
                 String token = authService.register("Vinicius", "vini@email.com", "123456", "Qronis Ltda");
 
                 assertThat(token).isEqualTo("jwt-token");
-                verify(jwtService).generateToken(user.getId(), "Vinicius", "vini@email.com", tenant.getId(), Role.OWNER);
+                verify(jwtService).generateToken(user.getId(), "Vinicius", "vini@email.com", tenant.getId(), "OWNER");
         }
 
         @Test
@@ -92,9 +93,9 @@ class AuthServiceTest {
                 TenantUser tenantUser = new TenantUser(tenant, user, Role.OWNER);
 
                 when(identityService.getAuthDetailsByEmail("vini@email.com"))
-                                .thenReturn(Optional.of(new TenantUserAuthDTO(user.getId(), "vini@email.com", "Vinicius", "encoded-password", tenant.getId(), Role.OWNER)));
+                                .thenReturn(Optional.of(new TenantUserAuthDTO(user.getId(), "vini@email.com", "Vinicius", "encoded-password", tenant.getId(), "OWNER")));
                 when(passwordEncoder.matches("123456", "encoded-password")).thenReturn(true);
-                when(jwtService.generateToken(any(UUID.class), any(String.class), any(String.class), any(UUID.class), any(Role.class)))
+                when(jwtService.generateToken(any(UUID.class), any(String.class), any(String.class), any(UUID.class), any(String.class)))
                                 .thenReturn("jwt-token");
 
                 String token = authService.login("vini@email.com", "123456");
@@ -116,7 +117,7 @@ class AuthServiceTest {
         @DisplayName("login: deve rejeitar senha incorreta")
         void login_wrongPassword() {
                 when(identityService.getAuthDetailsByEmail("vini@email.com"))
-                                .thenReturn(Optional.of(new TenantUserAuthDTO(user.getId(), "vini@email.com", "Vinicius", "encoded-password", tenant.getId(), Role.OWNER)));
+                                .thenReturn(Optional.of(new TenantUserAuthDTO(user.getId(), "vini@email.com", "Vinicius", "encoded-password", tenant.getId(), "OWNER")));
                 when(passwordEncoder.matches("senha-errada", "encoded-password")).thenReturn(false);
 
                 assertThatThrownBy(() -> authService.login("vini@email.com", "senha-errada"))

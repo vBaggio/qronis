@@ -5,7 +5,7 @@ import lombok.Setter;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import java.time.Instant;
-import com.qronis.modules.identity.api.enums.Role;
+import com.qronis.modules.identity.domain.enums.Role;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
