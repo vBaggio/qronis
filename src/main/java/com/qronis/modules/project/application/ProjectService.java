@@ -24,15 +24,15 @@ public class ProjectService implements ProjectFacade {
     }
 
     public Page<Project> findByTenantId(UUID tenantId, String name, Pageable pageable) {
-        return projectRepository.findByTenantIdWithCreator(tenantId, name, pageable);
+        return projectRepository.findByTenantId(tenantId, name, pageable);
     }
 
     public List<Project> findByTenantId(UUID tenantId) {
-        return projectRepository.findByTenantIdWithCreator(tenantId);
+        return projectRepository.findByTenantId(tenantId);
     }
 
     public Project findByIdAndTenantId(UUID id, UUID tenantId) {
-        return projectRepository.findByIdAndTenantIdWithCreator(id, tenantId)
+        return projectRepository.findByIdAndTenantId(id, tenantId)
                 .orElseThrow(() -> new ProjectNotFoundException(id.toString()));
     }
 

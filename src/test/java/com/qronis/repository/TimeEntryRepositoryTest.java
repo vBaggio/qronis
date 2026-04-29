@@ -97,7 +97,7 @@ class TimeEntryRepositoryTest extends AbstractIntegrationTest {
         newer.setEndTime(now.minus(1, ChronoUnit.HOURS));
         timeEntryRepository.save(newer);
 
-        Page<TimeEntry> result = timeEntryRepository.findByUserIdWithProject(userId, PageRequest.of(0, 10));
+        Page<TimeEntry> result = timeEntryRepository.findByUserId(userId, PageRequest.of(0, 10));
 
         assertThat(result.getContent()).hasSize(2);
         assertThat(result.getContent().get(0).getStartTime()).isAfter(result.getContent().get(1).getStartTime());

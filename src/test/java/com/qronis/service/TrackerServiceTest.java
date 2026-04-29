@@ -152,7 +152,7 @@ class TrackerServiceTest {
         entry.setEndTime(Instant.now());
         entry.setDescription("Original");
 
-        when(timeEntryRepository.findByIdAndCreatedByIdWithProject(entry.getId(), userId))
+        when(timeEntryRepository.findByIdAndUserId(entry.getId(), userId))
                 .thenReturn(Optional.of(entry));
         when(timeEntryRepository.save(any(TimeEntry.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -171,7 +171,7 @@ class TrackerServiceTest {
         entry.setStartTime(Instant.now().minus(2, ChronoUnit.HOURS));
         entry.setEndTime(Instant.now());
 
-        when(timeEntryRepository.findByIdAndCreatedByIdWithProject(entry.getId(), userId))
+        when(timeEntryRepository.findByIdAndUserId(entry.getId(), userId))
                 .thenReturn(Optional.of(entry));
 
         Instant badEnd = entry.getStartTime().minus(1, ChronoUnit.HOURS);
@@ -191,7 +191,7 @@ class TrackerServiceTest {
         entry.setId(UUID.randomUUID());
         entry.setUserId(userId);
 
-        when(timeEntryRepository.findByIdAndCreatedByIdWithProject(entry.getId(), userId))
+        when(timeEntryRepository.findByIdAndUserId(entry.getId(), userId))
                 .thenReturn(Optional.of(entry));
 
         trackerService.delete(entry.getId(), userId);
@@ -208,7 +208,7 @@ class TrackerServiceTest {
         entry.setId(UUID.randomUUID());
         entry.setUserId(otherUserId);
 
-        when(timeEntryRepository.findByIdAndCreatedByIdWithProject(entry.getId(), userId)).thenReturn(Optional.empty());
+        when(timeEntryRepository.findByIdAndUserId(entry.getId(), userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> trackerService.delete(entry.getId(), userId))
                 .isInstanceOf(TimeEntryNotFoundException.class);

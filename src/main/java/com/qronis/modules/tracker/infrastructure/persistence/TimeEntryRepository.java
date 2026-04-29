@@ -19,18 +19,18 @@ public interface TimeEntryRepository extends JpaRepository<TimeEntry, UUID> {
 
     @Query(value = "SELECT te FROM TimeEntry te WHERE te.userId = :userId ORDER BY te.startTime DESC",
            countQuery = "SELECT count(te) FROM TimeEntry te WHERE te.userId = :userId")
-    Page<TimeEntry> findByUserIdWithProject(@Param("userId") UUID userId, Pageable pageable);
+    Page<TimeEntry> findByUserId(@Param("userId") UUID userId, Pageable pageable);
 
     @Query(value = "SELECT te FROM TimeEntry te WHERE te.userId = :userId AND te.projectId = :projectId",
            countQuery = "SELECT count(te) FROM TimeEntry te WHERE te.userId = :userId AND te.projectId = :projectId")
-    Page<TimeEntry> findByUserIdAndProjectIdWithProject(@Param("userId") UUID userId,
+    Page<TimeEntry> findByUserIdAndProjectId(@Param("userId") UUID userId,
             @Param("projectId") UUID projectId, Pageable pageable);
 
     @Query("SELECT te FROM TimeEntry te WHERE te.projectId = :projectId ORDER BY te.startTime DESC")
-    List<TimeEntry> findByProjectIdWithProject(@Param("projectId") UUID projectId);
+    List<TimeEntry> findByProjectId(@Param("projectId") UUID projectId);
 
     @Query("SELECT te FROM TimeEntry te WHERE te.id = :id AND te.userId = :userId")
-    Optional<TimeEntry> findByIdAndCreatedByIdWithProject(@Param("id") UUID id, @Param("userId") UUID userId);
+    Optional<TimeEntry> findByIdAndUserId(@Param("id") UUID id, @Param("userId") UUID userId);
 
     @Query(value = "SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (te.end_time - te.start_time))), 0) FROM time_entry te WHERE te.project_id = CAST(:projectId AS uuid) AND te.created_by = CAST(:userId AS uuid) AND te.end_time IS NOT NULL", nativeQuery = true)
     Long sumDurationSecondsByProjectIdAndUserId(@Param("projectId") UUID projectId, @Param("userId") UUID userId);

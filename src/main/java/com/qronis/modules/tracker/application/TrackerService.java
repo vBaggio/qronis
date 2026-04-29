@@ -112,18 +112,18 @@ public class TrackerService implements TrackerFacade {
 
     public Page<TimeEntry> findByUserIdAndOptionalProjectId(UUID userId, UUID projectId, Pageable pageable) {
         if (projectId != null) {
-            return timeEntryRepository.findByUserIdAndProjectIdWithProject(userId, projectId, pageable);
+            return timeEntryRepository.findByUserIdAndProjectId(userId, projectId, pageable);
         }
-        return timeEntryRepository.findByUserIdWithProject(userId, pageable);
+        return timeEntryRepository.findByUserId(userId, pageable);
     }
 
     public List<TimeEntry> findByProjectId(UUID projectId, UUID tenantId) {
         projectFacade.validateProjectBelongsToTenant(projectId, tenantId);
-        return timeEntryRepository.findByProjectIdWithProject(projectId);
+        return timeEntryRepository.findByProjectId(projectId);
     }
 
     private TimeEntry findByIdAndUserId(UUID id, UUID userId) {
-        return timeEntryRepository.findByIdAndCreatedByIdWithProject(id, userId)
+        return timeEntryRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(TimeEntryNotFoundException::new);
     }
 

@@ -23,12 +23,12 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
             WHERE p.tenantId = :tenantId
             AND LOWER(p.name) LIKE LOWER(CONCAT('%', COALESCE(:name, p.name), '%'))
             """)
-    Page<Project> findByTenantIdWithCreator(@Param("tenantId") UUID tenantId, @Param("name") String name,
+    Page<Project> findByTenantId(@Param("tenantId") UUID tenantId, @Param("name") String name,
             Pageable pageable);
 
     @Query("SELECT p FROM Project p WHERE p.tenantId = :tenantId ORDER BY p.createdAt DESC")
-    List<Project> findByTenantIdWithCreator(@Param("tenantId") UUID tenantId);
+    List<Project> findByTenantId(@Param("tenantId") UUID tenantId);
 
     @Query("SELECT p FROM Project p WHERE p.id = :id AND p.tenantId = :tenantId")
-    Optional<Project> findByIdAndTenantIdWithCreator(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
+    Optional<Project> findByIdAndTenantId(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
 }

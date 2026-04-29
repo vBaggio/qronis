@@ -47,85 +47,85 @@ class ProjectRepositoryTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @DisplayName("findByTenantIdWithCreator paginado: deve retornar todos sem filtro de nome")
-    void findByTenantIdWithCreator_paged_returnsAll() {
+    @DisplayName("findByTenantId paginado: deve retornar todos sem filtro de nome")
+    void findByTenantId_paged_returnsAll() {
         projectRepository.save(new Project("Alpha", tenantId, userId));
         projectRepository.save(new Project("Beta", tenantId, userId));
 
         Pageable pageable = PageRequest.of(0, 20);
-        Page<Project> result = projectRepository.findByTenantIdWithCreator(tenantId, null, pageable);
+        Page<Project> result = projectRepository.findByTenantId(tenantId, null, pageable);
 
         assertThat(result.getContent()).hasSize(2);
         assertThat(result.getTotalElements()).isEqualTo(2);
     }
 
     @Test
-    @DisplayName("findByTenantIdWithCreator paginado: deve filtrar por nome parcial case-insensitive")
-    void findByTenantIdWithCreator_paged_filterByName() {
+    @DisplayName("findByTenantId paginado: deve filtrar por nome parcial case-insensitive")
+    void findByTenantId_paged_filterByName() {
         projectRepository.save(new Project("Alpha", tenantId, userId));
         projectRepository.save(new Project("Beta", tenantId, userId));
 
         Pageable pageable = PageRequest.of(0, 20);
-        Page<Project> result = projectRepository.findByTenantIdWithCreator(tenantId, "alph", pageable);
+        Page<Project> result = projectRepository.findByTenantId(tenantId, "alph", pageable);
 
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0).getName()).isEqualTo("Alpha");
     }
 
     @Test
-    @DisplayName("findByTenantIdWithCreator paginado: deve retornar vazio quando filtro não corresponde")
-    void findByTenantIdWithCreator_paged_filterByName_noMatch() {
+    @DisplayName("findByTenantId paginado: deve retornar vazio quando filtro não corresponde")
+    void findByTenantId_paged_filterByName_noMatch() {
         projectRepository.save(new Project("Alpha", tenantId, userId));
 
         Pageable pageable = PageRequest.of(0, 20);
-        Page<Project> result = projectRepository.findByTenantIdWithCreator(tenantId, "xyz", pageable);
+        Page<Project> result = projectRepository.findByTenantId(tenantId, "xyz", pageable);
 
         assertThat(result.getContent()).isEmpty();
         assertThat(result.getTotalElements()).isZero();
     }
 
     @Test
-    @DisplayName("findByTenantIdWithCreator: deve retornar projetos do tenant com criador carregado")
-    void findByTenantIdWithCreator_success() {
+    @DisplayName("findByTenantId: deve retornar projetos do tenant com criador carregado")
+    void findByTenantId_success() {
         projectRepository.save(new Project("Alpha", tenantId, userId));
         projectRepository.save(new Project("Beta", tenantId, userId));
 
-        List<Project> result = projectRepository.findByTenantIdWithCreator(tenantId);
+        List<Project> result = projectRepository.findByTenantId(tenantId);
 
         assertThat(result).hasSize(2);
     }
 
     @Test
-    @DisplayName("findByTenantIdWithCreator: não deve retornar projetos de outro tenant")
-    void findByTenantIdWithCreator_otherTenant() {
+    @DisplayName("findByTenantId: não deve retornar projetos de outro tenant")
+    void findByTenantId_otherTenant() {
         UUID otherTenantId = UUID.randomUUID();
         UUID otherUserId = UUID.randomUUID();
         jdbcTemplate.update("INSERT INTO tenant (id, name, created_at, updated_at) VALUES (?, 'Other Tenant', now(), now())", otherTenantId);
         jdbcTemplate.update("INSERT INTO users (id, email, password, name, created_at, updated_at) VALUES (?, 'other@test.com', 'pwd', 'Other User', now(), now())", otherUserId);
         projectRepository.save(new Project("Projeto Alheio", otherTenantId, otherUserId));
 
-        List<Project> result = projectRepository.findByTenantIdWithCreator(tenantId);
+        List<Project> result = projectRepository.findByTenantId(tenantId);
 
         assertThat(result).isEmpty();
     }
 
     @Test
-    @DisplayName("findByIdAndTenantIdWithCreator: deve encontrar projeto do tenant correto")
-    void findByIdAndTenantIdWithCreator_success() {
+    @DisplayName("findByIdAndTenantId: deve encontrar projeto do tenant correto")
+    void findByIdAndTenantId_success() {
         Project p = projectRepository.save(new Project("Projeto X", tenantId, userId));
 
-        Optional<Project> result = projectRepository.findByIdAndTenantIdWithCreator(p.getId(), tenantId);
+        Optional<Project> result = projectRepository.findByIdAndTenantId(p.getId(), tenantId);
 
         assertThat(result).isPresent();
         assertThat(result.get().getName()).isEqualTo("Projeto X");
     }
 
     @Test
-    @DisplayName("findByIdAndTenantIdWithCreator: deve retornar vazio para tenant errado")
-    void findByIdAndTenantIdWithCreator_wrongTenant() {
+    @DisplayName("findByIdAndTenantId: deve retornar vazio para tenant errado")
+    void findByIdAndTenantId_wrongTenant() {
         Project p = projectRepository.save(new Project("Projeto X", tenantId, userId));
 
-        Optional<Project> result = projectRepository.findByIdAndTenantIdWithCreator(p.getId(), UUID.randomUUID());
+        Optional<Project> result = projectRepository.findByIdAndTenantId(p.getId(), UUID.randomUUID());
 
         assertThat(result).isEmpty();
     }
