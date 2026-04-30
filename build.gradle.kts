@@ -76,13 +76,7 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    // Test (integration) — Testcontainers
-    "integrationTestImplementation"("org.springframework.boot:spring-boot-starter-test")
-    "integrationTestImplementation"("org.springframework.security:spring-security-test")
-    "integrationTestImplementation"("org.springframework.boot:spring-boot-testcontainers")
-    "integrationTestImplementation"(platform("org.testcontainers:testcontainers-bom:1.20.4"))
-    "integrationTestImplementation"("org.testcontainers:postgresql")
-    "integrationTestImplementation"("org.testcontainers:junit-jupiter")
+    // Test (integration) — runtime extras only (rest inherited via extendsFrom)
     "integrationTestRuntimeOnly"("org.junit.platform:junit-platform-launcher")
 }
 
@@ -128,6 +122,7 @@ val jacocoExclusions = listOf(
 
 tasks.named<JacocoReport>("jacocoTestReport") {
     dependsOn(tasks.test)
+    executionData.setFrom(layout.buildDirectory.file("jacoco/test.exec"))
     reports {
         xml.required = true
         html.required = true
@@ -146,7 +141,7 @@ tasks.register<JacocoCoverageVerification>("jacocoCoverageVerification") {
             fileTree(it) { exclude(jacocoExclusions) }
         })
     )
-    executionData.setFrom(tasks.named<JacocoReport>("jacocoTestReport").get().executionData)
+    executionData.setFrom(layout.buildDirectory.file("jacoco/test.exec"))
     violationRules {
         rule {
             limit {
