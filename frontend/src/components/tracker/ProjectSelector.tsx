@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { api } from '../../lib/api';
-import type { Project } from '../../lib/types';
+import React, { useState } from 'react';
+import type { Project } from '@/lib/types';
 import { cva } from 'class-variance-authority';
+
+import { useProjects, useCreateProject } from '@/hooks/useProjects';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Folder, Plus, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-export type { Project };
 
 const triggerVariants = cva(
     'w-full justify-between rounded-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 shrink-0',
@@ -39,47 +38,27 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
     size = 'default',
 }) => {
     const [open, setOpen] = useState(false);
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [loading, setLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
-    useEffect(() => {
-        if (open) fetchProjects();
-    }, [open]);
+    const { data, isLoading } = useProjects({ page: 0, search: '' });
+    const createProject = useCreateProject();
 
-    const fetchProjects = async () => {
-        try {
-            setLoading(true);
-            const res = await api.get('/projects?size=100');
-            setProjects(res.data.content || []);
-        } catch (error) {
-            console.error('Failed to fetch projects', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleCreateProject = async () => {
-        if (!searchQuery.trim()) return;
-        try {
-            setLoading(true);
-            const res = await api.post('/projects', { name: searchQuery.trim() });
-            const newProject = res.data;
-            setProjects((prev) => [newProject, ...prev]);
-            onSelect(newProject.id);
-            setOpen(false);
-            setSearchQuery('');
-        } catch (error) {
-            console.error('Failed to create project', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
+    const projects: Project[] = data?.content ?? [];
     const filteredProjects = projects.filter((p) =>
         p.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
     const selectedProject = projects.find((p) => p.id === selectedProjectId);
+
+    const handleCreateProject = () => {
+        if (!searchQuery.trim()) return;
+        createProject.mutate(searchQuery.trim(), {
+            onSuccess: (res) => {
+                onSelect(res.data.id);
+                setOpen(false);
+                setSearchQuery('');
+            },
+        });
+    };
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -111,10 +90,10 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
                         className="h-9 border-none bg-zinc-100 dark:bg-zinc-800 focus-visible:ring-0"
                     />
                     <div className="max-h-[200px] overflow-y-auto pt-2 flex flex-col gap-1">
-                        {loading && (
+                        {isLoading && (
                             <div className="text-sm text-center py-4 text-zinc-500">Carregando…</div>
                         )}
-                        {!loading && filteredProjects.map((project) => (
+                        {!isLoading && filteredProjects.map((project) => (
                             <Button
                                 key={project.id}
                                 variant="ghost"
@@ -128,17 +107,18 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
                                 {project.name}
                             </Button>
                         ))}
-                        {allowCreate && !loading && searchQuery.trim() && filteredProjects.length === 0 && (
+                        {allowCreate && !isLoading && searchQuery.trim() && filteredProjects.length === 0 && (
                             <Button
                                 variant="ghost"
                                 className="justify-start text-emerald-600 dark:text-emerald-500 font-medium"
                                 onClick={handleCreateProject}
+                                disabled={createProject.isPending}
                             >
                                 <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
                                 Criar projeto "{searchQuery}"
                             </Button>
                         )}
-                        {!loading && !searchQuery.trim() && filteredProjects.length === 0 && (
+                        {!isLoading && !searchQuery.trim() && filteredProjects.length === 0 && (
                             <div className="text-sm text-center py-4 text-zinc-500">
                                 Nenhum projeto encontrado.
                             </div>

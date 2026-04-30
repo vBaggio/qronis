@@ -57,3 +57,14 @@ export function useDeleteTimeEntry() {
         },
     });
 }
+
+export function useCreateTimeEntry() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (payload: { projectId: string; description: string; startTime: string; endTime: string }) =>
+            api.post<TimeEntry>('/time-entries', payload),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: timeEntryKeys.all });
+        },
+    });
+}

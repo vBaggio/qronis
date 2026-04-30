@@ -7,8 +7,6 @@ import { Trash2, Loader2 } from 'lucide-react';
 import { parseISO, format } from 'date-fns';
 import { TimeEditDialog } from './TimeEditDialog';
 
-export type { TimeEntry };
-
 interface TimeEntryRowProps {
     entry: TimeEntry;
     isReadOnly?: boolean;

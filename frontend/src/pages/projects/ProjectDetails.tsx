@@ -7,7 +7,7 @@ import { TopNav } from '@/components/layout/TopNav';
 import { TimeEntryList } from '@/components/history/TimeEntryList';
 import { Button } from '@/components/ui/button';
 import { Loader2, ArrowLeft, Plus, Pencil } from 'lucide-react';
-import { formatSmartDuration } from '@/lib/time-utils';
+import { formatDurationSeconds } from '@/lib/time-utils';
 import { TimeEntryModal } from '@/components/tracker/TimeEntryModal';
 import {
     Dialog,
@@ -108,12 +108,7 @@ export const ProjectDetails: React.FC = () => {
         );
     };
 
-    const totalDurationStr = summary
-        ? formatSmartDuration(
-            new Date().toISOString(),
-            new Date(Date.now() + summary.totalDurationSeconds * 1000).toISOString()
-        ).value
-        : '--';
+    const totalDurationStr = summary ? formatDurationSeconds(summary.totalDurationSeconds) : '--';
 
     if (isLoadingProject && !project) {
         return (

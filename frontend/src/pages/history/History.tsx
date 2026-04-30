@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { TopNav } from '../../components/layout/TopNav';
-import { TimeEntryList } from '../../components/history/TimeEntryList';
-import { ProjectSelector } from '../../components/tracker/ProjectSelector';
+import { TopNav } from '@/components/layout/TopNav';
+import { TimeEntryList } from '@/components/history/TimeEntryList';
+import { ProjectSelector } from '@/components/tracker/ProjectSelector';
 import { Button } from '@/components/ui/button';
 import { Loader2, X } from 'lucide-react';
-import { useTimeEntries } from '../../hooks/useTimeEntries';
+import { useTimeEntries } from '@/hooks/useTimeEntries';
 
 export const History: React.FC = () => {
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);

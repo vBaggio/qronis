@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { TopNav } from '../../components/layout/TopNav';
-import { TimerDisplay } from '../../components/tracker/TimerDisplay';
-import { ProjectSelector } from '../../components/tracker/ProjectSelector';
+import { TopNav } from '@/components/layout/TopNav';
+import { TimerDisplay } from '@/components/tracker/TimerDisplay';
+import { ProjectSelector } from '@/components/tracker/ProjectSelector';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Play, Square } from 'lucide-react';
-import { useActiveTimer, useStartTimer, useStopTimer } from '../../hooks/useTimer';
-import { MESSAGES } from '../../lib/constants';
+import { useActiveTimer, useStartTimer, useStopTimer } from '@/hooks/useTimer';
+import { MESSAGES } from '@/lib/constants';
 
 export const ZenTimer: React.FC = () => {
     const [taskDescription, setTaskDescription] = useState('');
