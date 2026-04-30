@@ -52,7 +52,7 @@ class AuthControllerIT extends AbstractControllerIT {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error").isNotEmpty());
+                .andExpect(jsonPath("$.error").value("USER_ALREADY_EXISTS"));
     }
 
     @Test
@@ -126,7 +126,8 @@ class AuthControllerIT extends AbstractControllerIT {
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginBody))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("INVALID_CREDENTIALS"));
     }
 
     @Test
@@ -141,6 +142,7 @@ class AuthControllerIT extends AbstractControllerIT {
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginBody))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("INVALID_CREDENTIALS"));
     }
 }
