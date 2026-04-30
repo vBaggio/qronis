@@ -18,22 +18,6 @@ repositories {
     mavenCentral()
 }
 
-// ─── Source Sets ────────────────────────────────────────────────────────────
-
-sourceSets {
-    create("integrationTest") {
-        java.srcDir("src/integrationTest/java")
-        resources.srcDir("src/integrationTest/resources")
-        compileClasspath += sourceSets["main"].output + sourceSets["test"].output
-        runtimeClasspath += sourceSets["main"].output + sourceSets["test"].output
-    }
-}
-
-configurations["integrationTestImplementation"]
-    .extendsFrom(configurations["testImplementation"])
-configurations["integrationTestRuntimeOnly"]
-    .extendsFrom(configurations["testRuntimeOnly"])
-
 // ─── Dependency Management ────────────────────────────────────────────────
 
 dependencyManagement {
@@ -66,18 +50,15 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
     annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
 
-    // Test (unit)
+    // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.springframework.modulith:spring-modulith-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation(platform("org.testcontainers:testcontainers-bom:1.20.4"))
+    testImplementation("org.testcontainers:postgresql")
+    testImplementation("org.testcontainers:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-
-    // Test (integration)
-    "integrationTestImplementation"("org.springframework.boot:spring-boot-testcontainers")
-    "integrationTestImplementation"(platform("org.testcontainers:testcontainers-bom:1.20.4"))
-    "integrationTestImplementation"("org.testcontainers:postgresql")
-    "integrationTestImplementation"("org.testcontainers:junit-jupiter")
-    "integrationTestRuntimeOnly"("org.junit.platform:junit-platform-launcher")
 }
 
 // ─── Compile Options ─────────────────────────────────────────────────────
@@ -92,25 +73,25 @@ tasks.withType<JavaCompile> {
 
 // ─── Test Tasks ──────────────────────────────────────────────────────────
 
-tasks.withType<Test> {
-    useJUnitPlatform()
+tasks.test {
+    useJUnitPlatform { excludeTags("integration") }
     testLogging {
         events("passed", "skipped", "failed")
         showStandardStreams = true
     }
 }
 
-tasks.named<ProcessResources>("processIntegrationTestResources") {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
-val integrationTest = tasks.register<Test>("integrationTest") {
+tasks.register<Test>("integrationTest") {
     description = "Roda testes de integração com Testcontainers + PostgreSQL"
     group = "verification"
-    testClassesDirs = sourceSets["integrationTest"].output.classesDirs
-    classpath = sourceSets["integrationTest"].runtimeClasspath
-    useJUnitPlatform()
+    useJUnitPlatform { includeTags("integration") }
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+    }
     shouldRunAfter(tasks.test)
+    classpath = sourceSets["test"].runtimeClasspath
+    testClassesDirs = sourceSets["test"].output.classesDirs
 }
 
 // ─── JaCoCo ──────────────────────────────────────────────────────────────
@@ -122,23 +103,22 @@ val jacocoExclusions = listOf(
     "**/*Properties*",
     "**/QronisApplication*",
     "**/QronisModuleDetectionStrategy*",
-    // Web layer: controllers and exception handlers — covered by integration tests
-    "**/*Controller*",
-    "**/*ExceptionHandler*",
-    // Security filter — covered by integration tests
-    "**/security/**",
-    // Shared global exception handler — covered by integration tests
-    "**/shared/exception/**",
     // JPA domain entities — no-arg constructors called reflectively by Hibernate
     "**/domain/entity/**",
     // Domain and API exception classes — trivial constructors, tested indirectly
     "**/domain/exception/**",
-    "**/api/exception/**"
+    "**/api/exception/**",
+    // Shared global exception handler — covered by integration tests (excluded from unit threshold)
+    "**/shared/exception/**",
+    // Security filter — covered by integration tests
+    "**/security/**"
 )
 
-tasks.named<JacocoReport>("jacocoTestReport") {
-    dependsOn(tasks.test)
-    executionData.setFrom(layout.buildDirectory.file("jacoco/test.exec"))
+tasks.jacocoTestReport {
+    dependsOn(tasks.test, tasks.named("integrationTest"))
+    executionData.setFrom(
+        fileTree(layout.buildDirectory).include("jacoco/test.exec", "jacoco/integrationTest.exec")
+    )
     reports {
         xml.required = true
         html.required = true
@@ -151,13 +131,15 @@ tasks.named<JacocoReport>("jacocoTestReport") {
 }
 
 tasks.register<JacocoCoverageVerification>("jacocoCoverageVerification") {
-    dependsOn(tasks.named("jacocoTestReport"))
+    dependsOn(tasks.jacocoTestReport)
+    executionData.setFrom(
+        fileTree(layout.buildDirectory).include("jacoco/test.exec", "jacoco/integrationTest.exec")
+    )
     classDirectories.setFrom(
         files(sourceSets["main"].output.classesDirs.map {
             fileTree(it) { exclude(jacocoExclusions) }
         })
     )
-    executionData.setFrom(layout.buildDirectory.file("jacoco/test.exec"))
     violationRules {
         rule {
             limit {
