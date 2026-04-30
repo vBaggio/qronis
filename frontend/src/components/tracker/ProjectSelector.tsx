@@ -40,7 +40,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
     const [open, setOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
-    const { data, isLoading } = useProjects({ page: 0, search: '' });
+    const { data, isLoading } = useProjects({ page: 0, search: '', size: 100 });
     const createProject = useCreateProject();
 
     const projects: Project[] = data?.content ?? [];

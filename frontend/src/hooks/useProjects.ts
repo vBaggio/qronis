@@ -10,13 +10,13 @@ export const projectKeys = {
     summary: (id: string) => ['projects', 'summary', id] as const,
 };
 
-export function useProjects({ page, search }: { page: number; search: string }) {
+export function useProjects({ page, search, size }: { page: number; search: string; size?: number }) {
     return useQuery({
         queryKey: projectKeys.list(page, search),
         queryFn: async ({ signal }) => {
             const params: Record<string, unknown> = {
                 page,
-                size: PAGE_SIZE.projects,
+                size: size ?? PAGE_SIZE.projects,
                 sort: 'createdAt,desc',
             };
             if (search) params.name = search;

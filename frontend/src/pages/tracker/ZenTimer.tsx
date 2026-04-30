@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { TopNav } from '@/components/layout/TopNav';
 import { TimerDisplay } from '@/components/tracker/TimerDisplay';
 import { ProjectSelector } from '@/components/tracker/ProjectSelector';
@@ -43,7 +44,7 @@ export const ZenTimer: React.FC = () => {
     }
 
     const errorMessage = error
-        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+        ? (axios.isAxiosError(error) ? error.response?.data?.message : undefined)
             ?? 'Ocorreu um erro. Tente novamente.'
         : null;
 

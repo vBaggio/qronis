@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { formatSmartDuration, formatTimeRange, formatTimeOnly } from '../../lib/time-utils';
-import { api } from '../../lib/api';
 import { accentColorFor, accentBgFor } from '../../lib/colors';
 import type { TimeEntry } from '../../lib/types';
+import { usePatchTimeEntry } from '../../hooks/useTimeEntries';
 import { Trash2, Loader2 } from 'lucide-react';
 import { parseISO, format } from 'date-fns';
 import { TimeEditDialog } from './TimeEditDialog';
@@ -38,13 +38,11 @@ export const TimeEntryRow: React.FC<TimeEntryRowProps> = ({
     onUpdate
 }) => {
     const [description, setDescription] = useState(entry.description || '');
-    const [isSaving, setIsSaving] = useState(false);
-
-    // Time edit dialog state
     const [isTimeDialogOpen, setIsTimeDialogOpen] = useState(false);
     const [editStartTime, setEditStartTime] = useState('');
     const [editEndTime, setEditEndTime] = useState('');
-    const [isTimeSaving, setIsTimeSaving] = useState(false);
+
+    const patchEntry = usePatchTimeEntry();
 
     useEffect(() => {
         setDescription(entry.description || '');
@@ -52,21 +50,21 @@ export const TimeEntryRow: React.FC<TimeEntryRowProps> = ({
 
     // ─── Description edit ─────────────────────────────────────────────────────
 
-    const handleDescriptionBlur = async () => {
+    const handleDescriptionBlur = () => {
         if (isReadOnly) return;
         if (description.trim() === (entry.description || '').trim()) return;
 
-        setIsSaving(true);
-        try {
-            if (onUpdate) onUpdate({ ...entry, description: description.trim() });
-            await api.patch(`/time-entries/${entry.id}`, { description: description.trim() });
-        } catch (error) {
-            console.error('Failed to patch description', error);
-            setDescription(entry.description || '');
-            if (onUpdate) onUpdate({ ...entry });
-        } finally {
-            setIsSaving(false);
-        }
+        const optimistic = { ...entry, description: description.trim() };
+        if (onUpdate) onUpdate(optimistic);
+        patchEntry.mutate(
+            { id: entry.id, patch: { description: description.trim() } },
+            {
+                onError: () => {
+                    setDescription(entry.description || '');
+                    if (onUpdate) onUpdate({ ...entry });
+                },
+            }
+        );
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -86,10 +84,10 @@ export const TimeEntryRow: React.FC<TimeEntryRowProps> = ({
         setIsTimeDialogOpen(true);
     };
 
-    const handleTimeSave = async () => {
+    const handleTimeSave = () => {
         if (!editStartTime) return;
 
-        const patch: Record<string, string> = {};
+        const patch: Partial<TimeEntry> = {};
         const newStartIso = replaceTimeInIso(entry.startTime, editStartTime);
         if (newStartIso !== entry.startTime) patch.startTime = newStartIso;
 
@@ -103,18 +101,17 @@ export const TimeEntryRow: React.FC<TimeEntryRowProps> = ({
             return;
         }
 
-        setIsTimeSaving(true);
-        try {
-            const updatedEntry = { ...entry, ...patch };
-            if (onUpdate) onUpdate(updatedEntry);
-            await api.patch(`/time-entries/${entry.id}`, patch);
-            setIsTimeDialogOpen(false);
-        } catch (error) {
-            console.error('Failed to patch time', error);
-            if (onUpdate) onUpdate({ ...entry });
-        } finally {
-            setIsTimeSaving(false);
-        }
+        const optimistic = { ...entry, ...patch };
+        if (onUpdate) onUpdate(optimistic);
+        setIsTimeDialogOpen(false);
+        patchEntry.mutate(
+            { id: entry.id, patch },
+            {
+                onError: () => {
+                    if (onUpdate) onUpdate({ ...entry });
+                },
+            }
+        );
     };
 
     const duration = formatSmartDuration(entry.startTime, entry.endTime);
@@ -178,7 +175,7 @@ export const TimeEntryRow: React.FC<TimeEntryRowProps> = ({
                                 className="w-full bg-transparent border-none p-0 m-0 text-base text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 rounded-sm truncate transition-shadow hover:bg-zinc-50 dark:hover:bg-zinc-800/30 px-1.5 -mx-1.5"
                             />
                         )}
-                        {isSaving && (
+                        {patchEntry.isPending && (
                             <Loader2 className="absolute -right-6 w-3 h-3 text-zinc-400 animate-spin" aria-hidden="true" />
                         )}
                     </div>
@@ -217,7 +214,7 @@ export const TimeEntryRow: React.FC<TimeEntryRowProps> = ({
                     onStartTimeChange={setEditStartTime}
                     onEndTimeChange={setEditEndTime}
                     onSave={handleTimeSave}
-                    isSaving={isTimeSaving}
+                    isSaving={patchEntry.isPending}
                 />
             )}
         </>

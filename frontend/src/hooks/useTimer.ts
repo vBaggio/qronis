@@ -1,5 +1,4 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
 import { api } from '../lib/api';
 import { timeEntryKeys } from './useTimeEntries';
 import type { TimeEntry } from '../lib/types';
@@ -12,16 +11,9 @@ export function useActiveTimer() {
     return useQuery({
         queryKey: timerKeys.active,
         queryFn: async ({ signal }) => {
-            try {
-                const { data } = await api.get<TimeEntry>('/time-entries/active', { signal });
-                return data?.id ? data : null;
-            } catch (error) {
-                // 204 No Content = no active timer, not an error
-                if (axios.isAxiosError(error) && error.response?.status === 204) {
-                    return null;
-                }
-                throw error;
-            }
+            // 204 No Content (no active timer) → data is empty, id is undefined → returns null
+            const { data } = await api.get<TimeEntry>('/time-entries/active', { signal });
+            return data?.id ? data : null;
         },
         staleTime: 1000 * 5,
         retry: false,

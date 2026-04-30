@@ -11,7 +11,6 @@ export interface Project {
     id: string;
     name: string;
     tenantId?: string;
-    createdByName?: string;
     createdAt?: string;
 }
 
@@ -27,6 +26,7 @@ export interface TimeEntry {
     endTime: string | null;
     projectId: string | null;
     projectName: string | null;
+    createdAt?: string;
 }
 
 export interface PageResponse<T> {
