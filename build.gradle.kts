@@ -121,7 +121,19 @@ val jacocoExclusions = listOf(
     "**/*Config*",
     "**/*Properties*",
     "**/QronisApplication*",
-    "**/QronisModuleDetectionStrategy*"
+    "**/QronisModuleDetectionStrategy*",
+    // Web layer: controllers and exception handlers — covered by integration tests
+    "**/*Controller*",
+    "**/*ExceptionHandler*",
+    // Security filter — covered by integration tests
+    "**/security/**",
+    // Shared global exception handler — covered by integration tests
+    "**/shared/**",
+    // JPA domain entities — no-arg constructors called reflectively by Hibernate
+    "**/domain/entity/**",
+    // Domain and API exception classes — trivial constructors, tested indirectly
+    "**/domain/exception/**",
+    "**/api/exception/**"
 )
 
 tasks.named<JacocoReport>("jacocoTestReport") {
