@@ -1,5 +1,6 @@
 package com.qronis.modules.tracker.web;
 
+import com.qronis.modules.project.api.exception.ProjectNotFoundException;
 import com.qronis.modules.tracker.api.exception.ActiveTimerConflictException;
 import com.qronis.modules.tracker.api.exception.InvalidTimeBoundsException;
 import com.qronis.modules.tracker.api.exception.TimeEntryNotFoundException;
@@ -17,6 +18,12 @@ import java.util.Map;
 
 @RestControllerAdvice(basePackages = "com.qronis.modules.tracker")
 public class TrackerExceptionHandler {
+
+    @ExceptionHandler(ProjectNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponseDTO handleProjectNotFound(ProjectNotFoundException ex) {
+        return ErrorResponseDTO.of(404, "PROJECT_NOT_FOUND", ex.getMessage());
+    }
 
     @ExceptionHandler(TimeEntryNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
