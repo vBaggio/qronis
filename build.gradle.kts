@@ -70,13 +70,13 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.springframework.modulith:spring-modulith-starter-test")
-    testImplementation("org.springframework.boot:spring-boot-testcontainers")
-    testImplementation(platform("org.testcontainers:testcontainers-bom:1.20.4"))
-    testImplementation("org.testcontainers:postgresql")
-    testImplementation("org.testcontainers:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    // Test (integration) — runtime extras only (rest inherited via extendsFrom)
+    // Test (integration)
+    "integrationTestImplementation"("org.springframework.boot:spring-boot-testcontainers")
+    "integrationTestImplementation"(platform("org.testcontainers:testcontainers-bom:1.20.4"))
+    "integrationTestImplementation"("org.testcontainers:postgresql")
+    "integrationTestImplementation"("org.testcontainers:junit-jupiter")
     "integrationTestRuntimeOnly"("org.junit.platform:junit-platform-launcher")
 }
 
@@ -98,6 +98,10 @@ tasks.withType<Test> {
         events("passed", "skipped", "failed")
         showStandardStreams = true
     }
+}
+
+tasks.named<ProcessResources>("processIntegrationTestResources") {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 val integrationTest = tasks.register<Test>("integrationTest") {
