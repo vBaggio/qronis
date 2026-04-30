@@ -128,7 +128,7 @@ val jacocoExclusions = listOf(
     // Security filter — covered by integration tests
     "**/security/**",
     // Shared global exception handler — covered by integration tests
-    "**/shared/**",
+    "**/shared/exception/**",
     // JPA domain entities — no-arg constructors called reflectively by Hibernate
     "**/domain/entity/**",
     // Domain and API exception classes — trivial constructors, tested indirectly

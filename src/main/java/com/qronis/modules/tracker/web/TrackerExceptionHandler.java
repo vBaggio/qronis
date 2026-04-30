@@ -19,6 +19,7 @@ import java.util.Map;
 @RestControllerAdvice(basePackages = "com.qronis.modules.tracker")
 public class TrackerExceptionHandler {
 
+    // ProjectNotFoundException can reach here when ProjectFacade validates tenant ownership from within the tracker module
     @ExceptionHandler(ProjectNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponseDTO handleProjectNotFound(ProjectNotFoundException ex) {
