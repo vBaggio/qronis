@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useAuth } from '../../lib/auth-context';
-import { authApi } from '../../lib/api';
+import { useAuth } from '@/lib/auth-context';
+import { authApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -116,6 +116,8 @@ export const Register: React.FC = () => {
                                 <Label htmlFor="name" className="text-zinc-700 dark:text-zinc-300 font-semibold">Seu Nome</Label>
                                 <Input
                                     id="name"
+                                    name="name"
+                                    autoComplete="name"
                                     placeholder="Ex: Alan Turing"
                                     required
                                     value={formData.name}
@@ -129,6 +131,8 @@ export const Register: React.FC = () => {
                                 <Label htmlFor="companyName" className="text-zinc-700 dark:text-zinc-300 font-semibold">Nome da Empresa (Workspace)</Label>
                                 <Input
                                     id="companyName"
+                                    name="companyName"
+                                    autoComplete="organization"
                                     placeholder="Sua Consultoria ou Nome Pessoal"
                                     required
                                     value={formData.companyName}
@@ -142,7 +146,10 @@ export const Register: React.FC = () => {
                                 <Label htmlFor="email" className="text-zinc-700 dark:text-zinc-300 font-semibold">E-mail Profissional</Label>
                                 <Input
                                     id="email"
+                                    name="email"
                                     type="email"
+                                    autoComplete="email"
+                                    spellCheck={false}
                                     placeholder="alan@turing.com"
                                     required
                                     value={formData.email}
@@ -157,7 +164,9 @@ export const Register: React.FC = () => {
                                     <Label htmlFor="password" className="text-zinc-700 dark:text-zinc-300 font-semibold">Senha Forte</Label>
                                     <Input
                                         id="password"
+                                        name="password"
                                         type="password"
+                                        autoComplete="new-password"
                                         required
                                         value={formData.password}
                                         onChange={handleChange}
@@ -169,7 +178,9 @@ export const Register: React.FC = () => {
                                     <Label htmlFor="confirmPassword" className="text-zinc-700 dark:text-zinc-300 font-semibold">Confirmar Senha</Label>
                                     <Input
                                         id="confirmPassword"
+                                        name="confirmPassword"
                                         type="password"
+                                        autoComplete="new-password"
                                         required
                                         value={formData.confirmPassword}
                                         onChange={handleChange}

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
-import { api } from '@/lib/api';
+import { useCreateTimeEntry } from '@/hooks/useTimeEntries';
 
 interface TimeEntryModalProps {
     isOpen: boolean;
@@ -14,19 +15,20 @@ interface TimeEntryModalProps {
 }
 
 export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({ isOpen, onClose, projectId, onSuccess }) => {
-    const [description, setDescription] = useState('');
-    // Defaulting to today at 09:00 for start, and 10:00 for end as a convenience
     const today = new Date();
     today.setHours(9, 0, 0, 0);
-    const [startTime, setStartTime] = useState(new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().slice(0, 16));
-
+    const defaultStart = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
     today.setHours(10, 0, 0, 0);
-    const [endTime, setEndTime] = useState(new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().slice(0, 16));
+    const defaultEnd = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
 
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [description, setDescription] = useState('');
+    const [startTime, setStartTime] = useState(defaultStart);
+    const [endTime, setEndTime] = useState(defaultEnd);
     const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const createTimeEntry = useCreateTimeEntry();
+
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
 
@@ -43,25 +45,27 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({ isOpen, onClose,
             return;
         }
 
-        setIsSubmitting(true);
-        try {
-            await api.post('/time-entries', {
+        createTimeEntry.mutate(
+            {
                 projectId,
                 description: description.trim(),
                 startTime: start.toISOString(),
-                endTime: end.toISOString()
-            });
-
-            // Reset state
-            setDescription('');
-            onSuccess();
-            onClose();
-        } catch (err: any) {
-            console.error('Failed to create manual entry:', err);
-            setError(err.response?.data?.message || 'Erro ao salvar o lançamento');
-        } finally {
-            setIsSubmitting(false);
-        }
+                endTime: end.toISOString(),
+            },
+            {
+                onSuccess: () => {
+                    setDescription('');
+                    onSuccess();
+                    onClose();
+                },
+                onError: (err: unknown) => {
+                    const message = axios.isAxiosError(err)
+                        ? err.response?.data?.message
+                        : undefined;
+                    setError(message || 'Erro ao salvar o lançamento');
+                },
+            }
+        );
     };
 
     return (
@@ -76,9 +80,11 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({ isOpen, onClose,
                         <Label htmlFor="description">O que foi feito?</Label>
                         <Input
                             id="description"
-                            placeholder="Descreva a atividade..."
+                            name="description"
+                            placeholder="Descreva a atividade…"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
+                            autoComplete="off"
                         />
                     </div>
 
@@ -110,11 +116,11 @@ export const TimeEntryModal: React.FC<TimeEntryModalProps> = ({ isOpen, onClose,
                     )}
 
                     <DialogFooter className="pt-4">
-                        <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting}>
+                        <Button type="button" variant="ghost" onClick={onClose} disabled={createTimeEntry.isPending}>
                             Cancelar
                         </Button>
-                        <Button type="submit" disabled={isSubmitting} className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        <Button type="submit" disabled={createTimeEntry.isPending} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                            {createTimeEntry.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
                             Salvar Lançamento
                         </Button>
                     </DialogFooter>

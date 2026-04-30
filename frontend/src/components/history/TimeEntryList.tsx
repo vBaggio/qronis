@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
-import { TimeEntryRow, type TimeEntry } from './TimeEntryRow';
-import { formatRelativeDate } from '../../lib/time-utils';
+import type { TimeEntry } from '@/lib/types';
+import { TimeEntryRow } from './TimeEntryRow';
+import { formatRelativeDate, formatDurationSeconds } from '@/lib/time-utils';
 
 interface TimeEntryListProps {
     entries: TimeEntry[];
@@ -60,7 +61,6 @@ export const TimeEntryList: React.FC<TimeEntryListProps> = ({
             return acc;
         }, {} as Record<string, TimeEntry[]>);
 
-        // Calculate total seconds per day group
         const calcDayTotal = (dayEntries: TimeEntry[]): string => {
             const totalSeconds = dayEntries.reduce((sum, e) => {
                 if (!e.startTime || !e.endTime) return sum;
@@ -68,13 +68,7 @@ export const TimeEntryList: React.FC<TimeEntryListProps> = ({
                 const end = new Date(e.endTime).getTime();
                 return sum + Math.max(0, Math.floor((end - start) / 1000));
             }, 0);
-
-            if (totalSeconds < 60) return `${totalSeconds}s`;
-            const minutes = Math.floor(totalSeconds / 60);
-            if (minutes < 60) return `${minutes}m`;
-            const hours = Math.floor(minutes / 60);
-            const remainingMinutes = minutes % 60;
-            return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
+            return formatDurationSeconds(totalSeconds);
         };
 
         return Object.entries(grouped).map(([day, dayEntries]) => (

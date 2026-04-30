@@ -13,11 +13,14 @@ Qronis é um SaaS de Time Tracker projetado para oferecer um fluxo sem atritos, 
 - MapStruct + Lombok
 
 ### Frontend
-- React 19
-- TypeScript
-- Vite
-- Tailwind CSS v4
-- Shadcn UI
+- React 19 + TypeScript 5 (strict)
+- Vite 7
+- Tailwind CSS v4 + Shadcn UI
+- React Router 7
+- TanStack React Query 5 — cache, deduplicação e data fetching
+- React Hook Form + Zod — formulários e validação
+- Axios — HTTP client com interceptors JWT e auth expiry
+- date-fns (pt-BR) — formatação de datas
 
 ## Arquitetura e Estrutura
 

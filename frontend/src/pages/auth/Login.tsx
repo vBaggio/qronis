@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useAuth } from '../../lib/auth-context';
-import { authApi } from '../../lib/api';
+import { useAuth } from '@/lib/auth-context';
+import { authApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -102,7 +102,10 @@ export const Login: React.FC = () => {
                                 <Label htmlFor="email" className="text-zinc-700 dark:text-zinc-300 font-semibold">E-mail</Label>
                                 <Input
                                     id="email"
+                                    name="email"
                                     type="email"
+                                    autoComplete="email"
+                                    spellCheck={false}
                                     placeholder="alan@turing.com"
                                     required
                                     value={email}
@@ -120,7 +123,9 @@ export const Login: React.FC = () => {
                                 </div>
                                 <Input
                                     id="password"
+                                    name="password"
                                     type="password"
+                                    autoComplete="current-password"
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}

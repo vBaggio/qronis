@@ -1,15 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { TOKEN_KEY, AUTH_EXPIRED_EVENT, api } from './api';
+import type { User } from './types';
 
-// Define the shape of our User based on the backend DTO
-export interface User {
-    id: string;
-    email: string;
-    name: string;
-    tenantId: string;
-    tenantName: string;
-    role: string;
-}
+export type { User };
 
 interface AuthContextType {
     user: User | null;

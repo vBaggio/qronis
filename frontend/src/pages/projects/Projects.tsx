@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useDeferredValue } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '@/lib/api';
+import { accentColorFor } from '@/lib/colors';
+import type { Project } from '@/lib/types';
+import { useProjects, useDeleteProject, useCreateProject } from '@/hooks/useProjects';
 import { TopNav } from '@/components/layout/TopNav';
-// Removed shadcn/ui table imports to apply the Zen Paradigm flat list
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -33,43 +34,15 @@ import {
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Utilities ────────────────────────────────────────────────────────────────
 
-interface Project {
-    id: string;
-    name: string;
-    tenantId: string;
-    createdAt: string;
-}
-
-interface Page<T> {
-    content: T[];
-    totalElements: number;
-    totalPages: number;
-    size: number;
-    number: number;
-    first: boolean;
-    last: boolean;
-}
-
-// ─── Accent colors — border-left (Linear/Notion style) ───────────────────────
-// Mapeados como hex para garantir compatibilidade com inline style.
-// A cor é determinística: mesma cor sempre para o mesmo UUID de projeto.
-const ACCENT_COLORS = [
-    '#10b981', // emerald-500
-    '#0ea5e9', // sky-500
-    '#f59e0b', // amber-500
-    '#f43f5e', // rose-500
-    '#6366f1', // indigo-500
-    '#f97316', // orange-500
-    '#14b8a6', // teal-500
-    '#d946ef', // fuchsia-500
-];
-
-function accentColorFor(id: string): string {
-    const hash = id.slice(0, 8).split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-    return ACCENT_COLORS[hash % ACCENT_COLORS.length];
-}
+const formatDate = (iso: string) => {
+    try {
+        return format(new Date(iso), "dd 'de' MMM 'de' yyyy", { locale: ptBR });
+    } catch {
+        return iso;
+    }
+};
 
 // ─── Delete Confirm Dialog ────────────────────────────────────────────────────
 
@@ -88,7 +61,7 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
             <DialogHeader>
                 <DialogTitle className="flex items-center gap-2.5 text-zinc-900 dark:text-zinc-50">
                     <span className="flex h-8 w-8 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-900/30 shrink-0">
-                        <AlertTriangle className="h-4 w-4 text-rose-600 dark:text-rose-400" />
+                        <AlertTriangle className="h-4 w-4 text-rose-600 dark:text-rose-400" aria-hidden="true" />
                     </span>
                     Excluir Projeto
                 </DialogTitle>
@@ -112,9 +85,7 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
                         disabled={loading}
                         className="min-w-[100px]"
                     >
-                        {loading
-                            ? <Loader2 className="h-4 w-4 animate-spin" />
-                            : 'Excluir'}
+                        {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : 'Excluir'}
                     </Button>
                 </div>
             </div>
@@ -122,7 +93,7 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
     </Dialog>
 );
 
-// ─── New Project Dialog ────────────────────────────────────────────────────────
+// ─── New Project Dialog ───────────────────────────────────────────────────────
 
 interface NewProjectDialogProps {
     onCreated: () => void;
@@ -131,24 +102,24 @@ interface NewProjectDialogProps {
 const NewProjectDialog: React.FC<NewProjectDialogProps> = ({ onCreated }) => {
     const [open, setOpen] = useState(false);
     const [name, setName] = useState('');
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const createProject = useCreateProject();
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!name.trim()) return;
-        setLoading(true);
         setError(null);
-        try {
-            await api.post('/projects', { name: name.trim() });
-            setName('');
-            setOpen(false);
-            onCreated();
-        } catch {
-            setError('Não foi possível criar o projeto. Tente novamente.');
-        } finally {
-            setLoading(false);
-        }
+        createProject.mutate(name.trim(), {
+            onSuccess: () => {
+                setName('');
+                setOpen(false);
+                onCreated();
+            },
+            onError: () => {
+                setError('Não foi possível criar o projeto. Tente novamente.');
+            },
+        });
     };
 
     return (
@@ -158,14 +129,14 @@ const NewProjectDialog: React.FC<NewProjectDialogProps> = ({ onCreated }) => {
                     id="btn-new-project"
                     className="bg-emerald-50/80 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20 gap-2 shrink-0 rounded-full h-11 px-6 shadow-sm transition-all border border-emerald-200/50 dark:border-emerald-800/50 w-full sm:w-auto font-semibold text-base"
                 >
-                    <Plus className="h-5 w-5" />
+                    <Plus className="h-5 w-5" aria-hidden="true" />
                     Novo Projeto
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-zinc-900 dark:text-zinc-50">
-                        <Briefcase className="h-5 w-5 text-emerald-600" />
+                        <Briefcase className="h-5 w-5 text-emerald-600" aria-hidden="true" />
                         Criar Novo Projeto
                     </DialogTitle>
                 </DialogHeader>
@@ -176,7 +147,7 @@ const NewProjectDialog: React.FC<NewProjectDialogProps> = ({ onCreated }) => {
                         </label>
                         <Input
                             id="project-name"
-                            placeholder="Ex: Site Corporativo, App Mobile..."
+                            placeholder="Ex: Site Corporativo, App Mobile…"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             autoFocus
@@ -188,16 +159,16 @@ const NewProjectDialog: React.FC<NewProjectDialogProps> = ({ onCreated }) => {
                         )}
                     </div>
                     <div className="flex justify-end gap-2 pt-1">
-                        <Button type="button" variant="ghost" onClick={() => setOpen(false)} disabled={loading}>
+                        <Button type="button" variant="ghost" onClick={() => setOpen(false)} disabled={createProject.isPending}>
                             Cancelar
                         </Button>
                         <Button
                             type="submit"
                             id="btn-submit-project"
-                            disabled={loading || !name.trim()}
+                            disabled={createProject.isPending || !name.trim()}
                             className="bg-emerald-600 hover:bg-emerald-700 text-white min-w-[100px]"
                         >
-                            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Criar'}
+                            {createProject.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : 'Criar'}
                         </Button>
                     </div>
                 </form>
@@ -206,96 +177,45 @@ const NewProjectDialog: React.FC<NewProjectDialogProps> = ({ onCreated }) => {
     );
 };
 
-// ─── Projects Page ─────────────────────────────────────────────────────────────
-
-const PAGE_SIZE = 15;
+// ─── Projects Page ────────────────────────────────────────────────────────────
 
 export const Projects: React.FC = () => {
     const navigate = useNavigate();
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [totalElements, setTotalElements] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
     const [page, setPage] = useState(0);
-    const [loading, setLoading] = useState(true);
-
-    // Live search com debounce
     const [searchQuery, setSearchQuery] = useState('');
-    const [debouncedSearch, setDebouncedSearch] = useState('');
-    const isSearchPending = searchQuery !== debouncedSearch;
+    const deferredSearch = useDeferredValue(searchQuery);
+    const isSearchPending = searchQuery !== deferredSearch;
 
     const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
-    const [deletingId, setDeletingId] = useState<string | null>(null);
 
-    // Dispara debounce 400ms após o usuário parar de digitar
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearch(searchQuery);
-            setPage(0);
-        }, 400);
-        return () => clearTimeout(timer);
-    }, [searchQuery]);
+    const { data, isLoading, isError } = useProjects({ page, search: deferredSearch });
+    const deleteProject = useDeleteProject();
 
-    const fetchProjects = useCallback(async () => {
-        setLoading(true);
-        try {
-            const params: Record<string, unknown> = {
-                page,
-                size: PAGE_SIZE,
-                sort: 'createdAt,desc',
-            };
-            if (debouncedSearch) params.name = debouncedSearch;
-            const { data } = await api.get<Page<Project>>('/projects', { params });
-            setProjects(data.content);
-            setTotalElements(data.totalElements);
-            setTotalPages(data.totalPages);
-        } catch {
-            setProjects([]);
-        } finally {
-            setLoading(false);
-        }
-    }, [page, debouncedSearch]);
+    const projects = data?.content ?? [];
+    const totalElements = data?.totalElements ?? 0;
+    const totalPages = data?.totalPages ?? 0;
 
-    useEffect(() => {
-        fetchProjects();
-    }, [fetchProjects]);
-
-    const handleDeleteConfirm = async () => {
+    const handleDeleteConfirm = () => {
         if (!projectToDelete) return;
-        setDeletingId(projectToDelete.id);
-        try {
-            await api.delete(`/projects/${projectToDelete.id}`);
-            setProjectToDelete(null);
-            fetchProjects();
-        } catch {
-            setProjectToDelete(null);
-        } finally {
-            setDeletingId(null);
-        }
-    };
-
-    const formatDate = (iso: string) => {
-        try {
-            return format(new Date(iso), "dd 'de' MMM 'de' yyyy", { locale: ptBR });
-        } catch {
-            return iso;
-        }
+        deleteProject.mutate(projectToDelete.id, {
+            onSuccess: () => setProjectToDelete(null),
+            onError: () => setProjectToDelete(null),
+        });
     };
 
     return (
         <div className="min-h-screen bg-white dark:bg-zinc-950 flex flex-col">
             <TopNav />
 
-            {/* Dialog de exclusão com confirmação visual */}
             <DeleteConfirmDialog
                 project={projectToDelete}
                 onConfirm={handleDeleteConfirm}
                 onCancel={() => setProjectToDelete(null)}
-                loading={deletingId !== null}
+                loading={deleteProject.isPending}
             />
 
             <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
 
-                {/* ── Unified Page Header & Search ── */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                     <div className="flex-1">
                         <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
@@ -310,46 +230,51 @@ export const Projects: React.FC = () => {
 
                     <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto pt-2 md:pt-0">
                         <div className="relative w-full sm:w-72 md:w-80">
-                            {isSearchPending || loading ? (
-                                <Loader2 className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400 animate-spin" />
+                            {isSearchPending || isLoading ? (
+                                <Loader2 className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400 animate-spin" aria-hidden="true" />
                             ) : (
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" aria-hidden="true" />
                             )}
                             <Input
                                 id="search-projects"
-                                placeholder="Buscar projetos..."
+                                placeholder="Buscar projetos…"
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onChange={(e) => { setSearchQuery(e.target.value); setPage(0); }}
                                 className="pl-11 h-11 w-full rounded-full bg-white dark:bg-zinc-900/50 border-zinc-200/80 dark:border-zinc-800/80 focus-visible:ring-emerald-500/30 shadow-sm text-base transition-all"
                             />
                         </div>
                         <div className="w-full sm:w-auto">
-                            {(!(!loading && projects.length === 0 && !debouncedSearch)) && (
-                                <NewProjectDialog onCreated={fetchProjects} />
+                            {!(isLoading && projects.length === 0 && !deferredSearch) && (
+                                <NewProjectDialog onCreated={() => setPage(0)} />
                             )}
                         </div>
                     </div>
                 </div>
 
-                {/* ── Continuous Stream (Flat List) ── */}
+                {isError && (
+                    <div className="mb-6 rounded-lg bg-red-50 dark:bg-red-900/30 p-4 text-sm text-red-600 dark:text-red-400">
+                        Falha ao carregar os projetos. Tente recarregar a página.
+                    </div>
+                )}
+
                 <div className="flex flex-col gap-2 w-full mt-2">
-                    {loading ? (
+                    {isLoading ? (
                         <div className="py-16 flex flex-col items-center justify-center gap-2 text-zinc-500 dark:text-zinc-400">
-                            <Loader2 className="h-5 w-5 animate-spin text-emerald-500" />
-                            <span className="text-sm">Carregando projetos...</span>
+                            <Loader2 className="h-5 w-5 animate-spin text-emerald-500" aria-hidden="true" />
+                            <span className="text-sm">Carregando projetos…</span>
                         </div>
                     ) : projects.length === 0 ? (
                         <div className="py-24 flex flex-col items-center gap-3 text-zinc-400 dark:text-zinc-600">
-                            <FolderOpen className="h-10 w-10 mb-1" />
+                            <FolderOpen className="h-10 w-10 mb-1" aria-hidden="true" />
                             <p className="text-sm font-medium text-zinc-600 dark:text-zinc-300">Nenhum projeto encontrado</p>
                             <p className="text-xs text-zinc-500 mb-2">
-                                {debouncedSearch
-                                    ? `Nenhum resultado para "${debouncedSearch}"`
+                                {deferredSearch
+                                    ? `Nenhum resultado para "${deferredSearch}"`
                                     : 'Crie seu primeiro projeto para começar a rastrear o tempo.'}
                             </p>
-                            {!debouncedSearch && (
+                            {!deferredSearch && (
                                 <div className="mt-2">
-                                    <NewProjectDialog onCreated={fetchProjects} />
+                                    <NewProjectDialog onCreated={() => setPage(0)} />
                                 </div>
                             )}
                         </div>
@@ -357,10 +282,12 @@ export const Projects: React.FC = () => {
                         projects.map((project, index) => {
                             const accentColor = accentColorFor(project.id);
                             return (
-                                <div
+                                <button
                                     key={project.id}
+                                    type="button"
                                     onClick={() => navigate(`/projects/${project.id}`)}
-                                    className="group cursor-pointer relative flex items-center justify-between min-h-[56px] px-4 border-b border-zinc-100 dark:border-zinc-800/60 last:border-0 transition-all duration-200 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/30 animate-in fade-in"
+                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate(`/projects/${project.id}`); }}
+                                    className="group text-left cursor-pointer relative flex items-center justify-between min-h-[56px] px-4 border-b border-zinc-100 dark:border-zinc-800/60 last:border-0 transition-all duration-200 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/30 animate-in fade-in w-full"
                                     style={{
                                         animationDelay: `${index * 40}ms`,
                                         animationFillMode: 'both',
@@ -368,46 +295,42 @@ export const Projects: React.FC = () => {
                                     }}
                                 >
                                     <div className="flex items-center gap-4 flex-1 overflow-hidden">
-                                        {/* Color Dot */}
                                         <span
                                             className="h-2.5 w-2.5 shrink-0 rounded-full shadow-sm"
                                             style={{ backgroundColor: accentColor }}
+                                            aria-hidden="true"
                                         />
-
-                                        {/* Project Name */}
                                         <span className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight truncate">
                                             {project.name}
                                         </span>
                                     </div>
 
                                     <div className="flex items-center gap-6 justify-end shrink-0 pl-4 w-[200px]">
-                                        {/* Subtle Meta Data */}
                                         <span className="text-sm font-medium text-zinc-400 dark:text-zinc-500 tracking-tight">
-                                            {formatDate(project.createdAt)}
+                                            {project.createdAt ? formatDate(project.createdAt) : '—'}
                                         </span>
 
-                                        {/* Actions Dropdown */}
-                                        <div onClick={(e) => e.stopPropagation()}>
+                                        <div onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
                                                     <Button
                                                         variant="ghost"
+                                                        aria-label={`Opções de ${project.name}`}
                                                         className="h-8 w-8 p-0 text-zinc-300 hover:text-zinc-600 dark:text-zinc-600 dark:hover:text-zinc-300 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
                                                     >
-                                                        <span className="sr-only">Abrir menu</span>
-                                                        <MoreVertical className="h-4 w-4" />
+                                                        <MoreVertical className="h-4 w-4" aria-hidden="true" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end" className="w-[160px]">
                                                     <DropdownMenuItem
                                                         className="text-rose-600 focus:text-rose-600 focus:bg-rose-50 dark:focus:bg-rose-900/20 cursor-pointer transition-colors"
-                                                        disabled={deletingId === project.id}
+                                                        disabled={deleteProject.isPending && projectToDelete?.id === project.id}
                                                         onClick={() => setProjectToDelete(project)}
                                                     >
-                                                        {deletingId === project.id ? (
-                                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        {deleteProject.isPending && projectToDelete?.id === project.id ? (
+                                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                                                         ) : (
-                                                            <Trash2 className="mr-2 h-4 w-4" />
+                                                            <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
                                                         )}
                                                         Excluir
                                                     </DropdownMenuItem>
@@ -415,13 +338,12 @@ export const Projects: React.FC = () => {
                                             </DropdownMenu>
                                         </div>
                                     </div>
-                                </div>
+                                </button>
                             );
                         })
                     )}
                 </div>
 
-                {/* ── Pagination ── */}
                 {totalPages > 1 && (
                     <div className="flex items-center justify-between mt-4 px-1">
                         <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -433,22 +355,22 @@ export const Projects: React.FC = () => {
                                 variant="outline"
                                 size="icon"
                                 className="h-8 w-8"
-                                disabled={page === 0 || loading}
+                                disabled={page === 0 || isLoading}
                                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                                 aria-label="Página anterior"
                             >
-                                <ChevronLeft className="h-4 w-4" />
+                                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                             </Button>
                             <Button
                                 id="btn-next-page"
                                 variant="outline"
                                 size="icon"
                                 className="h-8 w-8"
-                                disabled={page >= totalPages - 1 || loading}
+                                disabled={page >= totalPages - 1 || isLoading}
                                 onClick={() => setPage((p) => p + 1)}
                                 aria-label="Próxima página"
                             >
-                                <ChevronRight className="h-4 w-4" />
+                                <ChevronRight className="h-4 w-4" aria-hidden="true" />
                             </Button>
                         </div>
                     </div>

@@ -172,3 +172,70 @@ Este documento registra decisões arquiteturais cruciais para que o contexto de 
 - **Camada 2 (Identidade Visual):** Toast notifications via `sonner`, skeleton loading, empty state humanizado, refinamento TopNav.
 - **Camada 3 (Infraestrutura):** Lazy loading de rotas, Error Boundary global, acessibilidade (a11y), preparação i18n.
 - **Filosofia:** Todas as decisões respeitam o DNA Zen/Minimalista do Qronis.
+
+---
+
+## ADR-FE-001: React Query como Camada de Data Fetching
+**Status:** Aceito
+**Contexto:** As páginas gerenciavam cada uma seu próprio estado de loading, error e paginação com `useEffect` + Axios direto. Isso produzia: requests sem AbortController (memory leak ao desmontar), zero cache entre navegações, erro silencioso swallowado em catch blocks, e duplicação de lógica de paginação.
+**Decisão:**
+- Adotar `@tanstack/react-query` como única camada de data fetching client-side.
+- `QueryClient` configurado com `staleTime: 30s`, `retry: 1`. Timer ativo com `staleTime: 5s`.
+- Cada domínio tem seus hooks em `src/hooks/` (`useProjects`, `useTimeEntries`, `useTimer`).
+- Query keys hierárquicas por domínio (`projectKeys`, `timeEntryKeys`, `timerKeys`) permitem invalidação precisa.
+- AbortController integrado via `signal` do React Query em todas as `queryFn` — eliminando o memory leak de P0.
+
+---
+
+## ADR-FE-002: Fonte de Verdade Única para Tipos TypeScript
+**Status:** Aceito
+**Contexto:** `Project`, `TimeEntry`, `PageResponse<T>` e `User` eram redefinidos em múltiplos arquivos (`Projects.tsx`, `History.tsx`, `TimeEntryRow.tsx`, `auth-context.tsx`, `ProjectSelector.tsx`). Divergências silenciosas entre as definições eram possíveis.
+**Decisão:**
+- Criar `src/lib/types.ts` como único source of truth para todas as interfaces de domínio.
+- Arquivos consumidores importam com `import type { ... } from '@/lib/types'`.
+- Tipos re-exportados onde necessário (`export type { TimeEntry }` em `TimeEntryRow.tsx`) para não quebrar consumers existentes.
+
+---
+
+## ADR-FE-003: Centralização de Lógica de Accent Colors
+**Status:** Aceito
+**Contexto:** `ACCENT_COLORS`, `accentColorFor()` e `accentBgFor()` estavam definidos identicamente em `Projects.tsx` e `TimeEntryRow.tsx`. Qualquer mudança na paleta exigia edição em dois lugares.
+**Decisão:**
+- Criar `src/lib/colors.ts` com as três exports. Todos os consumers importam dali.
+
+---
+
+## ADR-FE-004: useDeferredValue em vez de useEffect+setTimeout para Debounce
+**Status:** Aceito
+**Contexto:** `Projects.tsx` implementava debounce de busca com `useEffect(() => { const t = setTimeout(..., 400); return () => clearTimeout(t); }, [searchQuery])`. Isso cria um timer manual e um estado intermediário (`debouncedSearch`) que exige reset manual ao mudar de página.
+**Decisão:**
+- Substituir por `useDeferredValue(searchQuery)` — padrão React moderno que delega o debounce ao scheduler do React sem timers manuais.
+- `isSearchPending = searchQuery !== deferredSearch` provê o indicador de loading sem estado adicional.
+
+---
+
+## ADR-FE-005: CSS group-hover em vez de useState para Hover em Listas
+**Status:** Aceito
+**Contexto:** `TimeEntryRow.tsx` usava `const [isHovered, setIsHovered] = useState(false)` com `onMouseEnter/Leave`. Em listas de 20 entradas, cada movimento de mouse disparava setState → re-render do componente inteiro (290 linhas). ~40 re-renders por scroll.
+**Decisão:**
+- Remover o estado completamente. Usar `className="group"` no container e `group-hover:opacity-100` nos filhos — comportamento idêntico, custo zero para o React.
+
+---
+
+## ADR-FE-006: ErrorBoundary Global
+**Status:** Aceito
+**Contexto:** Qualquer erro não tratado em um render React desmontava silenciosamente a árvore inteira, deixando o usuário com tela branca sem feedback.
+**Decisão:**
+- Criar `src/components/error/ErrorBoundary.tsx` (React class component, única forma de capturar erros de render).
+- Envolve toda a app em `App.tsx` (fora de `BrowserRouter` para capturar inclusive erros de roteamento).
+- Fallback: mensagem amigável em PT-BR + botão "Recarregar".
+
+---
+
+## ADR-FE-007: Extração de TimeEditDialog de TimeEntryRow
+**Status:** Aceito
+**Contexto:** `TimeEntryRow.tsx` tinha 290 linhas com três responsabilidades distintas: (1) renderização da linha, (2) edição de descrição inline com blur-save, (3) dialog de ajuste de horário com seus próprios estados.
+**Decisão:**
+- Extrair o dialog para `src/components/history/TimeEditDialog.tsx` — componente puro de apresentação que recebe props de estado e callbacks.
+- `TimeEntryRow` passa `open`, `startTime`, `endTime`, `onSave`, `isSaving` via props. Zero estado interno de dialog em `TimeEntryRow`.
+- Labels do dialog passam a ter `htmlFor` associado (`edit-start-time`, `edit-end-time`) — corrigindo gap de a11y.

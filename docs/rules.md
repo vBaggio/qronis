@@ -11,10 +11,12 @@ O Qronis deve respeitar as versões estipuladas abaixo para garantir estabilidad
 - **Segurança:** Spring Security com OAuth2 Resource Server para validação JWT stateless.
 
 ### Frontend
-- **Framework Ouro:** React 19 executado via Vite.
-- **Linguagem:** TypeScript.
+- **Framework:** React 19 executado via Vite.
+- **Linguagem:** TypeScript (strict mode obrigatório).
 - **Estilização:** Tailwind CSS v4.
 - **Componentes:** Shadcn UI.
+- **Data Fetching:** @tanstack/react-query (useQuery, useInfiniteQuery, useMutation).
+- **Formulários:** React Hook Form + Zod.
 
 ---
 
@@ -78,6 +80,20 @@ Estas são as regras invioláveis para o desenvolvimento das interfaces, especia
    - Para evitar bloqueios na thread principal e re-renders em cadeia, a UI deve utilizar um manipulador `setInterval` atachado num hook utilitário.
    - O frontend **NUNCA DEVE SOMAR SEGUNDOS VIA STATE (`setSeconds(s => s+1)`)**.
    - O cálculo matemático inviolável para renderizar o timer é: `[Hora Local do Browser Atual] - [start_time do banco convertido para o fuso local]`. Essa diferença nativa gera a interface visual, de forma imune a gargalos do event loop.
+
+2. **Data Fetching obrigatoriamente via React Query:**
+   - **Proibido** fazer requests Axios diretamente dentro de componentes ou `useEffect`. Todo acesso à API deve passar por hooks em `src/hooks/` (`useProjects`, `useTimeEntries`, `useTimer`).
+   - Mutations devem usar `useMutation` com `onSuccess` invalidando as query keys relevantes.
+   - `queryFn` sempre recebe e propaga o `signal` do React Query para AbortController automático.
+
+3. **Tipos centralizados em `src/lib/types.ts`:**
+   - **Proibido** redefinir `Project`, `TimeEntry`, `PageResponse<T>`, `ProjectSummary` ou `User` em arquivos de página ou componente. Importar sempre de `@/lib/types`.
+
+4. **Sem `useState` para hover em listas:**
+   - Usar `className="group"` no container e `group-hover:` nos filhos. `onMouseEnter/Leave` com `setState` em componentes de lista é proibido (gera N re-renders por scroll).
+
+5. **`catch (err: unknown)` obrigatório:**
+   - `catch (err: any)` é proibido em qualquer novo código. Usar `catch (err: unknown)` com type guard `axios.isAxiosError(err)` ou `err instanceof Error`.
 
 ## 🎨 O Paradigma "Zen" (Identidade Visual e UX)
 O Qronis deve transparecer calma, foco e acabamento premium. Para manter a coesão do design system nas próximas telas, siga estas heurísticas visuais:

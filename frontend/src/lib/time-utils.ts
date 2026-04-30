@@ -80,3 +80,12 @@ export function formatTimeAgo(isoString: string): string {
     if (!isoString) return '';
     return formatDistanceToNow(parseISO(isoString), { addSuffix: true, locale: ptBR });
 }
+
+export function formatDurationSeconds(totalSeconds: number): string {
+    if (totalSeconds < 60) return `${totalSeconds}s`;
+    const minutes = Math.floor(totalSeconds / 60);
+    if (minutes < 60) return `${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
+}
