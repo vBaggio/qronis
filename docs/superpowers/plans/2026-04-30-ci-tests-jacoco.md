@@ -18,10 +18,10 @@
 
 | Fase | Descrição | Status |
 |---|---|---|
-| Fase 1 | Gradle: JaCoCo + source set integrationTest | ⬜ Pendente |
-| Fase 2 | Migrar testes de integração existentes | ⬜ Pendente |
-| Fase 3 | Novos unit tests (IdentityService, JwtService) | ⬜ Pendente |
-| Fase 4 | Novos controller integration tests | ⬜ Pendente |
+| Fase 1 | Gradle: JaCoCo + source set integrationTest | ✅ Concluída |
+| Fase 2 | Migrar testes de integração existentes | ✅ Concluída |
+| Fase 3 | Novos unit tests (IdentityService, JwtService) | ✅ Concluída |
+| Fase 4 | Novos controller integration tests | ⏳ Em andamento — AbstractControllerIT + AuthControllerIT pendentes |
 | Fase 5 | GitHub Actions workflow | ⬜ Pendente |
 
 > Atualize esta tabela trocando ⬜ por ✅ conforme cada fase for concluída.
