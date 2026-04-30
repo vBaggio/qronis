@@ -2,6 +2,7 @@ package com.qronis.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qronis.AbstractIntegrationTest;
+import com.qronis.modules.auth.web.dto.AuthResponseDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -25,8 +26,9 @@ public abstract class AbstractControllerIT extends AbstractIntegrationTest {
     protected ObjectMapper objectMapper;
 
     protected String registerAndGetToken(String email, String password) throws Exception {
-        String uniqueName = "User-" + UUID.randomUUID().toString().substring(0, 8);
-        String companyName = "Company-" + UUID.randomUUID().toString().substring(0, 8);
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        String uniqueName = "User-" + suffix;
+        String companyName = "Company-" + suffix;
 
         String body = objectMapper.writeValueAsString(Map.of(
                 "name", uniqueName,
@@ -38,12 +40,12 @@ public abstract class AbstractControllerIT extends AbstractIntegrationTest {
         MvcResult result = mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
-                .andExpect(status().isOk())
+                .andExpect(status().is2xxSuccessful())
                 .andReturn();
 
-        Map<?, ?> response = objectMapper.readValue(
-                result.getResponse().getContentAsString(), Map.class);
-        return (String) response.get("token");
+        AuthResponseDTO response = objectMapper.readValue(
+                result.getResponse().getContentAsString(), AuthResponseDTO.class);
+        return response.token();
     }
 
     protected String bearerHeader(String token) {
