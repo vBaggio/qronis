@@ -120,4 +120,38 @@ class ProjectControllerIT extends AbstractControllerIT {
                         .header("Authorization", bearerHeader(tokenB)))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @DisplayName("PUT /api/projects/{id}: deve atualizar nome e retornar 200")
+    void update_success() throws Exception {
+        String createBody = objectMapper.writeValueAsString(Map.of("name", "Nome Original"));
+        MvcResult createResult = mockMvc.perform(post("/api/projects")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createBody)
+                        .header("Authorization", bearerHeader(token)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        ProjectResponseDTO created = objectMapper.readValue(
+                createResult.getResponse().getContentAsString(), ProjectResponseDTO.class);
+
+        String updateBody = objectMapper.writeValueAsString(Map.of("name", "Nome Atualizado"));
+        mockMvc.perform(put("/api/projects/" + created.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateBody)
+                        .header("Authorization", bearerHeader(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Nome Atualizado"));
+    }
+
+    @Test
+    @DisplayName("PUT /api/projects/{id}: deve retornar 404 para projeto inexistente")
+    void update_notFound() throws Exception {
+        String body = objectMapper.writeValueAsString(Map.of("name", "Qualquer Nome"));
+        mockMvc.perform(put("/api/projects/" + UUID.randomUUID())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body)
+                        .header("Authorization", bearerHeader(token)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("PROJECT_NOT_FOUND"));
+    }
 }
