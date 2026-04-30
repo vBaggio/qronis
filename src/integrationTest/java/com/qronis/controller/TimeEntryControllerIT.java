@@ -33,6 +33,7 @@ class TimeEntryControllerIT extends AbstractControllerIT {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)
                         .header("Authorization", bearerHeader(token)))
+                .andExpect(status().isCreated())
                 .andReturn();
         ProjectResponseDTO created = objectMapper.readValue(
                 result.getResponse().getContentAsString(), ProjectResponseDTO.class);
@@ -134,7 +135,8 @@ class TimeEntryControllerIT extends AbstractControllerIT {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)
                         .header("Authorization", bearerHeader(token)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("INVALID_TIME_BOUNDS"));
     }
 
     @Test
