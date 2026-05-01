@@ -11,8 +11,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.data.domain.Page;
@@ -26,8 +24,6 @@ import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @Tag("integration")
-@SpringBootTest
-@ActiveProfiles("test")
 @Transactional
 class TimeEntryRepositoryTest extends AbstractIntegrationTest {
 
@@ -82,6 +78,7 @@ class TimeEntryRepositoryTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("findByUserId: deve retornar entries ordenadas por startTime desc")
     void findByUserId_ordered() {
         Instant now = Instant.now();
 

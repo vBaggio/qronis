@@ -42,7 +42,7 @@ public abstract class AbstractControllerIT extends AbstractIntegrationTest {
         MvcResult result = mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
-                .andExpect(status().is2xxSuccessful())
+                .andExpect(status().isOk())
                 .andReturn();
 
         AuthResponseDTO response = objectMapper.readValue(

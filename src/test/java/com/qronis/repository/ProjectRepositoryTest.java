@@ -12,11 +12,9 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -26,8 +24,6 @@ import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @Tag("integration")
-@SpringBootTest
-@ActiveProfiles("test")
 @Transactional
 class ProjectRepositoryTest extends AbstractIntegrationTest {
 

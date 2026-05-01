@@ -115,7 +115,7 @@ val jacocoExclusions = listOf(
 )
 
 tasks.jacocoTestReport {
-    dependsOn(tasks.test, tasks.named("integrationTest"))
+    dependsOn(tasks.test)
     executionData.setFrom(
         fileTree(layout.buildDirectory).include("jacoco/test.exec", "jacoco/integrationTest.exec")
     )
@@ -147,4 +147,8 @@ tasks.register<JacocoCoverageVerification>("jacocoCoverageVerification") {
             }
         }
     }
+}
+
+tasks.check {
+    dependsOn(tasks.named("jacocoCoverageVerification"))
 }

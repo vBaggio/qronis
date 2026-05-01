@@ -4,7 +4,7 @@
 
 **Goal:** Elevar cobertura de testes para ≥90%, criar source set `integrationTest` com Testcontainers, e configurar GitHub Actions CI que valida todo PR aberto para `main`.
 
-**Architecture:** Source set `integrationTest` separado em `src/integrationTest/java` com Testcontainers gerenciando PostgreSQL internamente. Unit tests em `src/test` com Mockito. JaCoCo agrega cobertura do task `test`, checa ≥90% excluindo DTOs, gerados por MapStruct, configs e entry points. CI roda dois jobs em paralelo no GitHub Actions.
+**Architecture:** Todos os testes em `src/test/java`. Integration tests identificados por `@Tag("integration")`. Tasks Gradle filtram por tag: `test` (exclui integration) e `integrationTest` (inclui só integration). JaCoCo agrega ambos os `.exec` files, checa ≥90% sem exclusões artificiais de camada. CI roda dois jobs em paralelo no GitHub Actions.
 
 **Tech Stack:** Spring Boot 3.5.14 · Java 21 · Gradle Kotlin DSL · JaCoCo · Testcontainers PostgreSQL 16 · JUnit 5 · Mockito · MockMvc · GitHub Actions
 
@@ -21,8 +21,9 @@
 | Fase 1 | Gradle: JaCoCo + source set integrationTest | ✅ Concluída |
 | Fase 2 | Migrar testes de integração existentes | ✅ Concluída |
 | Fase 3 | Novos unit tests (IdentityService, JwtService) | ✅ Concluída |
-| Fase 4 | Novos controller integration tests | ⏳ Em andamento — AbstractControllerIT + AuthControllerIT pendentes |
-| Fase 5 | GitHub Actions workflow | ⬜ Pendente |
+| Fase 4 | Novos controller integration tests | ✅ Concluída |
+| Fase 4.5 | Refactor: unificar source sets com @Tag("integration") | ✅ Concluída |
+| Fase 5 | GitHub Actions workflow | ⏳ Em andamento |
 
 > Atualize esta tabela trocando ⬜ por ✅ conforme cada fase for concluída.
 
@@ -1390,6 +1391,132 @@ Esperado: `BUILD SUCCESSFUL` com cobertura ≥90%. Se falhar, verifique o relat�
 git add src/integrationTest/java/com/qronis/controller/ProjectSummaryControllerIT.java \
         src/integrationTest/java/com/qronis/controller/UserControllerIT.java
 git commit -m "test(integration): adicionar ProjectSummaryControllerIT e UserControllerIT"
+```
+
+---
+
+## Fase 4.5 — Refactor: Unificar Source Sets com @Tag("integration")
+
+**Motivação:** O source set `integrationTest` separado foi a abordagem inicial, mas gera complexidade desnecessária: wiring triplo de configurações Gradle, exclusões artificiais no JaCoCo para classes cobertas apenas por ITs, e atrito na DX local. JUnit 5 `@Tag` resolve o mesmo problema com menos config e cobertura honesta.
+
+**Resultado esperado:**
+- `src/integrationTest/java/**` movido para `src/test/java/**`
+- Todas as classes de IT anotadas com `@Tag("integration")`
+- `build.gradle.kts` simplificado: source set `integrationTest` removido, tasks filtram por tag
+- JaCoCo agrega `test.exec` + `integrationTest.exec` → cobertura real sem exclusões de camada
+- Suite completa (UTs + ITs) continua passando
+
+### Task 10: Migrar ITs para src/test e adicionar @Tag
+
+**Step 10.1: Anotar todas as classes de IT com `@Tag("integration")`**
+
+Adicionar `@Tag("integration")` nas seguintes classes (já em `src/integrationTest/java`):
+- `com.qronis.AbstractIntegrationTest`
+- `com.qronis.repository.ProjectRepositoryTest`
+- `com.qronis.repository.TimeEntryRepositoryTest`
+- `com.qronis.controller.AbstractControllerIT`
+- `com.qronis.controller.AuthControllerIT`
+- `com.qronis.controller.ProjectControllerIT`
+- `com.qronis.controller.TimeEntryControllerIT`
+- `com.qronis.controller.ProjectSummaryControllerIT`
+- `com.qronis.controller.UserControllerIT`
+
+**Step 10.2: Mover arquivos para `src/test/java`**
+
+```bash
+cp -r src/integrationTest/java/com/qronis/* src/test/java/com/qronis/
+cp -r src/integrationTest/resources/* src/test/resources/
+rm -rf src/integrationTest/
+```
+
+**Step 10.3: Reescrever `build.gradle.kts`**
+
+Remover:
+- Bloco `sourceSets { create("integrationTest") { ... } }`
+- `configurations["integrationTestImplementation"].extendsFrom(...)`
+- `configurations["integrationTestRuntimeOnly"].extendsFrom(...)`
+- Dependências com prefixo `"integrationTestImplementation"` e `"integrationTestRuntimeOnly"`
+- Task `val integrationTest = tasks.register<Test>("integrationTest") { ... }`
+
+Adicionar dependências de Testcontainers em `testImplementation`:
+```kotlin
+testImplementation("org.springframework.boot:spring-boot-testcontainers")
+testImplementation(platform("org.testcontainers:testcontainers-bom:1.20.4"))
+testImplementation("org.testcontainers:postgresql")
+testImplementation("org.testcontainers:junit-jupiter")
+```
+
+Reconfigurar tasks de teste com filtros de tag:
+```kotlin
+tasks.test {
+    useJUnitPlatform { excludeTags("integration") }
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+    }
+}
+
+tasks.register<Test>("integrationTest") {
+    description = "Roda testes de integração com Testcontainers + PostgreSQL"
+    group = "verification"
+    useJUnitPlatform { includeTags("integration") }
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+    }
+    shouldRunAfter(tasks.test)
+    classpath = sourceSets["test"].runtimeClasspath
+    testClassesDirs = sourceSets["test"].output.classesDirs
+}
+```
+
+**Step 10.4: Atualizar JaCoCo para agregar ambos os exec files**
+
+```kotlin
+tasks.jacocoTestReport {
+    dependsOn(tasks.test, tasks.named("integrationTest"))
+    executionData.setFrom(
+        fileTree(layout.buildDirectory).include("jacoco/test.exec", "jacoco/integrationTest.exec")
+    )
+    reports {
+        xml.required = true
+        html.required = true
+    }
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) { exclude(jacocoExclusions) }
+        })
+    )
+}
+```
+
+Simplificar `jacocoExclusions` — remover as exclusões artificiais de camada (agora cobertas pelos ITs):
+```kotlin
+val jacocoExclusions = listOf(
+    "**/*DTO*",
+    "**/*MapperImpl*",
+    "**/*Config*",
+    "**/*Properties*",
+    "**/QronisApplication*",
+    "**/QronisModuleDetectionStrategy*"
+)
+```
+
+**Step 10.5: Verificar**
+
+```bash
+./gradlew test                              # só unit tests, sem ITs
+./gradlew integrationTest                  # só ITs
+./gradlew test integrationTest jacocoTestReport jacocoCoverageVerification
+```
+
+Esperado: todos passam, cobertura ≥90% sem exclusões artificiais.
+
+**Step 10.6: Commit**
+
+```bash
+git add -A
+git commit -m "refactor: unificar source sets — ITs em src/test com @Tag(integration)"
 ```
 
 ---
