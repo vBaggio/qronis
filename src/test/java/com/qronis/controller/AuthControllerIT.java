@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AuthControllerIT extends AbstractControllerIT {
 
     @Test
-    @DisplayName("POST /auth/register: deve retornar 200 com token JWT")
+    @DisplayName("POST /auth/register: deve retornar 201 com token JWT")
     void register_success() throws Exception {
         String suffix = UUID.randomUUID().toString().substring(0, 8);
         String body = objectMapper.writeValueAsString(Map.of(
@@ -28,7 +28,7 @@ class AuthControllerIT extends AbstractControllerIT {
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.token").isNotEmpty());
     }
 
@@ -48,7 +48,7 @@ class AuthControllerIT extends AbstractControllerIT {
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -89,7 +89,7 @@ class AuthControllerIT extends AbstractControllerIT {
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
         String loginBody = objectMapper.writeValueAsString(Map.of(
                 "email", email,
@@ -118,7 +118,7 @@ class AuthControllerIT extends AbstractControllerIT {
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
         String loginBody = objectMapper.writeValueAsString(Map.of(
                 "email", email,
