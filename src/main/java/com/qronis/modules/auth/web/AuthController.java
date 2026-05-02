@@ -6,6 +6,7 @@ import com.qronis.modules.auth.web.dto.RegisterRequestDTO;
 import com.qronis.modules.auth.application.AuthService;
 
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,7 +26,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody RegisterRequestDTO request) {
         String token = authService.register(request.name(), request.email(), request.password(), request.companyName());
-        return ResponseEntity.ok(new AuthResponseDTO(token));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new AuthResponseDTO(token));
     }
 
     @PostMapping("/login")

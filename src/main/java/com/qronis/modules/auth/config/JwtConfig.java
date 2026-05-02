@@ -60,6 +60,8 @@ public class JwtConfig {
             missing.add("tenantId");
         if (!hasTextClaim(jwt, "role"))
             missing.add("role");
+        if (!hasTextClaim(jwt, "name"))
+            missing.add("name");
 
         if (missing.isEmpty()) {
             return OAuth2TokenValidatorResult.success();

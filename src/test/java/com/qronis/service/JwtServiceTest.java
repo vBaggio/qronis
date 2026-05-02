@@ -65,6 +65,7 @@ class JwtServiceTest {
             assertThat((String) params.getClaims().getClaim("email")).isEqualTo("vini@email.com");
             assertThat((String) params.getClaims().getClaim("tenantId")).isEqualTo(tenantId.toString());
             assertThat((String) params.getClaims().getClaim("role")).isEqualTo("OWNER");
+            assertThat((String) params.getClaims().getClaim("name")).isEqualTo("Vinicius");
             assertThat((String) params.getClaims().getClaim("iss")).isEqualTo("qronis-test");
             return jwt;
         });
