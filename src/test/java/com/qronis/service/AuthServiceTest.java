@@ -30,92 +30,92 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
-        @Mock
-        private IdentityFacade identityFacade;
-        @Mock
-        private PasswordEncoder passwordEncoder;
-        @Mock
-        private JwtService jwtService;
+    @Mock
+    private IdentityFacade identityFacade;
+    @Mock
+    private PasswordEncoder passwordEncoder;
+    @Mock
+    private JwtService jwtService;
 
-        @InjectMocks
-        private AuthService authService;
+    @InjectMocks
+    private AuthService authService;
 
-        private UUID userId;
-        private UUID tenantId;
+    private UUID userId;
+    private UUID tenantId;
 
-        @BeforeEach
-        void setUp() {
-                userId = UUID.randomUUID();
-                tenantId = UUID.randomUUID();
-        }
+    @BeforeEach
+    void setUp() {
+        userId = UUID.randomUUID();
+        tenantId = UUID.randomUUID();
+    }
 
-        @Test
-        @DisplayName("register: deve criar user, tenant, tenant_user e retornar JWT")
-        void register_success() {
-                when(identityFacade.provisionTenant(any(), any(), any(), any()))
-                                .thenReturn(new IdentityProvisionResult(
-                                                userId, "Vinicius", "vini@email.com", tenantId, "OWNER"));
-                when(passwordEncoder.encode("123456")).thenReturn("encoded-password");
-                when(jwtService.generateToken(any(UUID.class), any(String.class), any(String.class), any(UUID.class),
-                                any(String.class)))
-                                .thenReturn("jwt-token");
+    @Test
+    @DisplayName("register: deve criar user, tenant, tenant_user e retornar JWT")
+    void register_success() {
+        when(identityFacade.provisionTenant(any(), any(), any(), any()))
+                .thenReturn(new IdentityProvisionResult(
+                        userId, "Vinicius", "vini@email.com", tenantId, "OWNER"));
+        when(passwordEncoder.encode("123456")).thenReturn("encoded-password");
+        when(jwtService.generateToken(any(UUID.class), any(String.class), any(String.class), any(UUID.class),
+                any(String.class)))
+                .thenReturn("jwt-token");
 
-                String token = authService.register("Vinicius", "vini@email.com", "123456", "Qronis Ltda");
+        String token = authService.register("Vinicius", "vini@email.com", "123456", "Qronis Ltda");
 
-                assertThat(token).isEqualTo("jwt-token");
-                verify(identityFacade).provisionTenant("Vinicius", "vini@email.com", "encoded-password", "Qronis Ltda");
-                verify(jwtService).generateToken(userId, "Vinicius", "vini@email.com", tenantId, "OWNER");
-        }
+        assertThat(token).isEqualTo("jwt-token");
+        verify(identityFacade).provisionTenant("Vinicius", "vini@email.com", "encoded-password", "Qronis Ltda");
+        verify(jwtService).generateToken(userId, "Vinicius", "vini@email.com", tenantId, "OWNER");
+    }
 
-        @Test
-        @DisplayName("register: deve rejeitar email duplicado")
-        void register_duplicateEmail() {
-                when(identityFacade.provisionTenant(any(), any(), any(), any()))
-                                .thenThrow(new UserAlreadyExistsException("vini@email.com"));
+    @Test
+    @DisplayName("register: deve rejeitar email duplicado")
+    void register_duplicateEmail() {
+        when(identityFacade.provisionTenant(any(), any(), any(), any()))
+                .thenThrow(new UserAlreadyExistsException("vini@email.com"));
 
-                assertThatThrownBy(() -> authService.register("Vinicius", "vini@email.com", "123456", "Qronis"))
-                                .isInstanceOf(UserAlreadyExistsException.class)
-                                .hasMessageContaining("vini@email.com");
-        }
+        assertThatThrownBy(() -> authService.register("Vinicius", "vini@email.com", "123456", "Qronis"))
+                .isInstanceOf(UserAlreadyExistsException.class)
+                .hasMessageContaining("vini@email.com");
+    }
 
-        @Test
-        @DisplayName("login: deve autenticar e retornar JWT")
-        void login_success() {
-                when(identityFacade.getAuthDetailsByEmail("vini@email.com"))
-                                .thenReturn(Optional.of(new TenantUserAuthDTO(userId, "Vinicius",
-                                                "vini@email.com", "encoded-password", tenantId, "OWNER")));
-                when(passwordEncoder.matches("123456", "encoded-password")).thenReturn(true);
-                when(jwtService.generateToken(any(UUID.class), any(String.class), any(String.class), any(UUID.class),
-                                any(String.class)))
-                                .thenReturn("jwt-token");
+    @Test
+    @DisplayName("login: deve autenticar e retornar JWT")
+    void login_success() {
+        when(identityFacade.getAuthDetailsByEmail("vini@email.com"))
+                .thenReturn(Optional.of(new TenantUserAuthDTO(userId, "Vinicius",
+                        "vini@email.com", "encoded-password", tenantId, "OWNER")));
+        when(passwordEncoder.matches("123456", "encoded-password")).thenReturn(true);
+        when(jwtService.generateToken(any(UUID.class), any(String.class), any(String.class), any(UUID.class),
+                any(String.class)))
+                .thenReturn("jwt-token");
 
-                String token = authService.login("vini@email.com", "123456");
+        String token = authService.login("vini@email.com", "123456");
 
-                assertThat(token).isEqualTo("jwt-token");
-                verify(jwtService).generateToken(userId, "Vinicius", "vini@email.com", tenantId, "OWNER");
-        }
+        assertThat(token).isEqualTo("jwt-token");
+        verify(jwtService).generateToken(userId, "Vinicius", "vini@email.com", tenantId, "OWNER");
+    }
 
-        @Test
-        @DisplayName("login: deve rejeitar email inexistente")
-        void login_emailNotFound() {
-                when(identityFacade.getAuthDetailsByEmail("nao@existe.com"))
-                                .thenReturn(Optional.empty());
+    @Test
+    @DisplayName("login: deve rejeitar email inexistente")
+    void login_emailNotFound() {
+        when(identityFacade.getAuthDetailsByEmail("nao@existe.com"))
+                .thenReturn(Optional.empty());
 
-                assertThatThrownBy(() -> authService.login("nao@existe.com", "123456"))
-                                .isInstanceOf(InvalidCredentialsException.class);
-        }
+        assertThatThrownBy(() -> authService.login("nao@existe.com", "123456"))
+                .isInstanceOf(InvalidCredentialsException.class);
+    }
 
-        @Test
-        @DisplayName("login: deve rejeitar senha incorreta")
-        void login_wrongPassword() {
-                when(identityFacade.getAuthDetailsByEmail("vini@email.com"))
-                                .thenReturn(Optional.of(new TenantUserAuthDTO(userId, "Vinicius",
-                                                "vini@email.com", "encoded-password", tenantId, "OWNER")));
-                when(passwordEncoder.matches("senha-errada", "encoded-password")).thenReturn(false);
+    @Test
+    @DisplayName("login: deve rejeitar senha incorreta")
+    void login_wrongPassword() {
+        when(identityFacade.getAuthDetailsByEmail("vini@email.com"))
+                .thenReturn(Optional.of(new TenantUserAuthDTO(userId, "Vinicius",
+                        "vini@email.com", "encoded-password", tenantId, "OWNER")));
+        when(passwordEncoder.matches("senha-errada", "encoded-password")).thenReturn(false);
 
-                assertThatThrownBy(() -> authService.login("vini@email.com", "senha-errada"))
-                                .isInstanceOf(InvalidCredentialsException.class);
+        assertThatThrownBy(() -> authService.login("vini@email.com", "senha-errada"))
+                .isInstanceOf(InvalidCredentialsException.class);
 
-                verify(jwtService, never()).generateToken(any(), any(), any(), any(), any());
-        }
+        verify(jwtService, never()).generateToken(any(), any(), any(), any(), any());
+    }
 }
