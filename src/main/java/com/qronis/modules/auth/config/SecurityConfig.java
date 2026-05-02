@@ -1,5 +1,6 @@
 package com.qronis.modules.auth.config;
 
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -20,12 +21,15 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableConfigurationProperties(CorsProperties.class)
 public class SecurityConfig {
 
     private final JwtDecoder jwtDecoder;
+    private final CorsProperties corsProperties;
 
-    SecurityConfig(JwtDecoder jwtDecoder) {
+    SecurityConfig(JwtDecoder jwtDecoder, CorsProperties corsProperties) {
         this.jwtDecoder = jwtDecoder;
+        this.corsProperties = corsProperties;
     }
 
     @Bean
@@ -48,7 +52,7 @@ public class SecurityConfig {
 
     private CorsConfigurationSource corsConfigSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(List.of("http://localhost:5173", "http://127.0.0.1:5173"));
+        corsConfig.setAllowedOrigins(corsProperties.getAllowedOrigins());
         corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         corsConfig.setAllowedHeaders(List.of("*"));
         corsConfig.setAllowCredentials(true);
