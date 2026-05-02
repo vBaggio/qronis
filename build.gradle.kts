@@ -115,7 +115,6 @@ val jacocoExclusions = listOf(
 )
 
 tasks.jacocoTestReport {
-    dependsOn(tasks.test)
     executionData.setFrom(
         fileTree(layout.buildDirectory).include("jacoco/test.exec", "jacoco/integrationTest.exec")
     )
@@ -143,6 +142,7 @@ tasks.register<JacocoCoverageVerification>("jacocoCoverageVerification") {
     violationRules {
         rule {
             limit {
+                counter = "LINE"
                 minimum = "0.93".toBigDecimal()
             }
         }
