@@ -99,6 +99,27 @@ class ProjectControllerIT extends AbstractControllerIT {
     }
 
     @Test
+    @DisplayName("GET /api/projects/{id}: deve retornar 200 com o projeto")
+    void getById_success() throws Exception {
+        String body = objectMapper.writeValueAsString(Map.of("name", "Projeto GetById"));
+        MvcResult createResult = mockMvc.perform(post("/api/projects")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body)
+                        .header("Authorization", bearerHeader(token)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        Map<?, ?> created = objectMapper.readValue(
+                createResult.getResponse().getContentAsString(), Map.class);
+        String id = (String) created.get("id");
+
+        mockMvc.perform(get("/api/projects/" + id)
+                        .header("Authorization", bearerHeader(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id))
+                .andExpect(jsonPath("$.name").value("Projeto GetById"));
+    }
+
+    @Test
     @DisplayName("GET /api/projects/{id}: deve retornar 404 para projeto de outro tenant")
     void getById_otherTenantIsolation() throws Exception {
         // Cria projeto com tenant A
