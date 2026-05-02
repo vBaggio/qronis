@@ -35,6 +35,7 @@ jwt:
   issuer: qronis
   expiration-hours: ${JWT_EXPIRATION_HOURS:24}
 
-# cors.allowed-origins deve ser configurado no profile do ambiente
-# (ex: application-dev.yml, application-prod.yml) ou via env var CORS_ALLOWED_ORIGINS
-# A ausência dessa configuração fará a aplicação falhar ao inicializar (validação @NotEmpty)
+# cors.allowed-origins deve ser configurado no profile do ambiente:
+#   application-dev.yml  → origens de desenvolvimento local
+#   application-prod.yml → origens de produção
+# A ausência dessa configuração causa falha na inicialização (@NotEmpty).
