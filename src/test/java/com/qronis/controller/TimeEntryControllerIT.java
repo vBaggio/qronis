@@ -206,6 +206,21 @@ class TimeEntryControllerIT extends AbstractControllerIT {
     }
 
     @Test
+    @DisplayName("POST /api/time-entries/start: deve retornar 400 para projectId nulo")
+    void start_missingProjectId_returns400() throws Exception {
+        String body = objectMapper.writeValueAsString(Map.of(
+                "description", "Sem projeto"
+        ));
+
+        mockMvc.perform(post("/api/time-entries/start")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body)
+                        .header("Authorization", bearerHeader(token)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.projectId").isNotEmpty());
+    }
+
+    @Test
     @DisplayName("GET /api/time-entries/active: deve retornar 200 com o timer ativo")
     void active_withActiveTimer() throws Exception {
         String body = objectMapper.writeValueAsString(Map.of(
