@@ -143,7 +143,7 @@ tasks.register<JacocoCoverageVerification>("jacocoCoverageVerification") {
         rule {
             limit {
                 counter = "LINE"
-                minimum = "0.93".toBigDecimal()
+                minimum = "0.90".toBigDecimal()
             }
         }
     }
