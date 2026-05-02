@@ -198,6 +198,34 @@ class TrackerServiceTest {
     }
 
     @Test
+    @DisplayName("patch: deve atualizar startTime")
+    void patch_updatesStartTime() {
+        Instant originalStart = Instant.now().minus(3, ChronoUnit.HOURS);
+        Instant newStart = Instant.now().minus(2, ChronoUnit.HOURS);
+        Instant end = Instant.now().minus(1, ChronoUnit.HOURS);
+
+        TimeEntry entry = new TimeEntry();
+        entry.setId(UUID.randomUUID());
+        entry.setProjectId(projectId);
+        entry.setUserId(userId);
+        entry.setStartTime(originalStart);
+        entry.setEndTime(end);
+        entry.setDescription("Desc");
+
+        when(timeEntryRepository.findByIdAndUserId(entry.getId(), userId))
+                .thenReturn(Optional.of(entry));
+        when(timeEntryRepository.save(any(TimeEntry.class))).thenAnswer(inv -> inv.getArgument(0));
+        stubMapSingle(projectId);
+
+        TimeEntryPatchRequestDTO request = new TimeEntryPatchRequestDTO(null, newStart, null, null);
+        trackerService.patch(entry.getId(), request, tenantId, userId);
+
+        ArgumentCaptor<TimeEntry> captor = ArgumentCaptor.forClass(TimeEntry.class);
+        verify(timeEntryRepository).save(captor.capture());
+        assertThat(captor.getValue().getStartTime()).isEqualTo(newStart);
+    }
+
+    @Test
     @DisplayName("patch: deve validar novo projectId contra o tenant antes de aplicar")
     void patch_newProjectId_validTenant() {
         UUID newProjectId = UUID.randomUUID();
