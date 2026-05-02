@@ -6,6 +6,7 @@ import com.qronis.modules.identity.api.IdentityFacade;
 import com.qronis.modules.identity.api.dto.IdentityProvisionResult;
 import com.qronis.modules.identity.api.dto.TenantUserAuthDTO;
 import com.qronis.modules.auth.domain.exception.InvalidCredentialsException;
+import com.qronis.modules.identity.api.exception.UserAlreadyExistsException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -62,6 +63,7 @@ class AuthServiceTest {
                 String token = authService.register("Vinicius", "vini@email.com", "123456", "Qronis Ltda");
 
                 assertThat(token).isEqualTo("jwt-token");
+                verify(identityFacade).provisionTenant("Vinicius", "vini@email.com", "encoded-password", "Qronis Ltda");
                 verify(jwtService).generateToken(userId, "Vinicius", "vini@email.com", tenantId, "OWNER");
         }
 
@@ -69,12 +71,11 @@ class AuthServiceTest {
         @DisplayName("register: deve rejeitar email duplicado")
         void register_duplicateEmail() {
                 when(identityFacade.provisionTenant(any(), any(), any(), any()))
-                                .thenThrow(new com.qronis.modules.identity.api.exception.UserAlreadyExistsException(
-                                                "Email já cadastrado"));
+                                .thenThrow(new UserAlreadyExistsException("vini@email.com"));
 
                 assertThatThrownBy(() -> authService.register("Vinicius", "vini@email.com", "123456", "Qronis"))
-                                .isInstanceOf(com.qronis.modules.identity.api.exception.UserAlreadyExistsException.class)
-                                .hasMessageContaining("Email já cadastrado");
+                                .isInstanceOf(UserAlreadyExistsException.class)
+                                .hasMessageContaining("vini@email.com");
         }
 
         @Test
@@ -91,6 +92,7 @@ class AuthServiceTest {
                 String token = authService.login("vini@email.com", "123456");
 
                 assertThat(token).isEqualTo("jwt-token");
+                verify(jwtService).generateToken(userId, "Vinicius", "vini@email.com", tenantId, "OWNER");
         }
 
         @Test
