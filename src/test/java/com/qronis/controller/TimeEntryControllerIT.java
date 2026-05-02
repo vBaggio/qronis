@@ -206,6 +206,34 @@ class TimeEntryControllerIT extends AbstractControllerIT {
     }
 
     @Test
+    @DisplayName("GET /api/time-entries/active: deve retornar 200 com o timer ativo")
+    void active_withActiveTimer() throws Exception {
+        String body = objectMapper.writeValueAsString(Map.of(
+                "projectId", projectId,
+                "description", "Timer ativo"
+        ));
+        mockMvc.perform(post("/api/time-entries/start")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body)
+                        .header("Authorization", bearerHeader(token)))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/api/time-entries/active")
+                        .header("Authorization", bearerHeader(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.endTime").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("GET /api/time-entries/active: deve retornar 204 quando não há timer ativo")
+    void active_noActiveTimer() throws Exception {
+        mockMvc.perform(get("/api/time-entries/active")
+                        .header("Authorization", bearerHeader(token)))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
     @DisplayName("GET /api/time-entries: deve retornar histórico paginado")
     void history_paged() throws Exception {
         Instant start = Instant.now().minus(3, ChronoUnit.HOURS);
