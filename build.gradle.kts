@@ -1,5 +1,6 @@
 plugins {
     java
+    jacoco
     id("org.springframework.boot") version "3.5.14"
     id("io.spring.dependency-management") version "1.1.7"
 }
@@ -16,6 +17,8 @@ java {
 repositories {
     mavenCentral()
 }
+
+// ─── Dependency Management ────────────────────────────────────────────────
 
 dependencyManagement {
     imports {
@@ -58,6 +61,8 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+// ─── Compile Options ─────────────────────────────────────────────────────
+
 tasks.withType<JavaCompile> {
     options.compilerArgs.addAll(listOf(
         "-parameters",
@@ -66,10 +71,84 @@ tasks.withType<JavaCompile> {
     ))
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
+// ─── Test Tasks ──────────────────────────────────────────────────────────
+
+tasks.test {
+    useJUnitPlatform { excludeTags("integration") }
     testLogging {
         events("passed", "skipped", "failed")
         showStandardStreams = true
     }
+}
+
+tasks.register<Test>("integrationTest") {
+    description = "Roda testes de integração com Testcontainers + PostgreSQL"
+    group = "verification"
+    useJUnitPlatform { includeTags("integration") }
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+    }
+    shouldRunAfter(tasks.test)
+    classpath = sourceSets["test"].runtimeClasspath
+    testClassesDirs = sourceSets["test"].output.classesDirs
+}
+
+// ─── JaCoCo ──────────────────────────────────────────────────────────────
+
+val jacocoExclusions = listOf(
+    "**/*DTO*",
+    "**/*MapperImpl*",
+    "**/*Config*",
+    "**/*Properties*",
+    "**/QronisApplication*",
+    "**/QronisModuleDetectionStrategy*",
+    // JPA domain entities — no-arg constructors called reflectively by Hibernate
+    "**/domain/entity/**",
+    // Domain and API exception classes — trivial constructors, tested indirectly
+    "**/domain/exception/**",
+    "**/api/exception/**",
+    // Shared global exception handler — covered by integration tests (excluded from unit threshold)
+    "**/shared/exception/**",
+    // Security filter — covered by integration tests
+    "**/security/**"
+)
+
+tasks.jacocoTestReport {
+    executionData.setFrom(
+        fileTree(layout.buildDirectory).include("jacoco/test.exec", "jacoco/integrationTest.exec")
+    )
+    reports {
+        xml.required = true
+        html.required = true
+    }
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) { exclude(jacocoExclusions) }
+        })
+    )
+}
+
+tasks.register<JacocoCoverageVerification>("jacocoCoverageVerification") {
+    dependsOn(tasks.jacocoTestReport)
+    executionData.setFrom(
+        fileTree(layout.buildDirectory).include("jacoco/test.exec", "jacoco/integrationTest.exec")
+    )
+    classDirectories.setFrom(
+        files(sourceSets["main"].output.classesDirs.map {
+            fileTree(it) { exclude(jacocoExclusions) }
+        })
+    )
+    violationRules {
+        rule {
+            limit {
+                counter = "LINE"
+                minimum = "0.90".toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.check {
+    dependsOn(tasks.named("jacocoCoverageVerification"))
 }
