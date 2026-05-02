@@ -6,6 +6,5 @@ import java.util.UUID;
 
 public interface ProjectFacade {
     void validateProjectBelongsToTenant(UUID projectId, UUID tenantId);
-    String getProjectName(UUID projectId);
     Map<UUID, String> getProjectNames(Set<UUID> projectIds);
 }

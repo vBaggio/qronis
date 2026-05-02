@@ -67,14 +67,6 @@ public class ProjectService implements ProjectFacade {
 
     @Override
     @Transactional(readOnly = true)
-    public String getProjectName(UUID projectId) {
-        return projectRepository.findById(projectId)
-                .map(Project::getName)
-                .orElse(null);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public Map<UUID, String> getProjectNames(Set<UUID> projectIds) {
         if (projectIds == null || projectIds.isEmpty()) {
             return Map.of();
