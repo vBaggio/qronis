@@ -237,6 +237,7 @@ class TimeEntryControllerIT extends AbstractControllerIT {
                         .header("Authorization", bearerHeader(token)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.description").value("Timer ativo"))
                 .andExpect(jsonPath("$.endTime").doesNotExist());
     }
 

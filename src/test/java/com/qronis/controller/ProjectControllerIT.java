@@ -108,9 +108,9 @@ class ProjectControllerIT extends AbstractControllerIT {
                         .header("Authorization", bearerHeader(token)))
                 .andExpect(status().isCreated())
                 .andReturn();
-        Map<?, ?> created = objectMapper.readValue(
-                createResult.getResponse().getContentAsString(), Map.class);
-        String id = (String) created.get("id");
+        ProjectResponseDTO created = objectMapper.readValue(
+                createResult.getResponse().getContentAsString(), ProjectResponseDTO.class);
+        String id = created.id().toString();
 
         mockMvc.perform(get("/api/projects/" + id)
                         .header("Authorization", bearerHeader(token)))
