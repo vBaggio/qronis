@@ -70,7 +70,7 @@ Outras regras de domínio:
 
 ### 1. Banco de Dados
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ### 2. Backend (API)
